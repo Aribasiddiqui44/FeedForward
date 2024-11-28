@@ -2,10 +2,9 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'rea
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import FoodCard from '../../components/foodCard';
-
-export default function MyRequest() {
+export default function MyOrder() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('Lower Price');
+  const [activeTab, setActiveTab] = useState('Ongoing');
 
   const handleTrackPress = (foodDetails) => {
     router.push({
@@ -22,45 +21,39 @@ export default function MyRequest() {
       },
     });
   };
-  
 
   const handleCancelPress = () => {
     router.push('/donation');
   };
 
-  const handleRatePress = () => {
-    router.push('/donation');
-  };
-  const handleCompletePress = () => {
-    router.push('/donation');
-  };
+  
 
   return (
     <View style={styles.container}>
       {/* Tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'Lower Price' && styles.activeTab]}
-          onPress={() => setActiveTab('Lower Price')}
+          style={[styles.tab, activeTab === 'Ongoing' && styles.activeTab]}
+          onPress={() => setActiveTab('Ongoing')}
         >
-          <Text style={[styles.tabText, activeTab === 'Lower Price' && styles.activeTabText]}>Lower Price</Text>
+          <Text style={[styles.tabText, activeTab === 'Ongoing' && styles.activeTabText]}>Ongoing</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'Donation' && styles.activeTab]}
-          onPress={() => setActiveTab('Donation')}
+          style={[styles.tab, activeTab === 'History' && styles.activeTab]}
+          onPress={() => setActiveTab('History')}
         >
-          <Text style={[styles.tabText, activeTab === 'Donation' && styles.activeTabText]}>Donation</Text>
+          <Text style={[styles.tabText, activeTab === 'History' && styles.activeTabText]}>History</Text>
         </TouchableOpacity>
       </View>
 
       {/* Content */}
       <ScrollView>
-        {activeTab === 'Lower Price' && (
+        {activeTab === 'Ongoing' && (
           <>
             <FoodCard
               foodName="Chicken Biryani"
-              description="Delicious surplus biryani at a lower price..."
-              total="250 PKR"
+              description="Delicious surplus biryani available..."
+              total="350 PKR"
               portions="7"
               type="Paid"
               statusTime="11:00 pm"
@@ -68,25 +61,24 @@ export default function MyRequest() {
               imageSource={require('./../../assets/images/biryaniPng.png')}
               showTrackButton={true}
               onTrackPress={() => handleTrackPress({
-                foodName:'Chicken Biryani',
-                portions:'7',
+                foodName:'Chicken Karhai',
+                portions:'15',
                 statusTime:'11:00 pm',
-                imageSource:'./../../assets/images/biryaniPng.png',
+                imageSource:'./../../assets/images/yum.png',
                 date:'29/11/2024',
                 total:'250 PKR',
                 orderFrom:'Haveli restaurant',
                 deliverTo:'Zariya Foundation',
               })}
-              //onTrackPress={handleTrackPress}
               showCancelOption={true}
               onCancelPress={handleCancelPress}
             />
             <FoodCard
               foodName="Chicken Karahi"
-              description="Delicious surplus karahi at a lower price..."
-              total="350 PKR"
+              description="Delicious surplus karahi available..."
+              total="550 PKR"
               portions="15"
-              type="Paid"
+              type="Unpaid"
               statusTime="11:00 pm"
               date="29/11/2024"
               imageSource={require('./../../assets/images/yum.png')}
@@ -106,37 +98,8 @@ export default function MyRequest() {
             />
           </>
         )}
-        {activeTab === 'Donation' && (
-          <>
-            <FoodCard
-              foodName="Vegetable Curry"
-              description="Vegetable curry available for donation..."
-              total="0 PKR"
-              portions="10"
-              type="Free"
-              statusTime="10:00 pm"
-              date="28/11/2024"
-              imageSource={require('./../../assets/images/logo.png')}
-              showRateOption={true}
-              onRatePress={handleRatePress}
-              showCompleteOption={true}
-              onCompletePress={handleCompletePress}
-            />
-            <FoodCard
-              foodName="Rice and Beans"
-              description="Rice and beans available for donation..."
-              total="0 PKR"
-              portions="8"
-              type="Free"
-              statusTime="9:00 pm"
-              date="27/11/2024"
-              imageSource={require('./../../assets/images/Land.jpg')}
-              showRateOption={true}
-              onRatePress={handleRatePress}
-              showCompleteOption={true}
-              onCompletePress={handleCompletePress}
-            />
-          </>
+        {activeTab === 'History' && (
+          <Text style={styles.emptyText}>No history available.</Text>
         )}
       </ScrollView>
     </View>
@@ -152,6 +115,9 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: 'row',
     marginVertical: 10,
+  },
+  side:{
+    flexDirection:'column'
   },
   tab: {
     flex: 1,
@@ -169,6 +135,73 @@ const styles = StyleSheet.create({
   },
   activeTabText: {
     color: '#00aa95', // Active tab text color
+    fontWeight: 'bold',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3, // For Android shadow
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  image: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  foodName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  detailText: {
+    fontSize: 14,
+    color: '#555',
+  },
+  statusBadge: {
+    fontSize: 12,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  paid: {
+    backgroundColor: '#e6f9f5',
+    color: '#00aa95',
+  },
+  unpaid: {
+    backgroundColor: '#ffe6e6',
+    color: '#e63946',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  trackButton: {
+    flex: 1,
+    backgroundColor: '#00aa95',
+    borderRadius: 20,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginRight: 10,
+    marginTop:8,
+  },
+  
+  buttonText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
   emptyText: {

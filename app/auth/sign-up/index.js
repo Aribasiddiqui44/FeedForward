@@ -21,10 +21,10 @@ export default function SignUp() {
       {/* ScrollView to make everything scrollable */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Background Image */}
-        <View>
+        <View style={styles.up}>
           {/* Background Image */}
           <Image 
-            source={require('./../../../assets/images/Land.jpg')}
+            source={require('./../../../assets/images/whitelogo.png')}
             style={styles.image}
           />
           
@@ -42,7 +42,6 @@ export default function SignUp() {
         <View style={styles.container}>
           {/* App Title */}
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>Feed Forward</Text>
             <Text style={styles.description}>Create Your Account</Text>
           </View>
 
@@ -97,8 +96,7 @@ export default function SignUp() {
             />
           </View>
 
-          {/* User Type (Donor or Receiver) */}
-          <View style={styles.inputContainer}>
+          {/* <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Sign Up As</Text>
             <Picker 
               selectedValue={userType}
@@ -108,14 +106,13 @@ export default function SignUp() {
               <Picker.Item label="Donor" value="donor" />
               <Picker.Item label="Receiver" value="receiver" />
             </Picker>
-          </View>
+          </View> */}
 
-          {/* Sign Up Button */}
-          <TouchableOpacity style={styles.signUpButton}>
+          <TouchableOpacity style={styles.signUpButton}
+          onPress={() => router.replace('auth/sign-in')}>
             <Text style={styles.signUpButtonText}>Sign Up</Text>
           </TouchableOpacity>
 
-          {/* Already have an account? */}
           <TouchableOpacity 
             style={styles.signInButton}
             onPress={() => router.replace('auth/sign-in')}
@@ -137,9 +134,13 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 20, // To ensure the content doesn't get cut off at the bottom
   },
+  up:{
+    backgroundColor:Colors.primary,
+    height:'25%'
+  },
   image: {
     width: '100%',
-    height: 230,
+    height: 200,
     resizeMode: 'cover',
   },
   iconContainer: {
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   description: {
-    fontSize: 18,
+    fontSize: 25,
     fontFamily: 'Times New Roman',
     textAlign: 'center',
     color: Colors.Grey,

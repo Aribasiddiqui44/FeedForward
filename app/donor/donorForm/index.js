@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Picker
 import { useRouter,useNavigation } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
 import Head from '../../../components/header';
-const ReceiverForm = () => {
+const DonorForm = () => {
   const navigation = useNavigation();
   const router= useRouter();
   useEffect(() => {
@@ -21,28 +21,21 @@ const ReceiverForm = () => {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleSubmit = () => {
+    // Check if all fields are filled and checkbox is checked
     if (organizationName && organizationEmail && address && postalCode && isChecked) {
-      router.push({
-        pathname: '/(tabs)/restaurantListing',
-        params: {
-          organizationName,
-          organizationEmail,
-          address,
-          city,
-          country,
-          postalCode,
-        },
-      });
+      router.push('/(tabs)/profile');
     } else {
       alert('Please fill out all fields and agree to the terms.');
     }
-  };  
+  };
   const handleBackPress = () => {
     router.back(); // Navigate back
   };
   return (
     <ScrollView contentContainerStyle={styles.container_parent}>
-      
+      {/* <View style={styles.headerContainer}>
+        <Text style={styles.headerText}>Feed Forward</Text>
+      </View> */}
       <Head 
         showBackOption={true}
         label='Feed Forward'
@@ -51,9 +44,9 @@ const ReceiverForm = () => {
       
 
       <View style={styles.container_child}>
-        <Text style={styles.subHeaderText}>Receiver’s Form</Text>
+        <Text style={styles.subHeaderText}>Donor’s Form</Text>
 
-        <Text style={styles.label}>Organization Name:</Text>
+        <Text style={styles.label}>Donor's Organization Name:</Text>
         <TextInput
           style={styles.input}
           placeholder="Organization Name"
@@ -211,4 +204,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ReceiverForm;
+export default DonorForm;

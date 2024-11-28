@@ -1,43 +1,55 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from 'expo-router';
-import { Colors } from './../../constants/Colors.ts';
+import { Colors } from './../../constants/Colors';
 import { useRouter } from 'expo-router';
+import Head from '../../components/header';
+
 export default function RoleSelection() {
   const navigation = useNavigation();
-  const router= useRouter();
-  // Disable the header for this screen
+  const router = useRouter();
+
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, []);
 
+  const handlePress = (role) => {
+    router.push({
+      pathname: '/accessLocation/AccessLocation',
+      params: { role }, // Pass the selected role as a parameter
+    });
+  };
+
   return (
     <View style={styles.container}>
-        <View style={styles.overallHead}>
-            <View style={styles.header}>
-                <Text style={styles.headerText}>Feed Forward</Text>
-           </View>
-            <Text style={styles.subTitle}>Become a Feed Forward</Text>
-        </View>
-      
-      
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={() => router.replace('Donor')}>
+      <Head
+        showBackOption={true}
+        label="Feed Forward"
+        onBackPress={() => router.back()
+        
+        }
+      />
+      <View style={styles.header}>
+        <Text style={styles.subTitle}>Become a Feed Forward</Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => handlePress('donor')}>
         <Text style={styles.buttonText}>DONOR</Text>
       </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={() => router.replace('./../reciever/recieverForm')}>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => handlePress('receiver')}>
         <Text style={styles.buttonText}>RECEIVER</Text>
       </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={() => router.replace('Volunteer')}>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => handlePress('volunteer')}>
         <Text style={styles.buttonText}>VOLUNTEER</Text>
       </TouchableOpacity>
     </View>
@@ -47,40 +59,26 @@ export default function RoleSelection() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.LightGrey, 
-  },
-  overallHead:{
-    alignItems:'center'
-
+    backgroundColor: Colors.LightGrey,
   },
   header: {
-    backgroundColor: Colors.primary,
     width: '100%',
-    paddingVertical: 20,
     alignItems: 'center',
-   
-  },
-  headerText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   subTitle: {
     marginVertical: 30,
     fontSize: 18,
     color: Colors.primary,
     fontWeight: '600',
-    
   },
   button: {
     backgroundColor: Colors.primary,
     paddingVertical: 15,
-    paddingHorizontal: 60,
     borderRadius: 25,
     marginVertical: 10,
     alignItems: 'center',
-    margin:'15%',
-    width:'70%',
+    margin: '15%',
+    width: '70%',
   },
   buttonText: {
     color: '#fff',

@@ -7,19 +7,21 @@ export default function Login() {
     const router=useRouter();
   return (
     <View style={styles.mainContainer}>
+      <View style={styles.imgContainer}>
       <Image 
-        source={require('./../assets/images/Land.jpg')}
+        source={require('./../assets/images/whitelogo.png')}
         style={styles.image}
       />
+      </View>
       <View style={styles.container}>
-        <Text style={styles.title}>Feed Forward</Text>
+        
         
         <Text style={styles.description}>
           Empowering restaurants, charities, and communities to fight food waste by transforming surplus food into shared meals. Discover, donate, purchase, and volunteer seamlessly through our platform.
         </Text>
         
         <TouchableOpacity style={styles.button}
-            onPress={()=>router.push('auth/sign-in')}
+            onPress={()=>router.push('OnBoardScreens/onBoardOne')}
         
         >
           <Text style={styles.buttonText}>Get Started</Text>
@@ -34,18 +36,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.LightGrey,
   },
+  imgContainer:{
+    width:'100%',
+    height:'60%',
+    alignItems:'center',
+    justifyContent:'center',
+    backgroundColor:Colors.primary
+  },
   image: {
     width: '100%',
-    height: 350,
+    height: 200,
+    resizeMode: 'cover',
   },
   container: {
     backgroundColor: Colors.White,
-    marginTop: -30,
+    marginTop:-30,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 30,
-    paddingBottom: 50,
+    //paddingBottom: 50,
     alignItems: 'center',
+    //justifyContent:'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -61,11 +72,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   description: {
-    fontSize: 16,
-    fontFamily: 'Times New Roman',
+    fontSize: 18,
+    //fontFamily: 'Times New Roman',
     textAlign: 'center',
     color: Colors.Grey,
-    lineHeight: 24,
+    lineHeight: 30,
     marginBottom: 40,
     paddingHorizontal: 10,
   },

@@ -1,13 +1,14 @@
 // components/CustomDrawer.js
 
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView,Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons, FontAwesome5, MaterialIcons,Feather } from '@expo/vector-icons';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
-import {profile} from '../app/(tabs)/profile';
 export default function CustomDrawer({ onClose }) {
-    const router= useRouter();
+  const router = useRouter();
+
+  // Function to handle navigation
   const handleNavigation = (screen) => {
     onClose(); // Close the drawer
     router.push(screen); // Navigate to the desired screen
@@ -22,21 +23,20 @@ export default function CustomDrawer({ onClose }) {
 
       {/* Drawer Header */}
       <View style={styles.header}>
-
-        <Image source={require('./../assets/images/whitelogo.png')} style={styles.logo}/>
+        <Image source={require('./../assets/images/whitelogo.png')} style={styles.logo} />
       </View>
 
       <ScrollView>
         {/* Drawer Menu Items */}
         {[
-          { label: 'My Profile', icon: 'user', screen: '/profile' },
+          { label: 'Profile', icon: 'user', screen: '/(tabs)/profile' }, // Adjusted the path here
           { label: 'My Orders', icon: 'shopping-bag', screen: '/discount' },
           { label: 'My Requests', icon: 'git-pull-request', screen: '/myRequest' },
           { label: 'My Donations', icon: 'gift', screen: '/donation' },
           { label: 'About', icon: 'info', screen: '/About' },
           { label: 'Settings', icon: 'settings', screen: '/Settings' },
           { label: 'Customer Support', icon: 'message-circle', screen: '/Support' },
-          { label: 'Logout', icon: 'log-out', screen: '/Login' }
+          { label: 'Logout', icon: 'log-out', screen: '/Login' },
         ].map((item, index) => (
           <TouchableOpacity
             key={index}
@@ -58,34 +58,22 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingTop: 50,
     paddingHorizontal: 20,
-    
   },
   closeButton: {
     alignSelf: 'flex-end',
     marginBottom: 20,
-    marginTop:-30,
+    marginTop: -30,
   },
   header: {
-    
     marginBottom: -20,
-    marginTop:-90,
-    marginLeft:-10,
+    marginTop: -90,
+    marginLeft: -10,
   },
   logo: {
     width: 200,
     height: 200,
-    resizeMode: 'contain', // Adjust the size without stretching
+    resizeMode: 'contain',
     marginTop: 10,
-  },
-  
-  headerTitle: {
-    fontSize: 24,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  subTitle: {
-    fontSize: 16,
-    color: '#fff',
   },
   menuItem: {
     flexDirection: 'row',

@@ -1,12 +1,14 @@
 
 import React from "react";
 import { Text, View } from "react-native";
-import React from "react";
 import Login from './../components/Login' 
+import { SafeAreaView } from "react-native-safe-area-context";
+import {StatusBar} from 'expo-status-bar'
 export default function Index() {
   return (
-    <View>
+    <SafeAreaView>
       <Login/>
-    </View>
+      <StatusBar backgroundColor='#161622' style='light'></StatusBar>
+    </SafeAreaView>
   );
 }

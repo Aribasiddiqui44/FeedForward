@@ -20,10 +20,10 @@ export default function SignIn() {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
 
       {/* Background Image */}
-      <View>
+      <View style={styles.up}>
 
         <Image 
-            source={require('./../../../assets/images/Land.jpg')}
+            source={require('./../../../assets/images/whitelogo.png')}
             style={styles.image}
         />
         <TouchableOpacity 
@@ -37,8 +37,7 @@ export default function SignIn() {
       <View style={styles.container}>
         {/* App Title */}
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Feed Forward</Text>
-          <Text style={styles.description}>Let's Sign You In</Text>
+          <Text style={styles.description}>Sign In</Text>
         </View>
 
         {/* Email Input */}
@@ -63,12 +62,12 @@ export default function SignIn() {
         </View>
 
         {/* Sign In Button */}
-        <TouchableOpacity style={styles.signInButton} onPress={()=>router.replace('./../../role_selection')}>
+        <TouchableOpacity style={styles.signInButton} onPress={()=>router.push('/role_selection')}>
           <Text style={styles.signInButtonText}>Sign In</Text>
         </TouchableOpacity>
 
         {/* Create Account Button */}
-        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.replace('auth/sign-up')}>
+        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('auth/sign-up')}>
 
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>
@@ -82,6 +81,10 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: Colors.LightGrey,
+  },
+  up:{
+    backgroundColor:Colors.primary,
+    height:'35%'
   },
   scrollContainer: {
     flexGrow: 1,
@@ -119,7 +122,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   description: {
-    fontSize: 18,
+    fontSize: 29,
     fontFamily: 'Times New Roman',
     textAlign: 'center',
     color: Colors.Grey,
