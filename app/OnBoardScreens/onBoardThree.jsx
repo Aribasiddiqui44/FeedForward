@@ -23,18 +23,15 @@ export default function onBoardTwo() {
       {/* Image Section */}
       <View style={styles.imageContainer}>
         <Image
-          source={require('./../../assets/images/spalsh3.png')} // Ensure this image exists in your project
+          source={require('./../../assets/images/on3.png')}
           style={styles.image}
         />
       </View>
 
       {/* Text Section */}
       <Text style={styles.quoteText}>
-        <Text >Giving is not just about {'\n'}
-        making a <Text style={styles.highlight}>donation, </Text> {'\n'}it is about
-        making <Text style={styles.highlight}>a difference.</Text>
-        </Text>
-        
+        {'\n'}<Text style={styles.highlight}>Stay Updated with Nearby Offers</Text>{'\n'}
+        Get notified about food donation offers near you! Stay informed on available donations from local restaurants and businesses, making it easier to act fast and help your community.
       </Text>
 
       {/* Pagination Dots */}
@@ -74,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   quoteText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '400',
     textAlign: 'center',
     color: '#333',
@@ -84,6 +81,7 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '600',
     color: Colors.primary,
+    fontSize: 18,
   },
   paginationContainer: {
     flexDirection: 'row',

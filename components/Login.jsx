@@ -2,78 +2,71 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { Colors } from './../constants/Colors.ts';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function Login() {
-    const router=useRouter();
+export default function Login({ imageResizeMode = 'cover' }) { 
+  const router = useRouter();
+
   return (
+    <SafeAreaView>
     <View style={styles.mainContainer}>
       <View style={styles.imgContainer}>
-      <Image 
-        source={require('./../assets/images/whitelogo.png')}
-        style={styles.image}
-      />
+        <Image
+          source={require('./../assets/images/whitelogo.png')}
+          style={styles.image_head}
+          resizeMode={imageResizeMode} 
+        />
       </View>
       <View style={styles.container}>
-        
-        
         <Text style={styles.description}>
           Empowering restaurants, charities, and communities to fight food waste by transforming surplus food into shared meals. Discover, donate, purchase, and volunteer seamlessly through our platform.
         </Text>
         
-        <TouchableOpacity style={styles.button}
-            onPress={()=>router.push('OnBoardScreens/onBoardOne')}
-        
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push('OnBoardScreens/onBoardOne')}
         >
           <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
       </View>
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   mainContainer: {
-    flex: 1,
+    //flex: 1,
+    flexDirection:'column',
     backgroundColor: Colors.LightGrey,
   },
-  imgContainer:{
-    width:'100%',
-    height:'60%',
-    alignItems:'center',
+  imgContainer: {
+    width: '100%',
+    height: 300,
+    alignItems: 'center',
     justifyContent:'center',
-    backgroundColor:Colors.primary
+    backgroundColor: Colors.primary,
   },
-  image: {
+  image_head: {
     width: '100%',
     height: 200,
-    resizeMode: 'cover',
   },
   container: {
     backgroundColor: Colors.White,
-    marginTop:-30,
+    marginTop: -30,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 30,
-    //paddingBottom: 50,
     alignItems: 'center',
-    //justifyContent:'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 8,
-    height:'100%'
-  },
-  title: {
-    fontSize: 36,
-    fontFamily: 'Times New Roman',
-    textAlign: 'center',
-    color: Colors.primary,
-    marginBottom: 20,
+    height: '100%',
   },
   description: {
     fontSize: 18,
-    //fontFamily: 'Times New Roman',
     textAlign: 'center',
     color: Colors.Grey,
     lineHeight: 30,
@@ -96,7 +89,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: Colors.White,
-    fontFamily: 'Times New Roman',
     fontSize: 18,
-  }
+  },
 });

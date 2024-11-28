@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "FeedForard",
-    "slug": "FeedForard",
+    "name": "FeedForward",
+    "slug": "FeedForward",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -24,7 +24,8 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/greenLogo.png",
+      "shortName": "Feed Forward"
     },
     "plugins": [
       "expo-router"

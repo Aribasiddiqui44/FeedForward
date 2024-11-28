@@ -2,9 +2,9 @@ import { View, Text, Image, StyleSheet, TouchableOpacity,ScrollView } from 'reac
 import React, { useEffect } from 'react';
 import { Colors } from './../../../constants/Colors.ts';
 import { useNavigation, useRouter } from 'expo-router';
-import { TextInput } from 'react-native-web';
+import { TextInput } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
-
+import { StatusBar } from 'react-native';
 export default function SignIn() {
   const navigation = useNavigation();
     const router=useRouter();
@@ -21,7 +21,6 @@ export default function SignIn() {
 
       {/* Background Image */}
       <View style={styles.up}>
-
         <Image 
             source={require('./../../../assets/images/whitelogo.png')}
             style={styles.image}
@@ -37,14 +36,14 @@ export default function SignIn() {
       <View style={styles.container}>
         {/* App Title */}
         <View style={styles.titleContainer}>
-          <Text style={styles.description}>Sign In</Text>
+          <Text style={styles.description}>Log Into Your Account</Text>
         </View>
 
         {/* Email Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Email</Text>
           <TextInput 
-            style={styles.input} 
+            style={styles.input_text} 
             placeholder='Enter Email' 
             placeholderTextColor={Colors.Grey} 
           />
@@ -55,7 +54,7 @@ export default function SignIn() {
           <Text style={styles.inputLabel}>Password</Text>
           <TextInput 
             secureTextEntry={true} 
-            style={styles.input} 
+            style={styles.input_text} 
             placeholder='Enter Password' 
             placeholderTextColor={Colors.Grey}
           />
@@ -81,20 +80,25 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: Colors.LightGrey,
+
   },
   up:{
     backgroundColor:Colors.primary,
-    height:'35%'
+    height:'35%',
+    alignItems:'center',
+    justifyContent:'center'
+    // marginTop:35
+    
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 20, // To ensure the content doesn't get cut off at the bottom
+    paddingBottom: 20, 
     height:'100%'
   },
   image: {
     width: '100%',
     height: 200,
-    resizeMode: 'cover',
+    resizeMode: 'cover'
   },
   container: {
     backgroundColor: Colors.White,
@@ -113,24 +117,25 @@ const styles = StyleSheet.create({
   titleContainer: {
     alignItems: 'center',
     marginBottom: 30,
+
   },
   title: {
     fontSize: 36,
-    fontFamily: 'Times New Roman',
     textAlign: 'center',
     color: Colors.primary,
     marginBottom: 10,
+  
   },
   description: {
-    fontSize: 29,
-    fontFamily: 'Times New Roman',
+    fontSize: 25,
     textAlign: 'center',
     color: Colors.Grey,
-    lineHeight: 22,
+    lineHeight: 32,
+    
   },
   iconContainer: {
     position: 'absolute',
-    top: 23,
+    top: 34,
     left: 20,
     zIndex: 10,
   },
@@ -141,15 +146,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: Colors.primary,
-    marginBottom: 8,
+    marginBottom: 7,
   },
-  input: {
-    padding: 15,
+  input_text: {
+    padding: 12,
     borderWidth: 1,
     borderRadius: 15,
     borderColor: Colors.primary,
     backgroundColor: Colors.LightGrey,
-    fontFamily: 'Times New Roman',
     fontSize: 16,
   },
   signInButton: {
@@ -167,7 +171,6 @@ const styles = StyleSheet.create({
   },
   signInButtonText: {
     color: Colors.White,
-    fontFamily: 'Times New Roman',
     fontSize: 18,
   },
   createAccountButton: {
@@ -182,7 +185,6 @@ const styles = StyleSheet.create({
   },
   createAccountButtonText: {
     color: Colors.primary,
-    fontFamily: 'Times New Roman',
     fontSize: 18,
   },
 });

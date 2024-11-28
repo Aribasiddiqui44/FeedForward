@@ -14,7 +14,7 @@ export default function onBoardTwo() {
   }, []);
 
   const handleNextPress = () => {
-    router.push('./onBoardThree');
+    router.push('./onBoardFour');
   };
 
   const handleSkipPress = () => {
@@ -26,16 +26,15 @@ export default function onBoardTwo() {
       {/* Image Section */}
       <View style={styles.imageContainer}>
         <Image
-          source={require('./../../assets/images/splash2.png')} // Ensure this image exists in your project
+          source={require('./../../assets/images/on2.png')} 
           style={styles.image}
         />
       </View>
 
       {/* Text Section */}
       <Text style={styles.quoteText}>
-        <Text >If you cant feed a </Text>
-        {'\n'}<Text style={styles.highlight}>hundred people,</Text>{'\n'}
-        then just feed <Text style={styles.highlight}>one.</Text>.
+        {'\n'}<Text style={styles.highlight}>Affordable Food for Organizations</Text>{'\n'}
+        Organizations can order desired number of portions at lower prices—or even for free—from nearby restaurants, cafes, and factories. 
       </Text>
 
       {/* Pagination Dots */}
@@ -68,16 +67,17 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
+    height:'40%',
     alignItems: 'center',
     marginTop: 50,
   },
   image: {
     width: 307,
-    height: 290,
+    height: '100%',
     borderRadius: 15,
   },
   quoteText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '400',
     textAlign: 'center',
     color: '#333',
@@ -87,6 +87,7 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '600',
     color: Colors.primary,
+    fontSize: 18,
   },
   paginationContainer: {
     flexDirection: 'row',

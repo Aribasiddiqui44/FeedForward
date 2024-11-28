@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Picker, Switch } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,Switch,Picker } from 'react-native';
 import { useRouter,useNavigation } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
 import Head from '../../../components/header';
+//import { Picker } from '@react-native-picker/picker';
 const ReceiverForm = () => {
   const navigation = useNavigation();
   const router= useRouter();
@@ -38,7 +39,7 @@ const ReceiverForm = () => {
     }
   };  
   const handleBackPress = () => {
-    router.back(); // Navigate back
+    router.back(); 
   };
   return (
     <ScrollView contentContainerStyle={styles.container_parent}>

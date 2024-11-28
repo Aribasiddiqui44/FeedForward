@@ -49,7 +49,7 @@ export default function SignUp() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Organization Name</Text>
             <TextInput 
-              style={styles.input} 
+              style={styles.input_text} 
               placeholder='Enter Organization Name' 
               placeholderTextColor={Colors.Grey}
             />
@@ -59,7 +59,7 @@ export default function SignUp() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Email</Text>
             <TextInput 
-              style={styles.input} 
+              style={styles.input_text} 
               placeholder='Enter Email' 
               placeholderTextColor={Colors.Grey} 
             />
@@ -70,7 +70,7 @@ export default function SignUp() {
             <Text style={styles.inputLabel}>Password</Text>
             <TextInput 
               secureTextEntry={true} 
-              style={styles.input} 
+              style={styles.input_text} 
               placeholder='Enter Password' 
               placeholderTextColor={Colors.Grey}
             />
@@ -80,7 +80,7 @@ export default function SignUp() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Address</Text>
             <TextInput 
-              style={styles.input} 
+              style={styles.input_text} 
               placeholder='Enter Address' 
               placeholderTextColor={Colors.Grey}
             />
@@ -90,7 +90,7 @@ export default function SignUp() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Contact Number</Text>
             <TextInput 
-              style={styles.input} 
+              style={styles.input_text} 
               placeholder='Enter Contact Number' 
               placeholderTextColor={Colors.Grey} 
             />
@@ -169,17 +169,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 36,
-    fontFamily: 'Times New Roman',
     textAlign: 'center',
     color: Colors.primary,
     marginBottom: 10,
   },
   description: {
     fontSize: 25,
-    fontFamily: 'Times New Roman',
     textAlign: 'center',
     color: Colors.Grey,
-    lineHeight: 22,
+    lineHeight: 32,
   },
   inputContainer: {
     marginBottom: 20,
@@ -188,15 +186,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: Colors.primary,
-    marginBottom: 8,
+    marginBottom: 7,
   },
-  input: {
-    padding: 15,
+  input_text: {
+    padding: 12,
     borderWidth: 1,
     borderRadius: 15,
     borderColor: Colors.primary,
     backgroundColor: Colors.LightGrey,
-    fontFamily: 'Times New Roman',
     fontSize: 16,
   },
   picker: {
@@ -207,7 +204,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderColor: Colors.primary,
     borderWidth: 1,
-    fontFamily: 'Times New Roman',
     fontSize: 16,
   },
   signUpButton: {
@@ -225,7 +221,6 @@ const styles = StyleSheet.create({
   },
   signUpButtonText: {
     color: Colors.White,
-    fontFamily: 'Times New Roman',
     fontSize: 18,
   },
   signInButton: {
@@ -237,7 +232,6 @@ const styles = StyleSheet.create({
   },
   signInButtonText: {
     color: Colors.primary,
-    fontFamily: 'Times New Roman',
     fontSize: 16,
     textDecorationLine: 'underline',
   },

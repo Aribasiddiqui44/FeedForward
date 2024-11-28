@@ -14,7 +14,7 @@ export default function onBoardOne() {
   }, []);
 
   const handleNextPress = () => {
-    router.push('./onBoardTwo');
+    router.push('./onBoardThree');
   };
 
   const handleSkipPress = () => {
@@ -26,7 +26,7 @@ export default function onBoardOne() {
       {/* Image Section */}
       <View style={styles.imageContainer}>
         <Image
-          source={require('./../../assets/images/on1.png')} 
+          source={require('./../../assets/images/on4.png')} 
           style={styles.image}
         />
       </View>
