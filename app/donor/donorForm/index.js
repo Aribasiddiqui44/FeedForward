@@ -23,7 +23,7 @@ const DonorForm = () => {
   const handleSubmit = () => {
     // Check if all fields are filled and checkbox is checked
     if (organizationName && organizationEmail && address && postalCode && isChecked) {
-      router.push('/(tabs)/profile');
+      router.push('/(tabs)/donor/profile');
     } else {
       alert('Please fill out all fields and agree to the terms.');
     }

@@ -28,14 +28,14 @@ export default function Layout() {
 
   // Menu items for navigation
   const menuItems = [
-    { label: 'Restaurant Listing', icon: 'user', screen: '/(tabs)/restaurantListing' },
-    { label: 'Profile', icon: 'user', screen: '/(tabs)/profile' },
-    { label: 'My Orders', icon: 'shopping-bag', screen: '/myOrder'},
-    { label: 'My Requests', icon: 'git-pull-request', screen: '/myRequest'},
-    { label: 'My Donations', icon: 'gift', screen: '/donation'},
-    { label: 'About', icon: 'info', screen: '/About' },
-    { label: 'Settings', icon: 'settings', screen: '/Settings' },
-    { label: 'Customer Support', icon: 'message-circle', screen: '/Support' },
+    { label: 'Restaurant Listing', icon: 'user', screen: '/(tabs)/receiver/restaurantListing' },
+    { label: 'Profile', icon: 'user', screen: '/(tabs)/receiver/profile' },
+    { label: 'My Orders', icon: 'shopping-bag', screen: '/receiver/myOrder'},
+    { label: 'My Requests', icon: 'git-pull-request', screen: '/receiver/myRequest'},
+    { label: 'My Donations', icon: 'gift', screen: '/receiver/donation'},
+    { label: 'About', icon: 'info', screen: '/receiver/About' },
+    { label: 'Settings', icon: 'settings', screen: '/receiver/Settings' },
+    { label: 'Customer Support', icon: 'message-circle', screen: '/receiver/Support' },
     { label: 'Logout', icon: 'log-out', screen: '/Login' },
   ];
 

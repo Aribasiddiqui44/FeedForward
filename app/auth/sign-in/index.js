@@ -61,12 +61,12 @@ export default function SignIn() {
         </View>
 
         {/* Sign In Button */}
-        <TouchableOpacity style={styles.signInButton} onPress={()=>router.push('/role_selection')}>
+        <TouchableOpacity style={styles.signInButton} onPress={()=>router.push('/accessLocation/AccessLocation')}>
           <Text style={styles.signInButtonText}>Sign In</Text>
         </TouchableOpacity>
 
         {/* Create Account Button */}
-        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('auth/sign-up')}>
+        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('/role_selection')}>
 
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>

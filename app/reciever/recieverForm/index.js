@@ -24,7 +24,7 @@ const ReceiverForm = () => {
   const handleSubmit = () => {
     if (organizationName && organizationEmail && address && postalCode && isChecked) {
       router.push({
-        pathname: '/(tabs)/restaurantListing',
+        pathname: '/(tabs)/receiver/restaurantListing',
         params: {
           organizationName,
           organizationEmail,

@@ -77,7 +77,7 @@ export default function SignUp() {
           </View>
 
           {/* Address Input */}
-          <View style={styles.inputContainer}>
+          {/* <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Address</Text>
             <TextInput 
               style={styles.input_text} 
@@ -86,7 +86,7 @@ export default function SignUp() {
             />
           </View>
 
-          {/* Contact Number Input */}
+         
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Contact Number</Text>
             <TextInput 
@@ -94,7 +94,7 @@ export default function SignUp() {
               placeholder='Enter Contact Number' 
               placeholderTextColor={Colors.Grey} 
             />
-          </View>
+          </View> */}
 
           {/* <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Sign Up As</Text>

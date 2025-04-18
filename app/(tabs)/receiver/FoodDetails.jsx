@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/Colors';
-import FreeMealRequest from '../reciever/recieverDonation/FreeMealRequest';
+import { Colors } from '../../../constants/Colors';
+import FreeMealRequest from '../../reciever/recieverDonation/FreeMealRequest';
 export default function FoodDetails() {
   const router=useRouter();
   const searchParams = useLocalSearchParams();
