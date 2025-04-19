@@ -71,7 +71,9 @@ const generateAccessAndRefresfTokens = async(userId) => {
 
 const post_CreateUser_SignUp_Register_Initial = asyncHandler(
     async(req, res) => {
+        // console.log("request")
         const {fullName, email, password, } = req.body;
+        // console.log(fullName, " ", email, " ", password);
         if(
             [fullName, email, password].some((field) => field?.trim() === "")
         ) {

@@ -11,7 +11,7 @@ const app = express();
 
 //Cogifuring
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: [process.env.CORS_ORIGIN, 'http://localhost:8081'],
     credentials: true
 })); // configuring cors middleware
 app.use(express.json({limit: "16kb"})) // for working with request body.

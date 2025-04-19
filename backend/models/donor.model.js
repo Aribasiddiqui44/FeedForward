@@ -5,7 +5,7 @@ const donorSchema = new Schema(
     {
         userRegisteredTheOrg: {
             type: Schema.Types.ObjectId,
-            ref: User
+            ref: 'User'
         },
         donorOrganizationName: {
             type: String,
