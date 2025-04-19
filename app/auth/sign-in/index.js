@@ -1,4 +1,4 @@
-import { View, Alert, Text, Image, StyleSheet, TouchableOpacity,ScrollView } from 'react-native';
+import { View, Alert, Text, Image, StyleSheet, TouchableOpacity,ScrollView, Platform } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Colors } from './../../../constants/Colors.ts';
 import { useNavigation, useRouter } from 'expo-router';
@@ -33,9 +33,13 @@ export default function SignIn() {
       });
       if(response.status == 201) {
         Alert.alert("Success", "Account Logged in Successfully.");
-        // console.log(response);
-        await SecureStore.setItemAsync('accessToken', response.data.data.accessToken);
-        await SecureStore.setItemAsync('refreshToken', response.data.data.refreshToken);
+        if( Platform.OS === 'web' ) {
+          localStorage.setItem('accessToken', response.data.data.accessToken);
+          localStorage.setItem('refreshToken', response.data.data.refreshToken);
+        } else{
+          await SecureStore.setItemAsync('accessToken', response.data.data.accessToken);
+          await SecureStore.setItemAsync('refreshToken', response.data.data.refreshToken);
+        }
 
         router.push('/role_selection');
       } else {
