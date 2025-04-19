@@ -26,7 +26,7 @@ export default function SignUp() {
     setLoading(true);
 
     try{
-      console.log(apiClient);
+      // console.log(apiClient);
       const response = await apiClient.post('/user/signUp', {
         fullName: formData.name,
         email: formData.email,
