@@ -1,6 +1,9 @@
 import mongoose, {Schema} from "mongoose";
 import bcrypt from "bcrypt";
-import JWT from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import { Donor } from "./donor.model.js";
+import { Rider } from "./rider.model.js";
+import { Receiver } from "./receiver.model.js";
 
 const userSchema = new Schema(
     {
@@ -26,7 +29,8 @@ const userSchema = new Schema(
         },
         userRole: {
             type: String,
-            enum: ['donor', 'receiver', 'volunteer']
+            default: 'noRole',
+            enum: ['noRole', 'donor', 'receiver', 'volunteer', 'admin']
         },
         phoneNumber: {
             type: String,
@@ -78,13 +82,25 @@ userSchema.methods.passwordValidator = async function(enteredPassword){
     }
 };
 
-userSchema.methods.generateAccessToken = function () {
-    return JWT.sign(
+userSchema.methods.generateAccessToken = async function () {
+    let roleId = ''
+    if(this.role === 'donor'){
+        let donor = await Donor.findOne({userRegisteredTheOrg: this._id});
+        roleId = donor._id;
+    } else if(this.role === 'volunteer'){
+        let rider = await Rider.findOne({volunteerUserId: this._id});
+        roleId = rider._id;
+    } else if (this.role === 'receiver'){
+        let receiver = await Receiver.findOne({userRegisteredTheOrg: this._id});
+        roleId = receiver._id;
+    }
+    return jwt.sign(
         {
             _id: this._id,
             email: this.email,
             fullName: this.fullName,
-            role: this.userRole
+            role: this.userRole,
+            userRoleId: roleId
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -94,7 +110,7 @@ userSchema.methods.generateAccessToken = function () {
 };
 
 userSchema.methods.generateRefreshToken = function () {
-    return JWT.sign(
+    return jwt.sign(
         {
             _id: this._id
         },

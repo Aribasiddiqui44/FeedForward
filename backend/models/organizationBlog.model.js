@@ -1,7 +1,9 @@
 import mongoose, {Schema} from "mongoose";
 
 const organizationBlogSchema = new Schema({
-
+    blogLink: {
+        type: String
+    }
 },
 {
     timestamps: true

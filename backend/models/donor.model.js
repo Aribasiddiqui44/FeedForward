@@ -1,8 +1,12 @@
-import mongoose, {Schema} from "mongoose";
-import { OrganizationBlog } from "./organizationBlog.model";
-
+import mongoose, {Schema, Types} from "mongoose";
+import { OrganizationBlog } from "./organizationBlog.model.js";
+import { User } from "./user.model.js";
 const donorSchema = new Schema(
     {
+        userRegisteredTheOrg: {
+            type: Schema.Types.ObjectId,
+            ref: User
+        },
         donorOrganizationName: {
             type: String,
             required: [true, "organization name required"]
@@ -16,42 +20,11 @@ const donorSchema = new Schema(
         },
         address: [
             {
-                // houseNumber: {
-                //     type: String
-                // },
-                // area: {
-                //     type: String
-                // },
-                // street: {
-                //     type: String
-                // },
-                // state: {
-                //     type: String
-                // },
-                // country: {
-                //     type: String,
-                //     default: "Pakistan"
-                // },
-                // postalCode: {
-                //     type: String
-                // },
-                // near: {
-                //     type: String // near some known place
-                // },
-                // otherComment: {
-                //     type: String
-                // },
                 location: {
                     type: String
                 },
-                googleMapLocation: {
-                    type: String
-                },
-                Coordinates: {
-                    longitude: {type: String},
-                    latitude: {type: String}
-                },
-                isCurrent: {type: Boolean, default: true}
+                googleLocation: {type: String},
+                near: {type: String, default: "No near building / location provided."}
             }
         ],
         city: {
@@ -73,6 +46,7 @@ const donorSchema = new Schema(
             type: Boolean,
             default: true
         },
+        impactCreated: [],
         donationsOfDonor: {
             //complete this after creating donation table.
         },
@@ -81,13 +55,14 @@ const donorSchema = new Schema(
         },
         parentOrganizationOfDonor: {
             type: Schema.Types.ObjectId,
-            ref: Donor
+            ref: 'Donor'
         },
         linksOfTheOrganization: [
             {
                 Url: {type: String},
                 title: {type: String},
-                information: {type: String} //if any 
+                type: {type: String},
+                description: {type: String} //if any info/description.
             }
         ],
         organizationBlogs: [
@@ -95,6 +70,9 @@ const donorSchema = new Schema(
                 type: Schema.Types.ObjectId,
                 ref: OrganizationBlog
             }
+        ],
+        organizationAchievements: [
+
         ]
 },
 {
