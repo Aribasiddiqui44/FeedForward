@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation, useRouter,useLocalSearchParams } from 'expo-router';
-import { Colors } from '../../constants/Colors';
+import { Colors } from '../../../constants/Colors';
 
 export default function Profile() {
   const { organizationName, organizationEmail, address, city, country, postalCode } = useLocalSearchParams();

@@ -1,24 +1,24 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
-import FoodCard from '../../components/foodCard';
+import FoodCard from '../../../components/foodCard';
 export default function MyOrder() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Ongoing');
 
   const handleTrackPress = () => {
-    router.push('/donation');
+    router.push('receiver/donation');
   };
 
   const handleCancelPress = () => {
-    router.push('/donation');
+    router.push('receiver/donation');
   };
 
   const handleRatePress = () => {
-    router.push('/donation');
+    router.push('receiver/donation');
   };
   const handleCompletePress = () => {
-    router.push('/donation');
+    router.push('receiver/donation');
   };
 
   return (
@@ -51,7 +51,7 @@ export default function MyOrder() {
               type="Free"
               statusTime="11:00 pm"
               date="29/11/2024"
-              imageSource={require('./../../assets/images/biryaniPng.png')}
+              imageSource={require('../../../assets/images/biryaniPng.png')}
               showRateOption={true}
               onRatePress={handleRatePress}
               showCompleteOption={true}
@@ -65,7 +65,7 @@ export default function MyOrder() {
               type="Free"
               statusTime="11:00 pm"
               date="29/11/2024"
-              imageSource={require('./../../assets/images/yum.png')}
+              imageSource={require('../../../assets/images/yum.png')}
               showRateOption={true}
               onRatePress={handleRatePress}
               showCompleteOption={true}

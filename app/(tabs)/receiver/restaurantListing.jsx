@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, FlatList, ScrollView, SafeAreaView,Image } from 'react-native';
 import React from 'react';
-import RestaurantCard from '../../components/restaurantCard';
-import { Colors } from '../../constants/Colors';
+import RestaurantCard from '../../../components/restaurantCard';
+import { Colors } from '../../../constants/Colors';
 import { useRouter } from 'expo-router';
 
 const restaurantData = [

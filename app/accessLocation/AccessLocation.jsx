@@ -20,15 +20,16 @@ export default function AccessLocation() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
+      router.push('./../reciever/recieverForm'); 
 
       // Navigate based on the role
-      if (role === 'donor') {
-        router.push('./../donor/donorForm'); // Navigate to donor form
-      } else if (role === 'receiver') {
-        router.push('./../reciever/recieverForm/'); // Navigate to receiver form
-      } else {
-        router.push('/volunteer/volunteerForm'); // Navigate to volunteer form
-      }
+    //   if (role === 'donor') {
+    //     router.push('./../donor/donorForm'); // Navigate to donor form
+    //   } else if (role === 'receiver') {
+    //     router.push('./../reciever/recieverForm/'); // Navigate to receiver form
+    //   } else {
+    //     router.push('/volunteer/volunteerForm'); // Navigate to volunteer form
+    //   }
     }, 2000); // Simulate location fetching delay
   };
 
