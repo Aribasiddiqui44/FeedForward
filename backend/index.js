@@ -6,9 +6,11 @@ import { connectDB } from './db/config.js';
 import { configDotenv } from 'dotenv';
 configDotenv();
 import UserRouter from './routes/user.router.js';
+import DonorRouter from './routes/donor.router.js';
 import { PORT } from './constants.js';
 
 app.use("/user", UserRouter);
+app.use("/donor", DonorRouter);
 
 // "immediately invoked function expression" (IIFE)
 //check info about IIFE in ./db/config.js

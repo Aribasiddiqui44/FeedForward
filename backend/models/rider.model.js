@@ -1,12 +1,17 @@
 import mongoose, {Schema, Types} from "mongoose";
-import { Donor } from "./donor.model";
+import { Donor } from "./donor.model.js";
+import { User } from "./user.model.js";
 
 const riderSchema = new Schema({
+    volunteerUserId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
     riderName: {
         type: String
     },
     riderContacts: [{
-        type: String
+        
     }],
     riderEmail: {
         type: String,
@@ -14,7 +19,11 @@ const riderSchema = new Schema({
     availableTimings: [
         {
             day: {type: String},
-            availableTimings: {
+            availableDayTimings: {
+                from: {type: String},
+                to: {type: String}
+            },
+            availableNightTimings: {
                 from: {type: String},
                 to: {type: String}
             }

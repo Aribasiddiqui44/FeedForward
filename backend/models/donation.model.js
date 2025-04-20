@@ -61,7 +61,7 @@ const donationSchema = new Schema ({
             default: "kg"
         }
     },
-    doantionInitialPickupTimeRange: {
+    donationInitialPickupTimeRange: {
         startingTime: {type: String},
         endingTime: {type: String}
     },
