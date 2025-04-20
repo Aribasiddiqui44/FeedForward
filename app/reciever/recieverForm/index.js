@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,Switch,Picker } from 'react-native';
-import { useRouter,useNavigation } from 'expo-router';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch } from 'react-native';
+import { useRouter, useNavigation } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
 import Head from '../../../components/header';
-//import { Picker } from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';  // Import Picker
+
 const ReceiverForm = () => {
   const navigation = useNavigation();
-  const router= useRouter();
+  const router = useRouter();
+
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
@@ -16,10 +18,13 @@ const ReceiverForm = () => {
   const [organizationName, setOrganizationName] = useState('');
   const [organizationEmail, setOrganizationEmail] = useState('');
   const [address, setAddress] = useState('');
-  const [city, setCity] = useState('Karachi');
-  const [country, setCountry] = useState('Pakistan');
+  const [city, setCity] = useState('Karachi'); // State for city
+  const [country, setCountry] = useState('Pakistan'); // State for country
   const [postalCode, setPostalCode] = useState('');
   const [isChecked, setIsChecked] = useState(false);
+
+  // State for language selection (optional)
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
 
   const handleSubmit = () => {
     if (organizationName && organizationEmail && address && postalCode && isChecked) {
@@ -37,26 +42,26 @@ const ReceiverForm = () => {
     } else {
       alert('Please fill out all fields and agree to the terms.');
     }
-  };  
-  const handleBackPress = () => {
-    router.back(); 
   };
+
+  const handleBackPress = () => {
+    router.back();
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container_parent}>
-      
-      <Head 
+      <Head
         showBackOption={true}
-        label='Feed Forward'
+        label="Feed Forward"
         onBackPress={handleBackPress}
       />
-      
 
       <View style={styles.container_child}>
         <Text style={styles.subHeaderText}>Receiver’s Form</Text>
 
         <Text style={styles.label}>Organization Name:</Text>
         <TextInput
-          style={styles.input}
+          style={styles.input_text}
           placeholder="Organization Name"
           placeholderTextColor="#B0B0B0"
           value={organizationName}
@@ -65,7 +70,7 @@ const ReceiverForm = () => {
 
         <Text style={styles.label}>Organization Email:</Text>
         <TextInput
-          style={styles.input}
+          style={styles.input_text}
           placeholder="Organization Email"
           placeholderTextColor="#B0B0B0"
           keyboardType="email-address"
@@ -75,16 +80,21 @@ const ReceiverForm = () => {
 
         <Text style={styles.label}>Address:</Text>
         <TextInput
-          style={styles.input}
+          style={styles.input_text}
           placeholder="House No., Street No., Area/Sector"
           placeholderTextColor="#B0B0B0"
           value={address}
           onChangeText={setAddress}
         />
 
+        {/* City Picker */}
         <Text style={styles.label}>City:</Text>
         <View style={styles.pickerContainer}>
-          <Picker selectedValue={city} onValueChange={setCity} style={styles.picker}>
+          <Picker
+            selectedValue={city}
+            onValueChange={(itemValue) => setCity(itemValue)} // Handle city change
+            style={styles.picker}
+          >
             <Picker.Item label="Karachi" value="Karachi" />
             <Picker.Item label="Lahore" value="Lahore" />
             <Picker.Item label="Islamabad" value="Islamabad" />
@@ -96,16 +106,21 @@ const ReceiverForm = () => {
           </Picker>
         </View>
 
+        {/* Country Picker */}
         <Text style={styles.label}>Country:</Text>
         <View style={styles.pickerContainer}>
-          <Picker selectedValue={country} onValueChange={setCountry} style={styles.picker}>
+          <Picker
+            selectedValue={country}
+            onValueChange={(itemValue) => setCountry(itemValue)} // Handle country change
+            style={styles.picker}
+          >
             <Picker.Item label="Pakistan" value="Pakistan" />
           </Picker>
         </View>
 
         <Text style={styles.label}>Postal Code:</Text>
         <TextInput
-          style={styles.input}
+          style={styles.input_text}
           placeholder="Postal Code"
           placeholderTextColor="#B0B0B0"
           keyboardType="numeric"
@@ -138,17 +153,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.LightGrey,
     padding: 30,
   },
-  headerContainer: {
-    width: '100%',
-    backgroundColor: Colors.primary,
-    paddingVertical: 20,
-    alignItems: 'center',
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
   subHeaderText: {
     fontSize: 27,
     fontWeight: 'bold',
@@ -160,19 +164,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#333333',
     marginBottom: 5,
-    fontWeight:500,
+    fontWeight: '500',
   },
-  input: {
+  input_text: {
     backgroundColor: '#F5F5F5',
     padding: 10,
     borderRadius: 5,
     marginBottom: 15,
     borderBottomWidth: 1,
     borderBottomColor: Colors.LightGrey,
-    shadowColor: '#A9A9A9',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
     elevation: 5,
   },
   pickerContainer: {
@@ -184,7 +184,6 @@ const styles = StyleSheet.create({
   picker: {
     height: 35,
     width: '100%',
-
   },
   checkboxContainer: {
     flexDirection: 'row',
