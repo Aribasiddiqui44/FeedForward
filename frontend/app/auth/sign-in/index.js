@@ -1,13 +1,60 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity,ScrollView } from 'react-native';
-import React, { useEffect } from 'react';
+import { View, Alert, Text, Image, StyleSheet, TouchableOpacity,ScrollView, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { Colors } from './../../../constants/Colors.ts';
 import { useNavigation, useRouter } from 'expo-router';
 import { TextInput } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import apiClient from './../../../utils/apiClient.js';
 import { StatusBar } from 'react-native';
+//for cookie savings
+import * as SecureStore from 'expo-secure-store';
 export default function SignIn() {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const handleChange = (name, value) => {
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleLogin = async() => {
+    if( !formData.email || !formData.password ){
+      Alert.alert("Error", "Please fill in all required fields.");
+    };
+    setLoading(true);
+    try{
+      const response = await apiClient.post('/user/login', {
+        email: formData.email,
+        password: formData.password
+      });
+      if(response.status == 201) {
+        Alert.alert("Success", "Account Logged in Successfully.");
+        if( Platform.OS === 'web' ) {
+          localStorage.setItem('accessToken', response.data.data.accessToken);
+          localStorage.setItem('refreshToken', response.data.data.refreshToken);
+        } else{
+          await SecureStore.setItemAsync('accessToken', response.data.data.accessToken);
+          await SecureStore.setItemAsync('refreshToken', response.data.data.refreshToken);
+        }
+
+        router.push('/role_selection');
+      } else {
+        Alert.alert("Error", response.data.message || "Try again to login")
+      };
+    } catch(err){
+      Alert.alert('Error', 'Network request failed');
+      console.error('Signin error', err);
+    } finally {
+      setLoading(false);
+    }
+  };
   const navigation = useNavigation();
-    const router=useRouter();
+  const router=useRouter();
+
   // Disable the header for this screen
   useEffect(() => {
     navigation.setOptions({
@@ -43,7 +90,9 @@ export default function SignIn() {
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Email</Text>
           <TextInput 
-            style={styles.input_text} 
+            style={styles.input_text}
+            value={formData.email}
+            onChangeText={(text) => handleChange('email', text)}
             placeholder='Enter Email' 
             placeholderTextColor={Colors.Grey} 
           />
@@ -54,19 +103,27 @@ export default function SignIn() {
           <Text style={styles.inputLabel}>Password</Text>
           <TextInput 
             secureTextEntry={true} 
-            style={styles.input_text} 
+            style={styles.input_text}
+            value={formData.password}
+            onChangeText={(text) => handleChange('password', text)}
             placeholder='Enter Password' 
             placeholderTextColor={Colors.Grey}
           />
         </View>
 
         {/* Sign In Button */}
-        <TouchableOpacity style={styles.signInButton} onPress={()=>router.push('/accessLocation/AccessLocation')}>
-          <Text style={styles.signInButtonText}>Sign In</Text>
+        <TouchableOpacity 
+         style={styles.signInButton}
+         onPress={handleLogin}
+         disabled={loading}
+         >
+          <Text style={styles.signInButtonText}>
+            {loading ? "Logging In..." : 'Sign In'}
+            </Text>
         </TouchableOpacity>
 
         {/* Create Account Button */}
-        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('/role_selection')}>
+        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('auth/sign-up')}>
 
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>
