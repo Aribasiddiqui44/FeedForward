@@ -4,7 +4,8 @@ import { Colors } from './../../../constants/Colors.ts';
 import { useNavigation, useRouter } from 'expo-router';
 import { TextInput } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import apiClient from './../../../utils/apiClient.js';
+// import apiClient from './../../../utils/apiClient.js';
+import apiClient from '../../../utils/apiClient.js';
 import { StatusBar } from 'react-native';
 //for cookie savings
 import * as SecureStore from 'expo-secure-store';
