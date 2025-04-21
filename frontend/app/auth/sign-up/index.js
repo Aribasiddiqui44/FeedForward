@@ -1,13 +1,54 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Picker, ScrollView, ImageBackground } from 'react-native';
+import { View, Text, Alert, Image, StyleSheet, TouchableOpacity, TextInput, Picker, ScrollView, ImageBackground } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Colors } from './../../../constants/Colors.ts';
 import { router, useNavigation, useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import axios from "axios";
+import apiClient from './../../../utils/apiClient.js';
 export default function SignUp() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const handleChange = (name, value) => {
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSignUp = async () => {
+    if( !formData.name || !formData.email || !formData.password ) {
+      Alert.alert("Error", "Please fill in all required fields.");
+    };
+    setLoading(true);
+
+    try{
+      // console.log(apiClient);
+      const response = await apiClient.post('/user/signUp', {
+        fullName: formData.name,
+        email: formData.email,
+        password: formData.password
+      });
+      if (response.status == 201) {
+        Alert.alert('Success', "Account created successfully.");
+        router.replace('auth/sign-in');
+      } else{
+        Alert.alert('Error', response.data.message || 'Signup failed.');
+      };
+    } catch (err) {
+      Alert.alert('Error', 'Network request failed');
+      console.error('Signup error: ', err);
+    } finally {
+      setLoading(false);
+    }
+  }
   const router = useRouter();
   const navigation=useNavigation();
 
-  const [userType, setUserType] = useState('donor');
+  // const [userType, setUserType] = useState('donor');
 
   // Disable the header for this screen
   useEffect(() => {
@@ -50,7 +91,9 @@ export default function SignUp() {
             <Text style={styles.inputLabel}>Organization Name</Text>
             <TextInput 
               style={styles.input_text} 
-              placeholder='Enter Organization Name' 
+              value={formData.name}
+              onChangeText={(text) => handleChange('name', text)}
+              placeholder='Enter Organization Name'
               placeholderTextColor={Colors.Grey}
             />
           </View>
@@ -59,7 +102,9 @@ export default function SignUp() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Email</Text>
             <TextInput 
-              style={styles.input_text} 
+              style={styles.input_text}
+              value={formData.email}
+              onChangeText={(text) => handleChange('email', text)}
               placeholder='Enter Email' 
               placeholderTextColor={Colors.Grey} 
             />
@@ -70,14 +115,16 @@ export default function SignUp() {
             <Text style={styles.inputLabel}>Password</Text>
             <TextInput 
               secureTextEntry={true} 
-              style={styles.input_text} 
+              style={styles.input_text}
+              value={formData.password}
+              onChangeText={(text) => handleChange('password', text)} 
               placeholder='Enter Password' 
               placeholderTextColor={Colors.Grey}
             />
           </View>
 
           {/* Address Input */}
-          {/* <View style={styles.inputContainer}>
+          <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Address</Text>
             <TextInput 
               style={styles.input_text} 
@@ -86,7 +133,7 @@ export default function SignUp() {
             />
           </View>
 
-         
+          {/* Contact Number Input */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Contact Number</Text>
             <TextInput 
@@ -94,7 +141,7 @@ export default function SignUp() {
               placeholder='Enter Contact Number' 
               placeholderTextColor={Colors.Grey} 
             />
-          </View> */}
+          </View>
 
           {/* <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Sign Up As</Text>
@@ -108,9 +155,14 @@ export default function SignUp() {
             </Picker>
           </View> */}
 
-          <TouchableOpacity style={styles.signUpButton}
-          onPress={() => router.replace('auth/sign-in')}>
-            <Text style={styles.signUpButtonText}>Sign Up</Text>
+          <TouchableOpacity 
+            style={styles.signUpButton}
+            onPress={handleSignUp} 
+            disabled={loading}  // This was missing the value
+          >
+            <Text style={styles.signUpButtonText}>
+              {loading ? 'Creating Account...' : 'Sign Up'}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity 

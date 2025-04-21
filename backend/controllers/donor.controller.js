@@ -86,7 +86,7 @@ const patchaddNewAddress = asyncHandler(async(req, res) => {
 });
 
 const patchAddParentOrganization = asyncHandler( async(req, res) => {
-    // update both parent org and branch number of this child
+    // update both parent org and branch number of this childs
 });
 
 const patchAddOrganizationUrls = asyncHandler( async(req, res) => {
