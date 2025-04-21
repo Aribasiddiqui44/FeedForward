@@ -3,7 +3,7 @@ import asyncHandler from './../utils/asyncHandler.js';
 import ApiError from './../utils/ApiError.js';
 import ApiResponse from './../utils/ApiResponse.js';
 
-const generateAccessAndRefresfTokens = async(userId) => {
+const generateAccessAndRefreshTokens = async(userId) => {
     try {
         let user = await User.findById(userId);
         const accessToken = user.generateAccessToken();
