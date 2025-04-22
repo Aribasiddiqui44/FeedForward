@@ -58,4 +58,4 @@ const upload = multer ({
     storage, // in ES6 we can export function like this , if the function signature and export name are both same.
 });
 
-module.exports = upload;
+export default upload;
