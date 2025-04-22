@@ -1,7 +1,13 @@
 import mongoose, {Schema} from "mongoose";
 import { Rider } from "./rider.model";
+import { Receiver } from "./receiver.model.js";
 
 const donationSchema = new Schema ({
+    listingType: {
+        type: String,
+        enum: ["donate", "sell"],
+        required: true
+    },
     donationFoodTitle: {
         type: String,
 
@@ -24,7 +30,8 @@ const donationSchema = new Schema ({
             donatedTo: {
                 // reference to receiver organization if there are different receivers for different food items of a donation.
                 receiverId: {
-                    
+                    type: Schema.Types.ObjectId,
+                    ref: 'Receiver'
                 },
                 receiverOrgName: {
                     type: String
@@ -39,12 +46,11 @@ const donationSchema = new Schema ({
             riderInformation: {
                 riderId: {
                     type: Schema.Types.ObjectId,
-                    ref: Rider                    
+                    ref: 'Rider'                    
                 },
                 riderName: {type: String},
                 riderPhone: {type: String}
             }
-
         }
     ],
     donationDescription: {
@@ -52,7 +58,8 @@ const donationSchema = new Schema ({
     },
     donationUnitPrice: {
         value: {type: float},
-        currency: {type: String}
+        currency: {type: String},
+        required: function() { return this.listingType === "sell"}
     },
     donationQuantity: {
         quantity: {type: float},
