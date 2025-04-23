@@ -107,7 +107,7 @@ const patchAddImages = asyncHandler( async(req, res) => {
             "Internal Server Error! Something went wrong when uploading files on  cloud."
         )
     };
-    console.log(donorImage);
+    // console.log(donorImage);
     let donor = await Donor.findById(donorId);
     if ( !donor ) {
         throw new ApiError(400, "Bad Request, Unable to find Donor.")
