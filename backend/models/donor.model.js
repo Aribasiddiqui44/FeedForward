@@ -73,6 +73,13 @@ const donorSchema = new Schema(
         ],
         organizationAchievements: [
 
+        ],
+        imagesOfOrganization: [
+            {
+                title: {type: String},
+                description: {type: String},
+                imageURL: {type: String}
+            }
         ]
 },
 {
