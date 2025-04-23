@@ -1,5 +1,8 @@
 import mongoose, { Schema } from "mongoose";
-
+import {Donor} from './../models/donor.model.js';
+import { User } from "./user.model.js";
+import {Receiver} from "./receiver.model.js";
+import { Rider } from "./rider.model.js";
 const donationSchema = new Schema({
     donationFoodTitle: { type: String },
 
@@ -13,13 +16,13 @@ const donationSchema = new Schema({
             },
             donatedBy: {
                 type: Schema.Types.ObjectId,
-                ref: 'Donor',
+                ref: {Donor},
                 required: true
             },            
             donatedTo: {
                 receiverId: {
                     type: Schema.Types.ObjectId,
-                    ref: 'Receiver'
+                    ref: {Receiver}
                 },
                 receiverOrgName: { type: String },
                 receiverOrgEmail: { type: String },
@@ -28,7 +31,7 @@ const donationSchema = new Schema({
             riderInformation: {
                 riderId: {
                     type: Schema.Types.ObjectId,
-                    ref: 'Rider'
+                    ref: {Rider}
                 },
                 riderName: { type: String },
                 riderPhone: { type: String }

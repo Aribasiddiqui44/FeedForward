@@ -1,9 +1,10 @@
 import {Donor} from './../models/donor.model.js';
 import {User} from './../models/user.model.js';
 
-import asyncHandler from '../utils/asyncHandler.js';
-import ApiError from '../utils/ApiError.js';
-import ApiResponse from '../utils/ApiResponse.js';
+import asyncHandler from './../utils/asyncHandler.js';
+import ApiError from './../utils/ApiError.js';
+import ApiResponse from './../utils/ApiResponse.js';
+import uploadOnCloudinary from './../services/cloudinary.service.js';
 
 const postDonorForm = asyncHandler (async (req, res) => {
     const {
@@ -85,6 +86,44 @@ const patchaddNewAddress = asyncHandler(async(req, res) => {
     );
 });
 
+const patchAddImages = asyncHandler( async(req, res) => {
+    const {donorId, title, description} = req.body;
+    // console.log(title, description);
+    if (
+        [donorId, title, description].some((field) => field?.trim() === '')
+    ) {
+        throw new ApiError(400, "All fields are required.")
+    };
+    // currently single file upload, if more files then has to change this to loop here controller and change maxCount at router
+    const imageLocalPath = req.files?.donorImage[0]?.path;
+    if ( !imageLocalPath ) {
+        throw new ApiError(400, "Image not found.");
+    };
+    // uploading on Cloudinary.
+    const donorImage = await uploadOnCloudinary(imageLocalPath);
+    if ( !donorImage ) {
+        throw new ApiError(
+            500,
+            "Internal Server Error! Something went wrong when uploading files on  cloud."
+        )
+    };
+    // console.log(donorImage);
+    let donor = await Donor.findById(donorId);
+    if ( !donor ) {
+        throw new ApiError(400, "Bad Request, Unable to find Donor.")
+    };
+    donor.imagesOfOrganization.push(
+        {
+            title,
+            description,
+            imageURL: donor.url 
+        }
+    );
+    await donor.save();
+    return res.status(201).json(
+        new ApiResponse(201, donor, "Successfully added Image.")
+    );
+});
 const patchAddParentOrganization = asyncHandler( async(req, res) => {
     // update both parent org and branch number of this childs
 });
@@ -117,5 +156,5 @@ export {
     patchaddNewAddress,
     patchAddParentOrganization,
     patchAddOrganizationUrls,
-
+    patchAddImages
 }

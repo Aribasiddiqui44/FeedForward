@@ -112,7 +112,20 @@ const post_CreateUser_SignUp_Register_Initial = asyncHandler(
         )
     }
 );
-
+const patchAddRole = asyncHandler( async(req, res) => {
+    const { user_id, role } = req.body;
+    let updatedUser = await User.findByIdAndUpdate(
+        user_id,
+        { userRole: role },
+        { new: true }
+    );
+    if ( !updatedUser ) {
+        throw new ApiError(400, "Bad Request! User not found.");
+    };
+    return res.status(201).json(
+        new ApiResponse(201, updatedUser, "Successfully updated the role.")
+    );  
+});
 const post_SignUp_With_Google = asyncHandler( async(req, res) => {
 
 });
@@ -230,5 +243,6 @@ const logoutUser = asyncHandler( async(req, res) => {
 export {
     post_CreateUser_SignUp_Register_Initial,
     postLoginUser,
-    logoutUser 
+    logoutUser,
+    patchAddRole
 }

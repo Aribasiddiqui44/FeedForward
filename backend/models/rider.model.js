@@ -42,7 +42,7 @@ const riderSchema = new Schema({
             }
         ]
     },
-
+    pastVolunteerWork: [],
     cnic: {
         url: { type: String },
         cnicNumber: { type: Number }
