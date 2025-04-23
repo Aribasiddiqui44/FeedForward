@@ -90,10 +90,11 @@ const patchAddImages = asyncHandler( async(req, res) => {
     const {donorId, title, description} = req.body;
     // console.log(title, description);
     if (
-        [title, description].some((field) => field?.trim() === '')
+        [donorId, title, description].some((field) => field?.trim() === '')
     ) {
         throw new ApiError(400, "All fields are required.")
     };
+    // currently single file upload, if more files then has to change this to loop here controller and change maxCount at router
     const imageLocalPath = req.files?.donorImage[0]?.path;
     if ( !imageLocalPath ) {
         throw new ApiError(400, "Image not found.");
