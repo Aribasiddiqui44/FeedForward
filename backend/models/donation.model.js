@@ -11,6 +11,11 @@ const donationSchema = new Schema({
                 quantity: { type: Number },
                 unitOfMeasurement: { type: String, default: "kg" }
             },
+            donatedBy: {
+                type: Schema.Types.ObjectId,
+                ref: 'Donor',
+                required: true
+            },            
             donatedTo: {
                 receiverId: {
                     type: Schema.Types.ObjectId,
@@ -54,7 +59,7 @@ const donationSchema = new Schema({
         bestBefore: { type: Date, default: Date.now },
         listedFor: {
             period: { type: Number },
-            timeUnit: { type: String } // e.g., "days"
+            timeUnit: { type: String } 
         }
     },
 

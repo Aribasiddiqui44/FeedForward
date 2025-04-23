@@ -1,31 +1,19 @@
-import express from "express";
-import {
-  createDonation,
-  getAllDonations,
-  getDonationById,
-  assignRiderToDonation,
-  markDonationAsCompleted,
-  getDonationsByDonor,
-} from "../controllers/donation.controller.js";
+import express from 'express';
+import { createDonation, getDonationsForUser, getDonationsForReceiver, completeDonation } from '../controllers/donation.controller.js';
+import { verifyJWT } from '../middlewares/authentication.middleware.js';
 
 const router = express.Router();
 
 // Create a new donation
-router.post("/", createDonation);
+router.post('/create', verifyJWT, createDonation);
 
-// Get all donations
-router.get("/", getAllDonations);
+// Get donations for donor (filtered by ongoing/completed)
+router.get('/mine', verifyJWT, getDonationsForUser);
 
-// Get a single donation by ID
-router.get("/:id", getDonationById);
+// Get donations for receiver
+router.get('/receiver', verifyJWT, getDonationsForReceiver);
 
-// Assign a rider to a donation
-router.put("/assign-rider/:id", assignRiderToDonation);
-
-// Mark a donation as completed
-router.put("/complete/:id", markDonationAsCompleted);
-
-// Get all donations by a donor (optional route if donor field is added)
-router.get("/donor/:donorId", getDonationsByDonor);
+// Mark donation as completed
+router.patch('/:id/complete', verifyJWT, completeDonation);
 
 export default router;

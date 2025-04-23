@@ -17,7 +17,7 @@ export default function RoleSelection() {
 
   const handlePress = (role) => {
     router.push({
-      pathname: '/auth/sign-up',
+      pathname: '/reciever/recieverForm',
       params: { role }, // Pass the selected role as a parameter
     });
   };

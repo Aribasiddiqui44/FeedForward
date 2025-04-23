@@ -1,98 +1,77 @@
-import { Donation } from "../models/donation.model.js";
-import { Rider } from "../models/rider.model.js";
-import { Receiver } from "../models/receiver.model.js";
+import asyncHandler from '../utils/asyncHandler.js';
+import { Donation } from '../models/donation.model.js';
+import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
 
-// Create a new donation
-export const createDonation = async (req, res) => {
-  try {
-    const newDonation = new Donation(req.body);
-    const savedDonation = await newDonation.save();
-    res.status(201).json({ message: "Donation created successfully", donation: savedDonation });
-  } catch (error) {
-    console.error("Error creating donation:", error);
-    res.status(500).json({ error: "Failed to create donation" });
-  }
-};
+// 1. Create a donation
+export const createDonation = asyncHandler(async (req, res) => {
+    const { donationFoodTitle, donationFoodList, donationDescription, donationUnitPrice, donationQuantity, donationInitialPickupTimeRange, donationPickupInstructions, goodnessOfFood, rider } = req.body;
 
-// Get all donations
-export const getAllDonations = async (req, res) => {
-  try {
-    const donations = await Donation.find()
-      .populate("donationFoodList.donatedTo.receiverId")
-      .populate("donationFoodList.riderInformation.riderId");
-    res.status(200).json(donations);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch donations" });
-  }
-};
+    const newDonation = await Donation.create({
+        donationFoodTitle,
+        donationFoodList,
+        donationDescription,
+        donationUnitPrice,
+        donationQuantity,
+        donationInitialPickupTimeRange,
+        donationPickupInstructions,
+        goodnessOfFood,
+        rider,
+        donatedBy: req.user._id
+    });
 
-// Get a single donation by ID
-export const getDonationById = async (req, res) => {
-  try {
-    const donation = await Donation.findById(req.params.id)
-      .populate("donationFoodList.donatedTo.receiverId")
-      .populate("donationFoodList.riderInformation.riderId");
+    res.status(201).json(new ApiResponse(201, newDonation, "Donation created successfully"));
+});
 
-    if (!donation) {
-      return res.status(404).json({ error: "Donation not found" });
+// 2. Get donations for current user (Donor)
+export const getDonationsForUser = asyncHandler(async (req, res) => {
+    const { status } = req.query;
+
+    const filter = { donatedBy: req.user._id };
+    if (status === 'ongoing') {
+        filter["isDonationCompletedSuccessfully.isCompleted"] = false;
+    } else if (status === 'completed') {
+        filter["isDonationCompletedSuccessfully.isCompleted"] = true;
     }
 
-    res.status(200).json(donation);
+    const donations = await Donation.find(filter).sort({ createdAt: -1 });
+
+    res.status(200).json(new ApiResponse(200, donations, "Donor's donations fetched"));
+});
+
+// 3. Get donations for receiver (receiverId matched)
+export const getDonationsForReceiver = async (req, res) => {
+  try {
+    const receiverId = req.user?.id; // This comes from verifyJWT
+
+    if (!receiverId) {
+      return res.status(400).json({ message: 'Receiver ID is missing.' });
+    }
+
+    const donations = await Donation.find({ 'donatedTo.receiverId': receiverId })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ donations });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch donation" });
+    console.error('Error fetching donations for receiver:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-// Assign a rider to a donation
-export const assignRiderToDonation = async (req, res) => {
-  try {
-    const { riderId } = req.body;
-    const donation = await Donation.findById(req.params.id);
+// 4. Complete a donation
+export const completeDonation = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { comments } = req.body;
 
-    if (!donation) return res.status(404).json({ error: "Donation not found" });
+    const donation = await Donation.findById(id);
+    if (!donation) throw new ApiError(404, "Donation not found");
 
-    const rider = await Rider.findById(riderId);
-    if (!rider) return res.status(404).json({ error: "Rider not found" });
-
-    donation.rider.riderId = rider._id;
-    donation.rider.riderName = rider.riderName;
-    donation.rider.riderPhone = rider.riderContacts?.[0]?.phone || rider.riderPhone;
+    donation.isDonationCompletedSuccessfully = {
+        isCompleted: true,
+        comments: comments || ''
+    };
 
     await donation.save();
 
-    res.status(200).json({ message: "Rider assigned successfully", donation });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to assign rider" });
-  }
-};
-
-// Mark donation as completed
-export const markDonationAsCompleted = async (req, res) => {
-  try {
-    const { isCompleted, comments } = req.body;
-
-    const donation = await Donation.findById(req.params.id);
-    if (!donation) return res.status(404).json({ error: "Donation not found" });
-
-    donation.isDonationCompletedSuccessfully.isCompleted = isCompleted;
-    donation.isDonationCompletedSuccessfully.comments = comments;
-
-    await donation.save();
-
-    res.status(200).json({ message: "Donation status updated", donation });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to update donation status" });
-  }
-};
-
-// Get donations by donor (optional)
-export const getDonationsByDonor = async (req, res) => {
-  try {
-    const { donorId } = req.params;
-    const donations = await Donation.find({ "donor._id": donorId });
-    res.status(200).json(donations);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch donor's donations" });
-  }
-};
-
+    res.status(200).json(new ApiResponse(200, donation, "Donation marked as completed"));
+});
