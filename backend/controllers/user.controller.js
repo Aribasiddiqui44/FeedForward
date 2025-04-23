@@ -167,7 +167,7 @@ const patch_Add_Mobile_Phone = asyncHandler( async(req, res) => {
 
 const postLoginUser = asyncHandler( async (req, res) => {
     const { email, password } = req.body;
-    console.log(email, password)
+    // console.log(email, password)
     if ( !email ) {
         throw new ApiError(400, "email is required.")
     };

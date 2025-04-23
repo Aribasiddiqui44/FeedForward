@@ -1,5 +1,5 @@
 import { View, Alert, Text, Image, StyleSheet, TouchableOpacity,ScrollView, Platform } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useDeferredValue, useEffect, useState } from 'react';
 import { Colors } from './../../../constants/Colors.ts';
 import { useNavigation, useRouter } from 'expo-router';
 import { TextInput } from 'react-native';
@@ -42,7 +42,13 @@ export default function SignIn() {
           await SecureStore.setItemAsync('refreshToken', response.data.data.refreshToken);
         }
 
-        router.push('/role_selection');
+        router.push({
+          pathname: '/role_selection',
+          params: {
+            userRole: response.data.data.role,
+            useData: JSON.stringify(response.data.data)
+          }
+        });
       } else {
         Alert.alert("Error", response.data.message || "Try again to login")
       };
