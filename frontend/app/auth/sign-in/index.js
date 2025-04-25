@@ -45,8 +45,7 @@ export default function SignIn() {
         router.push({
           pathname: '/role_selection',
           params: {
-            userRole: response.data.data.role,
-            useData: JSON.stringify(response.data.data)
+            userData: JSON.stringify(response.data.data)
           }
         });
       } else {
