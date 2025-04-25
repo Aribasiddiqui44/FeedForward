@@ -3,7 +3,7 @@ import asyncHandler from './../utils/asyncHandler.js';
 import ApiError from './../utils/ApiError.js';
 import ApiResponse from './../utils/ApiResponse.js';
 
-const generateAccessAndRefresfTokens = async(userId) => {
+const generateAccessAndRefreshTokens = async(userId) => {
     try {
         let user = await User.findById(userId);
         const accessToken = user.generateAccessToken();
@@ -181,7 +181,7 @@ const postLoginUser = asyncHandler( async (req, res) => {
     if( !isPasswordValid ){
         throw new ApiError(401, "Invalid User credentials(password)")
     };
-    const { accessToken, refreshToken } = await generateAccessAndRefresfTokens(user._id);
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
     const loggedInUser = await User.findById(user._id).select(
         "-password -refreshToken"

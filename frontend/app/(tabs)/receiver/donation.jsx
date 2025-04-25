@@ -1,24 +1,78 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import FoodCard from '../../../components/foodCard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const getToken = async () => {
+  if (Platform.OS === 'web') {
+    return await AsyncStorage.getItem('accessToken');
+  } else {
+    return await SecureStore.getItemAsync('accessToken');
+  }
+};
+
 export default function MyOrder() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Ongoing');
+  const [donations, setDonations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleTrackPress = () => {
-    router.push('receiver/donation');
+  const fetchDonations = async () => {
+    try {
+      const token = await getToken();
+
+      const response = await fetch('http://localhost:8000/api/donation/receiver', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      setDonations(data.donations || []);
+    } catch (error) {
+      console.error("Failed to fetch receiver donations", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCancelPress = () => {
-    router.push('receiver/donation');
-  };
+  useEffect(() => {
+    fetchDonations();
+  }, []);
 
   const handleRatePress = () => {
     router.push('receiver/donation');
   };
+
   const handleCompletePress = () => {
     router.push('receiver/donation');
+  };
+
+  const renderDonations = (statusFilter) => {
+    const filtered = donations.filter((donation) => donation.donationStatus === statusFilter.toLowerCase());
+
+    if (filtered.length === 0) {
+      return <Text style={styles.emptyText}>No {statusFilter.toLowerCase()} donations.</Text>;
+    }
+
+    return filtered.map((donation, index) => (
+      <FoodCard
+        key={donation._id || index}
+        foodName={donation.foodName}
+        description={donation.pickupInstructions}
+        total={donation.price ? `${donation.price} PKR` : '0 PKR'}
+        portions={donation.portions}
+        type={donation.donationType}
+        statusTime={donation.expiry}
+        date={new Date(donation.createdAt).toLocaleDateString()}
+        imageSource={require('../../../assets/images/biryaniPng.png')}
+        showRateOption={statusFilter === 'History'}
+        onRatePress={handleRatePress}
+        showCompleteOption={statusFilter === 'Ongoing'}
+        onCompletePress={handleCompletePress}
+      />
+    ));
   };
 
   return (
@@ -41,40 +95,13 @@ export default function MyOrder() {
 
       {/* Content */}
       <ScrollView>
-        {activeTab === 'Ongoing' && (
+        {loading ? (
+          <ActivityIndicator size="large" color="#00aa95" />
+        ) : (
           <>
-            <FoodCard
-              foodName="Chicken Biryani"
-              description="Delicious surplus biryani available..."
-              total="0 PKR"
-              portions="7"
-              type="Free"
-              statusTime="11:00 pm"
-              date="29/11/2024"
-              imageSource={require('../../../assets/images/biryaniPng.png')}
-              showRateOption={true}
-              onRatePress={handleRatePress}
-              showCompleteOption={true}
-              onCompletePress={handleCompletePress}
-            />
-            <FoodCard
-              foodName="Chicken Karahi"
-              description="Delicious surplus karahi available..."
-              total="0 PKR"
-              portions="15"
-              type="Free"
-              statusTime="11:00 pm"
-              date="29/11/2024"
-              imageSource={require('../../../assets/images/yum.png')}
-              showRateOption={true}
-              onRatePress={handleRatePress}
-              showCompleteOption={true}
-              onCompletePress={handleCompletePress}
-            />
+            {activeTab === 'Ongoing' && renderDonations('Ongoing')}
+            {activeTab === 'History' && renderDonations('Completed')}
           </>
-        )}
-        {activeTab === 'History' && (
-          <Text style={styles.emptyText}>No history available.</Text>
         )}
       </ScrollView>
     </View>
@@ -84,15 +111,15 @@ export default function MyOrder() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa', // Light background color
+    backgroundColor: '#f8f9fa',
     paddingHorizontal: 10,
   },
   tabContainer: {
     flexDirection: 'row',
     marginVertical: 10,
   },
-  side:{
-    flexDirection:'column'
+  side: {
+    flexDirection: 'column'
   },
   tab: {
     flex: 1,
@@ -102,14 +129,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   activeTab: {
-    borderBottomColor: '#00aa95', // Active tab color
+    borderBottomColor: '#00aa95',
   },
   tabText: {
     fontSize: 16,
     color: '#777',
   },
   activeTabText: {
-    color: '#00aa95', // Active tab text color
+    color: '#00aa95',
     fontWeight: 'bold',
   },
   card: {
@@ -121,7 +148,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3, // For Android shadow
+    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -172,9 +199,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
     marginRight: 10,
-    marginTop:8,
+    marginTop: 8,
   },
-  
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',

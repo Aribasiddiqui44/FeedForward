@@ -136,13 +136,14 @@ const patchAddOrganizationUrls = asyncHandler( async(req, res) => {
         return new ApiError(400, "Bad Request, cant find the donor.")
     };
     Urls.forEach(element => {
-        donor.push({
+        donor.linksOfTheOrganization.push({
             Url: element.Url,
             title: element.title,
             type: element.type,
             description: element.description
         });
     });
+    
     await donor.save();
     return res.status(201).json(
         new ApiResponse(201, donor, "Successfully updated the urls.")

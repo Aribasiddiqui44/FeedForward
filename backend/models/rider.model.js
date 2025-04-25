@@ -1,4 +1,4 @@
-import mongoose, {Schema, Types} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { Donor } from "./donor.model.js";
 import { User } from "./user.model.js";
 
@@ -7,51 +7,49 @@ const riderSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    riderName: {
-        type: String
-    },
-    riderContacts: [{
-        
-    }],
-    riderEmail: {
-        type: String,
-    },
+    riderName: { type: String },
+
+    riderContacts: [
+        {
+            phoneNumber: { type: String },
+            type: { type: String, enum: ["mobile", "landline", "whatsapp"], default: "mobile" }
+        }
+    ],
+
+    riderEmail: { type: String },
+
     availableTimings: [
         {
-            day: {type: String},
+            day: { type: String },
             availableDayTimings: {
-                from: {type: String},
-                to: {type: String}
+                from: { type: String },
+                to: { type: String }
             },
             availableNightTimings: {
-                from: {type: String},
-                to: {type: String}
+                from: { type: String },
+                to: { type: String }
             }
-        } 
+        }
     ],
+
     isAssociatedWithAnOrganization: {
-        orgName: {type: String},
-        isAvailableForOtherOrg: {type: Boolean, default: false},
+        orgName: { type: String },
+        isAvailableForOtherOrg: { type: Boolean, default: false },
         availableForOnlyTheseOrganizations: [
             {
                 type: Schema.Types.ObjectId,
-                ref: Donor
+                ref: 'Donor'
             }
         ]
     },
     pastVolunteerWork: [],
     cnic: {
-        url: {
-            type: String
-        },
-        cnicNumber: {
-            type: Number
-        }
+        url: { type: String },
+        cnicNumber: { type: Number }
     }
-},
-{
+
+}, {
     timestamps: true
-}
-);
+});
 
 export const Rider = mongoose.model("Rider", riderSchema);
