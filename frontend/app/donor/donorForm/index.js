@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch } from 'react-native';
+import {
+  View, Text, TextInput, TouchableOpacity,
+  StyleSheet, ScrollView, Modal, FlatList, Pressable
+} from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
 import Head from '../../../components/header';
-import { Picker } from '@react-native-picker/picker';  // Import Picker
 
 const DonorForm = () => {
   const navigation = useNavigation();
   const router = useRouter();
+
+  const [donorName, setDonorName] = useState('');
+  const [donorEmail, setDonorEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('Karachi');
+  const [isCityModalVisible, setCityModalVisible] = useState(false);
+  const [country, setCountry] = useState('Pakistan');
+  const [postalCode, setPostalCode] = useState('');
+  const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -15,23 +26,24 @@ const DonorForm = () => {
     });
   }, []);
 
-  const [organizationName, setOrganizationName] = useState('');
-  const [organizationEmail, setOrganizationEmail] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('Karachi'); // State for city
-  const [country, setCountry] = useState('Pakistan'); // State for country
-  const [postalCode, setPostalCode] = useState('');
-  const [isChecked, setIsChecked] = useState(false);
-
-  // State for language selection (optional)
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const cityList = [
+    'Karachi', 'Lahore', 'Islamabad', 'Rawalpindi',
+    'Faisalabad', 'Multan', 'Peshawar', 'Quetta'
+  ];
 
   const handleSubmit = () => {
-    if (organizationName && organizationEmail && address && postalCode && isChecked) {
-      router.push('/(tabs)/donor/profile');
-    } else {
-      alert('Please fill out all fields and agree to the terms.');
-    }
+    router.push({
+      pathname: 'donor/Donations/chooseDonation',
+      params: {
+        userType: 'donor',
+        donorName,
+        donorEmail,
+        address,
+        city,
+        country,
+        postalCode
+      }
+    });
   };
 
   const handleBackPress = () => {
@@ -40,77 +52,93 @@ const DonorForm = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container_parent}>
-      <Head
+      <Head 
         showBackOption={true}
-        label="Feed Forward"
+        label='Feed Forward'
         onBackPress={handleBackPress}
       />
 
       <View style={styles.container_child}>
         <Text style={styles.subHeaderText}>Donor's Form</Text>
 
-        <Text style={styles.label}>Organization Name:</Text>
+        {/* Donor Name */}
+        <Text style={styles.label}>Donor Name:</Text>
         <TextInput
-          style={styles.input_text}
-          placeholder="Organization Name"
+          style={styles.input}
+          placeholder="Donor Name"
           placeholderTextColor="#B0B0B0"
-          value={organizationName}
-          onChangeText={setOrganizationName}
+          value={donorName}
+          onChangeText={setDonorName}
         />
 
-        <Text style={styles.label}>Organization Email:</Text>
+        {/* Donor Email */}
+        <Text style={styles.label}>Donor Email:</Text>
         <TextInput
-          style={styles.input_text}
-          placeholder="Organization Email"
+          style={styles.input}
+          placeholder="Donor Email"
           placeholderTextColor="#B0B0B0"
           keyboardType="email-address"
-          value={organizationEmail}
-          onChangeText={setOrganizationEmail}
+          value={donorEmail}
+          onChangeText={setDonorEmail}
         />
 
+        {/* Address */}
         <Text style={styles.label}>Address:</Text>
         <TextInput
-          style={styles.input_text}
+          style={styles.input}
           placeholder="House No., Street No., Area/Sector"
           placeholderTextColor="#B0B0B0"
           value={address}
           onChangeText={setAddress}
         />
 
-        {/* City Picker */}
+        {/* Custom City Picker */}
         <Text style={styles.label}>City:</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={city}
-            onValueChange={(itemValue) => setCity(itemValue)} // Handle city change
-            style={styles.picker}
-          >
-            <Picker.Item label="Karachi" value="Karachi" />
-            <Picker.Item label="Lahore" value="Lahore" />
-            <Picker.Item label="Islamabad" value="Islamabad" />
-            <Picker.Item label="Rawalpindi" value="Rawalpindi" />
-            <Picker.Item label="Faisalabad" value="Faisalabad" />
-            <Picker.Item label="Multan" value="Multan" />
-            <Picker.Item label="Peshawar" value="Peshawar" />
-            <Picker.Item label="Quetta" value="Quetta" />
-          </Picker>
-        </View>
+        <TouchableOpacity
+          style={styles.pickerContainer}
+          onPress={() => setCityModalVisible(true)}
+        >
+          <Text style={styles.pickerText}>{city}</Text>
+        </TouchableOpacity>
 
-        {/* Country Picker */}
+        {/* City Modal */}
+        <Modal visible={isCityModalVisible} animationType="slide" transparent>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <FlatList
+                data={cityList}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={styles.modalItem}
+                    onPress={() => {
+                      setCity(item);
+                      setCityModalVisible(false);
+                    }}
+                  >
+                    <Text>{item}</Text>
+                  </Pressable>
+                )}
+              />
+              <TouchableOpacity onPress={() => setCityModalVisible(false)}>
+                <Text style={styles.closeModalText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Country */}
         <Text style={styles.label}>Country:</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={country}
-            onValueChange={(itemValue) => setCountry(itemValue)} // Handle country change
-            style={styles.picker}
-          >
-            <Picker.Item label="Pakistan" value="Pakistan" />
-          </Picker>
-        </View>
+        <TextInput
+          style={styles.input}
+          value={country}
+          onChangeText={setCountry}
+        />
 
+        {/* Postal Code */}
         <Text style={styles.label}>Postal Code:</Text>
         <TextInput
-          style={styles.input_text}
+          style={styles.input}
           placeholder="Postal Code"
           placeholderTextColor="#B0B0B0"
           keyboardType="numeric"
@@ -118,14 +146,22 @@ const DonorForm = () => {
           onChangeText={setPostalCode}
         />
 
+        {/* Terms Switch */}
         <View style={styles.checkboxContainer}>
-          <Switch value={isChecked} onValueChange={setIsChecked} />
+          <TouchableOpacity onPress={() => setIsChecked(!isChecked)} style={styles.switchBox}>
+            <View style={[styles.switchDot, isChecked && styles.switchDotActive]} />
+          </TouchableOpacity>
           <Text style={styles.agreeText}>
             I agree to the <Text style={styles.linkText}>Terms and Conditions</Text>
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        {/* Submit Button */}
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handleSubmit}
+          disabled={!donorName || !donorEmail || !address || !postalCode || !isChecked}
+        >
           <Text style={styles.submitButtonText}>Submit</Text>
         </TouchableOpacity>
       </View>
@@ -152,33 +188,74 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 15,
-    color: '#333333',
+    color: '#333',
     marginBottom: 5,
     fontWeight: '500',
   },
-  input_text: {
-    backgroundColor: '#F5F5F5',
+  input: {
+    backgroundColor: '#ffffff',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
     marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.LightGrey,
     elevation: 5,
   },
   pickerContainer: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 5,
-    marginBottom: 15,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 10,
     elevation: 5,
+    marginBottom: 15,
   },
-  picker: {
-    height: 35,
-    width: '100%',
+  pickerText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    maxHeight: '50%',
+  },
+  modalItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  closeModalText: {
+    textAlign: 'center',
+    marginTop: 15,
+    color: Colors.primary,
+    fontWeight: 'bold',
   },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  switchBox: {
+    width: 24,
+    height: 24,
+    borderWidth: 1,
+    borderColor: '#aaa',
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  switchDot: {
+    width: 12,
+    height: 12,
+    backgroundColor: 'transparent',
+    borderRadius: 6,
+  },
+  switchDotActive: {
+    backgroundColor: Colors.primary,
   },
   agreeText: {
     color: '#333333',
