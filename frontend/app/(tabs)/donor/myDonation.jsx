@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
-import Head from '../../../components/header';
-import { useRouter, useNavigation } from 'expo-router';
+import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MyListings = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
   const router = useRouter();
 
   useEffect(() => {
@@ -29,15 +27,30 @@ const MyListings = () => {
     }
   };
 
-  const handleBackPress = () => {
-    router.back();
-  };
-
   const handleRefresh = () => {
     setLoading(true);
     fetchDonations();
   };
 
+  const handleDelete = (id) => {    
+    deleteDonation(id.toString());
+  };
+
+  const deleteDonation = async (id) => {
+    try {
+      console.log("Deleting donation with ID:", id);
+      const updatedDonations = donations.filter(item => item.id.toString() !== id);
+      console.log("Updated donations:", updatedDonations);
+  
+      await AsyncStorage.setItem('foodDonations', JSON.stringify(updatedDonations));
+      setDonations(updatedDonations);
+    } catch (error) {
+      console.error('Error deleting donation:', error);
+      Alert.alert("Error", "Failed to delete the listing");
+    }
+  };
+  
+  
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -50,42 +63,61 @@ const MyListings = () => {
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.card}
-      onPress={() => router.push({
-        pathname: '/donor/Donations/donationDetails',
-        params: { donation: JSON.stringify(item) }
-      })}
-    >
-      {item.images && item.images.length > 0 && (
-        <Image source={{ uri: item.images[0] }} style={styles.cardImage} />
-      )}
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{item.title}</Text>
-        <Text style={styles.cardDescription} numberOfLines={2}>{item.description}</Text>
-        
-        <View style={styles.cardDetails}>
-          <View style={styles.detailRow}>
-            <Ionicons name="pricetag" size={16} color={Colors.primary} />
-            <Text style={styles.detailText}>{item.price}</Text>
+    <View style={styles.cardContainer}>
+      <TouchableOpacity 
+        style={styles.card}
+        onPress={() => router.push({
+          pathname: '/donor/Donations/donationDetails',
+          params: { donation: JSON.stringify(item) }
+        })}
+      >
+        {item.images && item.images.length > 0 && (
+          <Image source={{ uri: item.images[0] }} style={styles.cardImage} />
+        )}
+        <View style={styles.cardContent}>
+          <Text style={styles.cardTitle}>{item.title}</Text>
+          <Text style={styles.cardDescription} numberOfLines={2}>{item.description}</Text>
+          
+          <View style={styles.cardDetails}>
+            <View style={styles.detailRow}>
+              <Ionicons name="pricetag" size={16} color={Colors.primary} />
+              <Text style={styles.detailText}>{item.price}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Ionicons name="time" size={16} color={Colors.primary} />
+              <Text style={styles.detailText}>{item.pickupTime}</Text>
+            </View>
           </View>
-          <View style={styles.detailRow}>
-            <Ionicons name="time" size={16} color={Colors.primary} />
-            <Text style={styles.detailText}>{item.pickupTime}</Text>
+          
+          {/* Views and Requests Containers */}
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Ionicons name="eye" size={16} color={Colors.dark} />
+              <Text style={styles.statText}>{item.views} views</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Ionicons name="people" size={16} color={Colors.dark} />
+              <Text style={styles.statText}>{item.requests} requests</Text>
+            </View>
           </View>
+          
+          <Text style={styles.cardDate}>Posted: {formatDate(item.createdAt)}</Text>
         </View>
-        
-        <Text style={styles.cardDate}>Posted: {formatDate(item.createdAt)}</Text>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={styles.deleteButton}
+        onPress={() => handleDelete(item.id)}
+      >
+        <Ionicons name="trash" size={20} color={Colors.danger} />
+      </TouchableOpacity>
+    </View>
   );
 
   if (loading) {
     return (
-      <View>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16 }}>
-        My Listings
-      </Text>
+      <View style={styles.container}>
+        <Text style={styles.header}>My Listing</Text>
         <View style={styles.loadingContainer}>
           <Text>Loading your listings...</Text>
         </View>
@@ -113,7 +145,7 @@ const MyListings = () => {
 
   return (
     <View style={styles.container}>
-      <Head label="My Listings" showBackOption={true} onBackPress={handleBackPress} />
+      <Text style={styles.header}>My Listing</Text>
       <FlatList
         data={donations}
         renderItem={renderItem}
@@ -121,11 +153,6 @@ const MyListings = () => {
         contentContainerStyle={styles.listContent}
         refreshing={loading}
         onRefresh={handleRefresh}
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <Text style={styles.headerText}>Your Food Donations ({donations.length})</Text>
-          </View>
-        }
       />
     </View>
   );
@@ -136,21 +163,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.LightGrey,
   },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    padding: 15,
+  },
   listContent: {
     padding: 15,
   },
-  header: {
+  cardContainer: {
+    position: 'relative',
     marginBottom: 15,
-  },
-  headerText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.dark,
   },
   card: {
     backgroundColor: 'white',
     borderRadius: 10,
-    marginBottom: 15,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -196,6 +223,18 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 5,
   },
+  deleteButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -229,6 +268,25 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.LightGrey,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  statText: {
+    marginLeft: 5,
+    fontSize: 12,
+    color: Colors.dark,
   },
 });
 
