@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEfect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { useNavigation, useLocalSearchParams } from 'expo-router';
 import { Colors } from './../../constants/Colors';
 import { useRouter } from 'expo-router';
 import Head from '../../components/header';
