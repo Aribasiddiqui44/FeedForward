@@ -91,14 +91,17 @@ const MyListings = () => {
           
           {/* Views and Requests Containers */}
           <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Ionicons name="eye" size={16} color={Colors.dark} />
-              <Text style={styles.statText}>{item.views} views</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="people" size={16} color={Colors.dark} />
-              <Text style={styles.statText}>{item.requests} requests</Text>
-            </View>
+                <View style={styles.statItem}>
+                  <Ionicons name="eye" size={16} color={Colors.primary} />
+                  <Text style={styles.statText}>{donations.reduce((acc, item) => acc + (item.views || 0), 0)} views</Text>
+                </View>      
+            <TouchableOpacity
+                onPress={() => router.push('/donor/myRequests')}>
+                <View style={styles.statItem}>
+                  <Ionicons name="bag" size={16} color={Colors.dark} />
+                  <Text style={styles.statText}>{donations.reduce((acc, item) => acc + (item.requests || 0), 0)} requests</Text>
+                </View>
+            </TouchableOpacity>
           </View>
           
           <Text style={styles.cardDate}>Posted: {formatDate(item.createdAt)}</Text>
@@ -107,9 +110,10 @@ const MyListings = () => {
       
       <TouchableOpacity 
         style={styles.deleteButton}
+
         onPress={() => handleDelete(item.id)}
       >
-        <Ionicons name="trash" size={20} color={Colors.danger} />
+        <Ionicons name="trash" size={16} color={Colors.danger} />
       </TouchableOpacity>
     </View>
   );
@@ -118,6 +122,12 @@ const MyListings = () => {
     return (
       <View style={styles.container}>
         <Text style={styles.header}>My Listing</Text>
+        <TouchableOpacity 
+          style={styles.fab}
+          onPress={() => router.push('donor/Donations/makeDonation')}
+        >
+          <Ionicons name="add" size={28} color="white" />
+        </TouchableOpacity>
         <View style={styles.loadingContainer}>
           <Text>Loading your listings...</Text>
         </View>
@@ -145,7 +155,15 @@ const MyListings = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>My Listing</Text>
+      <View style={styles.headerIcons}>
+        <Text style={styles.header}>My Listing</Text>
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => router.push('donor/Donations/makeDonation')}
+          >
+            <Ionicons name="add" size={26} color={Colors.White} />
+          </TouchableOpacity>
+        </View>
       <FlatList
         data={donations}
         renderItem={renderItem}
@@ -166,7 +184,20 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 15,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15, // Space between icons
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    paddingVertical: 10
   },
   listContent: {
     padding: 15,
@@ -229,8 +260,8 @@ const styles = StyleSheet.create({
     right: 10,
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 20,
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
@@ -260,28 +291,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   addButton: {
+    width: 35,
+    height: 35,
     backgroundColor: Colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 25,
     borderRadius: 25,
-  },
-  addButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop:3
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: 5,
     marginBottom: 5,
   },
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.LightGrey,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
+    flexWrap: 'nowrap'
   },
   statText: {
     marginLeft: 5,
