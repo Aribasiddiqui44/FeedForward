@@ -7,7 +7,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 // import apiClient from './../../../utils/apiClient.js';
 import apiClient from '../../../utils/apiClient.js';
 import { StatusBar } from 'react-native';
-import showLocalNotification from './../../../showNotification.js';
+// import showLocalNotification from './../../../showNotification.js';
 //for cookie savings
 import * as SecureStore from 'expo-secure-store';
 export default function SignIn() {
@@ -24,7 +24,7 @@ export default function SignIn() {
   };
 
   const handleLogin = async() => {
-    showLocalNotification('title', "success")
+    // showLocalNotification('title', "success")
     if( !formData.email || !formData.password ){
       Alert.alert("Error", "Please fill in all required fields.");
     };
@@ -35,7 +35,7 @@ export default function SignIn() {
         password: formData.password
       });
       if(response.status == 201) {
-        showLocalNotification("Success", "Account Logged in Successfully");
+        // showLocalNotification("Success", "Account Logged in Successfully");
         Alert.alert("Success", "Account Logged in Successfully.");
         if( Platform.OS === 'web' ) {
           localStorage.setItem('accessToken', response.data.data.accessToken);
