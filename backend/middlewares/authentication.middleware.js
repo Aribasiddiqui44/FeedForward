@@ -55,13 +55,13 @@ const verifyJWT = asyncHandler ( async (
         };
 
         // roleId = '';
-        // if( user.role == 'donor' ) {
+        // if( user.userRole == 'donor' ) {
         //     let donor = await Donor.findOne({userRegisteredTheOrg: user._id});
         //     role = donor._id;
-        // } else if(user.role == 'receiver') {
+        // } else if(user.userRole == 'receiver') {
         //     let receiver = await Receiver.findOne({ userRegisteredTheOrg: user._id });
         //     role = receiver._id;
-        // } else if(user.role == 'volunteer') {
+        // } else if(user.userRole == 'volunteer') {
         //     let rider = await Rider.findOne({ volunteerUserId: user._id });
         //     role = rider._id; 
         // };
