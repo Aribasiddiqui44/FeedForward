@@ -93,13 +93,17 @@ const MyListings = () => {
           <View style={styles.statsContainer}>
                 <View style={styles.statItem}>
                   <Ionicons name="eye" size={16} color={Colors.primary} />
-                  <Text style={styles.statText}>{donations.reduce((acc, item) => acc + (item.views || 0), 0)} views</Text>
+                  <Text style={styles.statText}>{item.views || 0} views</Text>
                 </View>      
-            <TouchableOpacity
-                onPress={() => router.push('/donor/myRequests')}>
+                <TouchableOpacity
+                  onPress={() => router.push({
+                    pathname: '/donor/myRequests',
+                    params: { foodItemId: item.id } // Pass the specific food item ID
+                  })}
+                >
                 <View style={styles.statItem}>
                   <Ionicons name="bag" size={16} color={Colors.dark} />
-                  <Text style={styles.statText}>{donations.reduce((acc, item) => acc + (item.requests || 0), 0)} requests</Text>
+                  <Text style={styles.statText}>{item.requests || 0} requests</Text>
                 </View>
             </TouchableOpacity>
           </View>

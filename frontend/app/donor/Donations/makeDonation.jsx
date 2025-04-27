@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function MakeDonationForm () {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [minprice, setminPrice] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [customQuantity, setCustomQuantity] = useState('');
@@ -69,6 +70,7 @@ export default function MakeDonationForm () {
         title,
         description,
         price,
+        minprice,
         quantity: quantity === 0 ? customQuantity : quantity,
         pickupTime,
         instructions,
@@ -154,6 +156,18 @@ export default function MakeDonationForm () {
           placeholder="e.g. 50 pkr"
           value={price}
           onChangeText={setPrice}
+          keyboardType="numeric"
+        />
+      </View>
+
+      {/* Minimum Price Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}> Minimum Price</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. 20 pkr"
+          value={minprice}
+          onChangeText={setminPrice}
           keyboardType="numeric"
         />
       </View>
@@ -280,7 +294,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    color: Colors.LightGrey,
+    color: Colors.Grey,
     borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
