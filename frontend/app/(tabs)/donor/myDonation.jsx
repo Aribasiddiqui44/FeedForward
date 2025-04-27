@@ -50,7 +50,6 @@ const MyListings = () => {
     }
   };
   
-  
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -91,20 +90,20 @@ const MyListings = () => {
           
           {/* Views and Requests Containers */}
           <View style={styles.statsContainer}>
-                <View style={styles.statItem}>
-                  <Ionicons name="eye" size={16} color={Colors.primary} />
-                  <Text style={styles.statText}>{item.views || 0} views</Text>
-                </View>      
-                <TouchableOpacity
-                  onPress={() => router.push({
-                    pathname: '/donor/myRequests',
-                    params: { foodItemId: item.id } // Pass the specific food item ID
-                  })}
-                >
-                <View style={styles.statItem}>
-                  <Ionicons name="bag" size={16} color={Colors.dark} />
-                  <Text style={styles.statText}>{item.requests || 0} requests</Text>
-                </View>
+            <View style={styles.statItem}>
+              <Ionicons name="eye" size={16} color={Colors.primary} />
+              <Text style={styles.statText}>{item.views || 0} views</Text>
+            </View>      
+            <TouchableOpacity
+              onPress={() => router.push({
+                pathname: '/donor/myRequests',
+                params: { foodItemId: item.id } // Pass the specific food item ID
+              })}
+            >
+              <View style={styles.statItem}>
+                <Ionicons name="bag" size={16} color={Colors.dark} />
+                <Text style={styles.statText}>{item.requests || 0} requests</Text>
+              </View>
             </TouchableOpacity>
           </View>
           
@@ -114,7 +113,6 @@ const MyListings = () => {
       
       <TouchableOpacity 
         style={styles.deleteButton}
-
         onPress={() => handleDelete(item.id)}
       >
         <Ionicons name="trash" size={16} color={Colors.danger} />
@@ -128,7 +126,7 @@ const MyListings = () => {
         <Text style={styles.header}>My Listing</Text>
         <TouchableOpacity 
           style={styles.fab}
-          onPress={() => router.push('donor/Donations/makeDonation')}
+          onPress={() => router.push('../././donor/Donations/makeDonation')}
         >
           <Ionicons name="add" size={28} color="white" />
         </TouchableOpacity>
@@ -148,7 +146,7 @@ const MyListings = () => {
           <Text style={styles.emptySubtext}>Your food donations will appear here</Text>
           <TouchableOpacity 
             style={styles.addButton}
-            onPress={() => router.push('/Donations/MakeDonationForm')}
+            onPress={() => router.push('/donor/Donations/makeDonation')}
           >
             <Text style={styles.addButtonText}>Add Your First Listing</Text>
           </TouchableOpacity>
@@ -161,13 +159,13 @@ const MyListings = () => {
     <View style={styles.container}>
       <View style={styles.headerIcons}>
         <Text style={styles.header}>My Listing</Text>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={() => router.push('donor/Donations/makeDonation')}
-          >
-            <Ionicons name="add" size={26} color={Colors.White} />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => router.push('donor/Donations/makeDonation')}
+        >
+          <Ionicons name="add" size={26} color={Colors.White} />
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={donations}
         renderItem={renderItem}
@@ -188,6 +186,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: Colors.dark,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -295,13 +294,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   addButton: {
-    width: 35,
-    height: 35,
+    width: 200,
+    height: 50,
     backgroundColor: Colors.primary,
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop:3
+    marginTop: 15,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  addButtonText: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -312,7 +321,7 @@ const styles = StyleSheet.create({
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'nowrap'
+    flexWrap: 'nowrap',
   },
   statText: {
     marginLeft: 5,

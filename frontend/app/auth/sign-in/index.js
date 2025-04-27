@@ -49,14 +49,22 @@ export default function SignIn() {
             // Get the user's role from the response
             const userRole = response.data.data.userRole;
             if (userRole === 'receiver') {
-                router.push('/(tabs)/receiver/restaurantListing');
+              router.push({
+                pathname: '/(tabs)',
+                params: { userType: userRole } 
+              });
             } else if (userRole === 'donor') {
-                router.push('/donor/(tabs)/myDonation');
-            } else if (userRole === 'receiver') {
+              router.push({
+                pathname: '/(tabs)/donor/myDonation',
+                params: { userType: userRole } 
+              });
+            } else if (userRole === 'volunteer') {
                 router.push('/receiver_dashboard');
             } else {
                 Alert.alert('Error', 'Unknown role');
             }
+
+          
         } else {
             Alert.alert("Error", response.data.message || "Try again to login");
         }
