@@ -16,7 +16,7 @@ const receiverSchema = new Schema(
         },
         address: [{
             location: {type: String},
-            gogoleLocation: {type: String},
+            googleLocation: {type: String},
             near: {type: String}
         }],
         city: {type: String, required: true},

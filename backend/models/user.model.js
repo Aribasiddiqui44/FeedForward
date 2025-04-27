@@ -83,24 +83,24 @@ userSchema.methods.passwordValidator = async function(enteredPassword){
 };
 
 userSchema.methods.generateAccessToken = async function () {
-    let roleId = ''
-    if(this.userRole === 'donor'){
-        let donor = await Donor.findOne({userRegisteredTheOrg: this._id});
-        roleId = donor._id;
-    } else if(this.userRole === 'volunteer'){
-        let rider = await Rider.findOne({volunteerUserId: this._id});
-        roleId = rider._id;
-    } else if (this.userRole === 'receiver'){
-        let receiver = await Receiver.findOne({userRegisteredTheOrg: this._id});
-        roleId = receiver._id;
-    }
+    // let roleId = ''
+    // if(this.userRole === 'donor'){
+    //     let donor = await Donor.findOne({userRegisteredTheOrg: this._id});
+    //     roleId = donor._id;
+    // } else if(this.userRole === 'volunteer'){
+    //     let rider = await Rider.findOne({volunteerUserId: this._id});
+    //     roleId = rider._id;
+    // } else if (this.userRole === 'receiver'){
+    //     let receiver = await Receiver.findOne({userRegisteredTheOrg: this._id});
+    //     roleId = receiver._id;
+    // }
     return jwt.sign(
         {
             _id: this._id,
             email: this.email,
             fullName: this.fullName,
             // role: this.userRole,
-            roleId: roleId
+            // roleId: roleId
         },
         process.env.ACCESS_TOKEN_SECRET,
         {

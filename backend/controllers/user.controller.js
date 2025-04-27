@@ -70,48 +70,49 @@ const generateAccessAndRefreshTokens = async(userId) => {
 // );
 
 const post_CreateUser_SignUp_Register_Initial = asyncHandler(
-    async(req, res) => {
-        // console.log("request")
-        const {fullName, email, password, } = req.body;
-        // console.log(fullName, " ", email, " ", password);
-        if(
+    async (req, res) => {
+        const { fullName, email, password,userRole } = req.body; 
+
+        if (
             [fullName, email, password].some((field) => field?.trim() === "")
         ) {
             throw new ApiError(400, "All fields are required");
-        };
+        }
 
-        // checking if user existed with this email.
+        // Checking if a user already exists with this email
         const existedUser = await User.findOne({
-            email
+            email,
         });
 
-        if( existedUser ) {
-            throw new ApiError(
-                409,
-                "User with this email already existed."
-            )
-        };
+        if (existedUser) {
+            throw new ApiError(409, "User with this email already exists.");
+        }
 
-        // createing new user if not already exited.
+        // Creating a new user if they do not already exist
         const newUser = await User.create({
             fullName,
             email,
-            password
+            password,
+            userRole
         });
-        if ( !newUser._id ) {
-            throw new ApiError(500,
-                "Internal Server Error. Something went wrong while signup"
-            )
-        } 
+
+        if (!newUser._id) {
+            throw new ApiError(
+                500,
+                "Internal Server Error. Something went wrong while signing up"
+            );
+        }
+
+        // Responding with a success message
         return res.status(201).json(
             new ApiResponse(
                 201,
                 "User registered successfully"
-
             )
-        )
+        );
     }
 );
+
 const patchAddRole = asyncHandler( async(req, res) => {
     const { user_id, role } = req.body;
     let updatedUser = await User.findByIdAndUpdate(
@@ -167,25 +168,27 @@ const patch_Add_Mobile_Phone = asyncHandler( async(req, res) => {
 
 const postLoginUser = asyncHandler( async (req, res) => {
     const { email, password } = req.body;
-    // console.log(email, password)
     if ( !email ) {
-        throw new ApiError(400, "email is required.")
+        throw new ApiError(400, "Email is required.");
     };
-    const user = await User.findOne({email});
-
+    
+    const user = await User.findOne({ email });
     if( !user ){
-        throw new ApiError(404, "User does not exist.")
-    };
+        throw new ApiError(404, "User does not exist.");
+    }
 
     const isPasswordValid = await user.passwordValidator(password);
     if( !isPasswordValid ){
-        throw new ApiError(401, "Invalid User credentials(password)")
-    };
+        throw new ApiError(401, "Invalid User credentials(password)");
+    }
+
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
-    const loggedInUser = await User.findById(user._id).select(
-        "-password -refreshToken"
-    );
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+
+    // Fetching the role
+    const userRole = user.userRole;
+
     const options = {
         httpOnly: true,
         secure: true,
@@ -193,21 +196,23 @@ const postLoginUser = asyncHandler( async (req, res) => {
     };
 
     return res
-    .status(201)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json(
-        new ApiResponse(
-            201,
-            {
-                user: loggedInUser,
-                accessToken,
-                refreshToken
-            },
-            "User logged in Successfully."
+        .status(201)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+            new ApiResponse(
+                201,
+                {
+                    user: loggedInUser,
+                    userRole, 
+                    accessToken,
+                    refreshToken
+                },
+                "User logged in Successfully."
+            )
         )
-    )
 });
+
 
 const logoutUser = asyncHandler( async(req, res) => {
     await User.findById(

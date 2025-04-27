@@ -24,43 +24,50 @@ export default function SignIn() {
   };
 
   const handleLogin = async() => {
-    // showLocalNotification('title', "success")
     if( !formData.email || !formData.password ){
-      Alert.alert("Error", "Please fill in all required fields.");
+        Alert.alert("Error", "Please fill in all required fields.");
     };
     setLoading(true);
     try{
-      const response = await apiClient.post('/user/login', {
-        email: formData.email,
-        password: formData.password
-      });
-      if(response.status == 201) {
-        // showLocalNotification("Success", "Account Logged in Successfully");
-        Alert.alert("Success", "Account Logged in Successfully.");
-        if( Platform.OS === 'web' ) {
-          localStorage.setItem('accessToken', response.data.data.accessToken);
-          localStorage.setItem('refreshToken', response.data.data.refreshToken);
-        } else{
-          await SecureStore.setItemAsync('accessToken', response.data.data.accessToken);
-          await SecureStore.setItemAsync('refreshToken', response.data.data.refreshToken);
-        }
-
-        router.push({
-          pathname: '/role_selection',
-          params: {
-            userData: JSON.stringify(response.data.data)
-          }
+        const response = await apiClient.post('/user/login', {
+            email: formData.email,
+            password: formData.password
         });
-      } else {
-        Alert.alert("Error", response.data.message || "Try again to login")
-      };
+        
+        if(response.status === 201) {
+            Alert.alert("Success", "Account Logged in Successfully.");
+
+            // Store tokens securely
+            if( Platform.OS === 'web' ) {
+                localStorage.setItem('accessToken', response.data.data.accessToken);
+                localStorage.setItem('refreshToken', response.data.data.refreshToken);
+            } else {
+                await SecureStore.setItemAsync('accessToken', response.data.data.accessToken);
+                await SecureStore.setItemAsync('refreshToken', response.data.data.refreshToken);
+            }
+
+            // Get the user's role from the response
+            const userRole = response.data.data.userRole;
+            if (userRole === 'receiver') {
+                router.push('/(tabs)/receiver/restaurantListing');
+            } else if (userRole === 'donor') {
+                router.push('/donor/(tabs)/myDonation');
+            } else if (userRole === 'receiver') {
+                router.push('/receiver_dashboard');
+            } else {
+                Alert.alert('Error', 'Unknown role');
+            }
+        } else {
+            Alert.alert("Error", response.data.message || "Try again to login");
+        }
     } catch(err){
-      Alert.alert('Error', 'Network request failed');
-      console.error('Signin error', err);
+        Alert.alert('Error', 'Network request failed');
+        console.error('Signin error', err);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
   const navigation = useNavigation();
   const router=useRouter();
 
@@ -132,7 +139,7 @@ export default function SignIn() {
         </TouchableOpacity>
 
         {/* Create Account Button */}
-        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('auth/sign-up')}>
+        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('role_selection')}>
 
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>
@@ -254,4 +261,3 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
-

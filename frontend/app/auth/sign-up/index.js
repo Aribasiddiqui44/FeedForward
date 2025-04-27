@@ -5,13 +5,24 @@ import { router, useNavigation, useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import axios from "axios";
 import apiClient from './../../../utils/apiClient.js';
+import { useLocalSearchParams } from 'expo-router';
 export default function SignUp() {
+  const { role } = useLocalSearchParams();  // Get role passed from RoleSelection page
+  console.log(role);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: ''
+    password: '',
+    address: '',
+    contactNumber: '',
+    role: role, 
   });
+  
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  // Handle input change
   const handleChange = (name, value) => {
     setFormData({
       ...formData,
@@ -19,33 +30,38 @@ export default function SignUp() {
     });
   };
 
+  // Handle the sign-up process
   const handleSignUp = async () => {
-    if( !formData.name || !formData.email || !formData.password ) {
+    if (!formData.name || !formData.email || !formData.password) {
       Alert.alert("Error", "Please fill in all required fields.");
-    };
+      return;
+    }
+
     setLoading(true);
 
-    try{
-      // console.log(apiClient);
+    try {
       const response = await apiClient.post('/user/signUp', {
         fullName: formData.name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        userRole: formData.role,
+        address: formData.address,
+        contactNumber: formData.contactNumber,
       });
-      if (response.status == 201) {
+
+      if (response.status === 201) {
         Alert.alert('Success', "Account created successfully.");
         router.replace('auth/sign-in');
-      } else{
+      } else {
         Alert.alert('Error', response.data.message || 'Signup failed.');
-      };
+      }
     } catch (err) {
       Alert.alert('Error', 'Network request failed');
       console.error('Signup error: ', err);
     } finally {
       setLoading(false);
     }
-  }
-  const router = useRouter();
+  };
   const navigation=useNavigation();
 
   // const [userType, setUserType] = useState('donor');

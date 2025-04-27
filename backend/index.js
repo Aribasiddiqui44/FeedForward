@@ -9,9 +9,9 @@ import UserRouter from './routes/user.router.js';
 import DonorRouter from './routes/donor.router.js';
 import { PORT } from './constants.js';
 import donationRoutes from './routes/donation.router.js';
-
+import ReceiverRoutes from './routes/receiver.router.js'
 app.use('/api/donation', donationRoutes);
-
+app.use("/receiver",ReceiverRoutes)
 app.use("/user", UserRouter);
 app.use("/donor", DonorRouter);
 

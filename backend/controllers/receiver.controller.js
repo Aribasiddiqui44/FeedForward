@@ -1,6 +1,6 @@
-import {Receiver} from './../models/receiver.model.js';
-import { User } from './../models/user.model.js';
-import asyncHandler from './../utils/asyncHandler.js';
+import {Receiver} from '../models/receiver.model.js';
+import { User } from '../models/user.model.js';
+import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 
@@ -9,11 +9,11 @@ const postReceiverForm = asyncHandler( async (req, res) => {
     let checkExistingReceiver = await Receiver.findOne({
         receiverOrgEmail: orgEmail
     });
-    if ( !checkExistingReceiver ) {
+    if (checkExistingReceiver ) {
         throw new ApiError(401, "Bad Request, Organization with such name already existed, if you are part try add your branch number with name.");
     };
     const receiver = new Receiver({
-        userRegisteredTheOrg: req.user._id,
+        // userRegisteredTheOrg: req.user._id,
         receiverOrgName: orgName,
         receiverOrgEmail: orgEmail,
         city,
@@ -24,7 +24,7 @@ const postReceiverForm = asyncHandler( async (req, res) => {
     }); 
     receiver.address.push({
         location: address.location,
-        googleLocation: address.googleLocation,
+        // googleLocation: address.googleLocation,
         near: address.near
     });
     await receiver.save();
@@ -32,6 +32,7 @@ const postReceiverForm = asyncHandler( async (req, res) => {
         new ApiResponse(201, receiver, "NPO/NGO Added Successfully.")
     );
 });
+
 
 const patchAddNewAddress = asyncHandler( async(req, res) => {
 

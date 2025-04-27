@@ -1,11 +1,47 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import FoodCard from '../../../components/foodCard';
+import axios from 'axios'; 
+
+const getToken = async () => {
+  if (Platform.OS === 'web') {
+    return await AsyncStorage.getItem('accessToken');
+  } else {
+    return await SecureStore.getItemAsync('accessToken');
+  }
+};
 
 export default function MyRequest() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Lower Price');
+  const [donations, setDonations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDonations = async () => {
+    try {
+      const token = await getToken();
+
+      const response = await axios.get('http://localhost:8000/api/donation/receiver', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setDonations(response.data.donations || []);
+    } catch (error) {
+      console.error("Failed to fetch receiver donations", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDonations();
+  }, []);
 
   const handleTrackPress = (foodDetails) => {
     router.push({
@@ -14,15 +50,14 @@ export default function MyRequest() {
         foodName: foodDetails.foodName,
         statusTime: foodDetails.statusTime,
         imageSource: foodDetails.imageSource,
-        portions:foodDetails.portions,
-        total:foodDetails.total,
-        date:foodDetails.date,
-        orderFrom:foodDetails.orderFrom,
-        deliverTo:foodDetails.deliverTo
+        portions: foodDetails.portions,
+        total: foodDetails.total,
+        date: foodDetails.date,
+        orderFrom: foodDetails.orderFrom,
+        deliverTo: foodDetails.deliverTo
       },
     });
   };
-  
 
   const handleCancelPress = () => {
     router.push('/donation');
@@ -31,8 +66,35 @@ export default function MyRequest() {
   const handleRatePress = () => {
     router.push('/donation');
   };
+
   const handleCompletePress = () => {
     router.push('/donation');
+  };
+
+  const renderDonations = (statusFilter) => {
+    const filtered = donations.filter((donation) => donation.donationStatus === statusFilter.toLowerCase());
+
+    if (filtered.length === 0) {
+      return <Text style={styles.emptyText}>No {statusFilter.toLowerCase()} donations.</Text>;
+    }
+
+    return filtered.map((donation, index) => (
+      <FoodCard
+        key={donation._id || index}
+        foodName={donation.foodName}
+        description={donation.pickupInstructions}
+        total={donation.price ? `${donation.price} PKR` : '0 PKR'}
+        portions={donation.portions}
+        type={donation.donationType}
+        statusTime={donation.expiry}
+        date={new Date(donation.createdAt).toLocaleDateString()}
+        imageSource={require('../../../assets/images/biryaniPng.png')}
+        showRateOption={statusFilter === 'History'}
+        onRatePress={handleRatePress}
+        showCompleteOption={statusFilter === 'Ongoing'}
+        onCompletePress={handleCompletePress}
+      />
+    ));
   };
 
   return (
@@ -55,87 +117,12 @@ export default function MyRequest() {
 
       {/* Content */}
       <ScrollView>
-        {activeTab === 'Lower Price' && (
+        {loading ? (
+          <ActivityIndicator size="large" color="#00aa95" />
+        ) : (
           <>
-            <FoodCard
-              foodName="Chicken Biryani"
-              description="Delicious surplus biryani at a lower price..."
-              total="250 PKR"
-              portions="7"
-              type="Paid"
-              statusTime="11:00 pm"
-              date="29/11/2024"
-              imageSource={require('../../../assets/images/biryaniPng.png')}
-              showTrackButton={true}
-              onTrackPress={() => handleTrackPress({
-                foodName:'Chicken Biryani',
-                portions:'7',
-                statusTime:'11:00 pm',
-                imageSource:'../../../assets/images/biryaniPng.png',
-                date:'29/11/2024',
-                total:'250 PKR',
-                orderFrom:'Haveli restaurant',
-                deliverTo:'Zariya Foundation',
-              })}
-              //onTrackPress={handleTrackPress}
-              showCancelOption={true}
-              onCancelPress={handleCancelPress}
-            />
-            <FoodCard
-              foodName="Chicken Karahi"
-              description="Delicious surplus karahi at a lower price..."
-              total="350 PKR"
-              portions="15"
-              type="Paid"
-              statusTime="11:00 pm"
-              date="29/11/2024"
-              imageSource={require('../../../assets/images/yum.png')}
-              showTrackButton={true}
-              onTrackPress={() => handleTrackPress({
-                foodName:'Chicken Karhai',
-                portions:'15',
-                statusTime:'11:00 pm',
-                imageSource:'../../../assets/images/yum.png',
-                date:'29/11/2024',
-                total:'250 PKR',
-                orderFrom:'Haveli restaurant',
-                deliverTo:'Zariya Foundation',
-              })}
-              showCancelOption={true}
-              onCancelPress={handleCancelPress}
-            />
-          </>
-        )}
-        {activeTab === 'Donation' && (
-          <>
-            <FoodCard
-              foodName="Vegetable Curry"
-              description="Vegetable curry available for donation..."
-              total="0 PKR"
-              portions="10"
-              type="Free"
-              statusTime="10:00 pm"
-              date="28/11/2024"
-              imageSource={require('../../../assets/images/logo.png')}
-              showRateOption={true}
-              onRatePress={handleRatePress}
-              showCompleteOption={true}
-              onCompletePress={handleCompletePress}
-            />
-            <FoodCard
-              foodName="Rice and Beans"
-              description="Rice and beans available for donation..."
-              total="0 PKR"
-              portions="8"
-              type="Free"
-              statusTime="9:00 pm"
-              date="27/11/2024"
-              imageSource={require('../../../assets/images/Land.jpg')}
-              showRateOption={true}
-              onRatePress={handleRatePress}
-              showCompleteOption={true}
-              onCompletePress={handleCompletePress}
-            />
+            {activeTab === 'Lower Price' && renderDonations('Ongoing')}
+            {activeTab === 'Donation' && renderDonations('Ongoing')}
           </>
         )}
       </ScrollView>
@@ -146,7 +133,7 @@ export default function MyRequest() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa', // Light background color
+    backgroundColor: '#f8f9fa',
     paddingHorizontal: 10,
   },
   tabContainer: {
@@ -161,14 +148,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   activeTab: {
-    borderBottomColor: '#00aa95', // Active tab color
+    borderBottomColor: '#00aa95',
   },
   tabText: {
     fontSize: 16,
     color: '#777',
   },
   activeTabText: {
-    color: '#00aa95', // Active tab text color
+    color: '#00aa95',
     fontWeight: 'bold',
   },
   emptyText: {

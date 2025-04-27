@@ -16,13 +16,13 @@ const donationSchema = new Schema({
             },
             donatedBy: {
                 type: Schema.Types.ObjectId,
-                ref: {Donor},
+                ref: 'Donor',
                 required: true
             },            
             donatedTo: {
                 receiverId: {
                     type: Schema.Types.ObjectId,
-                    ref: {Receiver}
+                    ref: 'Receiver'
                 },
                 receiverOrgName: { type: String },
                 receiverOrgEmail: { type: String },
@@ -31,7 +31,7 @@ const donationSchema = new Schema({
             riderInformation: {
                 riderId: {
                     type: Schema.Types.ObjectId,
-                    ref: {Rider}
+                    ref: 'Rider'
                 },
                 riderName: { type: String },
                 riderPhone: { type: String }
