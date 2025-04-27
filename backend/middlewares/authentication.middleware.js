@@ -3,8 +3,8 @@ import asyncHandler from './../utils/asyncHandler.js';
 import jwt from 'jsonwebtoken';
 import {User} from './../models/user.model.js';
 import { Donor } from './../models/donor.model.js';
-import { Rider } from './../models/rider.model.js';
 import { Receiver } from './../models/receiver.model.js';
+import { Rider } from './../models/rider.model.js';
 const verifyJWT = asyncHandler ( async (
     req,
     res,
@@ -53,9 +53,21 @@ const verifyJWT = asyncHandler ( async (
         if ( !user ) {
             throw new ApiError(401, "Invalid Access Token");
         };
-        
-            
+
+        // roleId = '';
+        // if( user.userRole == 'donor' ) {
+        //     let donor = await Donor.findOne({userRegisteredTheOrg: user._id});
+        //     role = donor._id;
+        // } else if(user.userRole == 'receiver') {
+        //     let receiver = await Receiver.findOne({ userRegisteredTheOrg: user._id });
+        //     role = receiver._id;
+        // } else if(user.userRole == 'volunteer') {
+        //     let rider = await Rider.findOne({ volunteerUserId: user._id });
+        //     role = rider._id; 
+        // };
+                   
         req.user = user;
+        // req.roleId = roleId;
         return next();
     } catch( error ) {
         throw new ApiError(
