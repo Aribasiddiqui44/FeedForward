@@ -2,57 +2,80 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
+import { useLocalSearchParams } from 'expo-router';
 
 const MyRequests = () => {
   const [activeTab, setActiveTab] = useState('requests');
   const [requests, setRequests] = useState([
-      {
-        id: 'REQ-001',
-        foodItemId: '1', // This should match the ID from MyListings
-        userId: 'USER-123',
-        type: 'requests',
-        foodItem: 'Chicken Biryani',
-        total: '350 pkr',
-        pickupTime: '11:00 pm',
-        portions: 7,
-        date: '29/11/2024',
-        action: 'Request for free food',
-        status: 'pending',
-        orderType: null
-      },
-      {
-        id: 'REQ-002',
-        userId: 'USER-456',
-        type: 'requests',
-        foodItem: 'Chicken Biryani',
-        total: '350 pkr',
-        pickupTime: '11:00 pm',
-        portions: 7,
-        date: '29/11/2024',
-        action: 'Request for lower price',
-        offerPrice: '250 pkr',
-        status: 'pending',
-        orderType: null
-      },
-      {
-        id: 'ORD-001',
-        userId: 'USER-789',
-        type: 'order',
-        foodItem: 'Beef Steak',
-        total: '1200 pkr',
-        pickupTime: '8:00 pm',
-        portions: 2,
-        date: '30/11/2024',
-        status: 'confirmed',
-        orderType: 'Original'
-      }
+    {
+      id: 'REQ-001',
+      foodItemId: '1',
+      userId: 'USER-123',
+      type: 'requests',
+      foodItem: 'Chicken Biryani',
+      total: '350 pkr',
+      pickupTime: '11:00 pm',
+      portions: 7,
+      date: '29/11/2024',
+      // action: 'Request for free food',
+      status: 'pending',
+      orderType: 'Free'
+    },
+    {
+      id: 'REQ-002',
+      userId: 'USER-456',
+      type: 'requests',
+      foodItem: 'Chicken Biryani',
+      total: '350 pkr',
+      pickupTime: '11:00 pm',
+      portions: 7,
+      date: '29/11/2024',
+      // action: 'Request for lower price',
+      offerPrice: '250 pkr',
+      status: 'pending',
+      orderType: 'Discounted'
+    },
+    {
+      id: 'ORD-001',
+      userId: 'USER-789',
+      type: 'order',
+      foodItem: 'Beef Steak',
+      total: '1200 pkr',
+      pickupTime: '8:00 pm',
+      portions: 2,
+      date: '30/11/2024',
+      status: 'completed',
+      completedTime: '8:30 pm',
+      orderType: 'Original'
+    },
+    {
+      id: 'ORD-002',
+      userId: 'USER-101',
+      type: 'order',
+      foodItem: 'Vegetable Pizza',
+      total: '800 pkr',
+      offerPrice: '450 pkr',
+      pickupTime: '7:00 pm',
+      portions: 4,
+      date: '30/11/2024',
+      status: 'confirmed',
+      orderType: 'Discounted'
+    }
   ]);
+  
+  const params = useLocalSearchParams();
+  const { foodItemId } = params;
+
+  const filteredRequests = requests.filter(item => 
+    item.type === activeTab && 
+    (foodItemId ? item.foodItemId === foodItemId : true)
+  );
 
   const handleConfirm = (id) => {
     setRequests(requests.map(request => {
       if (request.id === id) {
-        const isFreeFood = request.action === 'Request for free food';
-        const isDiscount = request.action === 'Request for lower price';
+        const isFreeFood = request.orderType === 'Free';
+        const isDiscount = request.orderType === 'Discounted';
         
         return {
           ...request,
@@ -66,8 +89,17 @@ const MyRequests = () => {
     }));
   };
 
-  const generateOrderId = () => {
-    return `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+  const handleComplete = (id) => {
+    setRequests(requests.map(request => {
+      if (request.id === id) {
+        return {
+          ...request,
+          status: 'completed',
+          completedTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+      }
+      return request;
+    }));
   };
 
   const handleDecline = (id) => {
@@ -83,21 +115,29 @@ const MyRequests = () => {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
+    <View style={[
+      styles.card,
+      item.status === 'completed' && styles.completedCard
+    ]}>
       <View style={styles.cardHeader}>
         <View style={styles.idRow}>
           <Text style={styles.idText}>
-          {item.type === 'requests' ? 'Request ID' : 'Order ID'}: {item.id}
+            {item.type === 'requests' ? 'Request ID' : 'Order ID'}: {item.id}
           </Text>
           <Text style={styles.idText}>User ID: {item.userId}</Text>
         </View>
         
         <View style={styles.titleRow}>
-          <Text style={styles.foodTitle}>{item.foodItem}</Text>
+          <Text style={[
+            styles.foodTitle,
+            item.status === 'completed' && styles.completedText
+          ]}>
+            {item.foodItem}
+          </Text>
           {item.orderType && (
             <View style={[
               styles.orderTypeBadge,
-              { backgroundColor: getOrderTypeBadge(item.orderType).bgColor }
+              { backgroundColor: item.status === 'completed' ? Colors.Grey : getOrderTypeBadge(item.orderType).bgColor }
             ]}>
               <Text style={[styles.orderTypeText, { color: getOrderTypeBadge(item.orderType).textColor }]}>
                 {item.orderType}
@@ -107,23 +147,47 @@ const MyRequests = () => {
         </View>
         
         <View style={styles.rowSpaceBetween}>
-          <Text style={styles.detailText}>Total: {item.total}</Text>
-          <Text style={styles.detailText}>Portions {item.portions}</Text>
+          <Text style={[
+            styles.detailText,
+            item.status === 'completed' && styles.completedText
+          ]}>
+            Total: {item.total}
+          </Text>
+          <Text style={[
+            styles.detailText,
+            item.status === 'completed' && styles.completedText
+          ]}>
+            Portions {item.portions}
+          </Text>
         </View>
+
+        {item.orderType === 'Discounted' && (
+            <View style={[
+              styles.offerPriceText,
+            ]}>
+              <Text style={styles.offerPriceText}>Discounted Price: {item.offerPrice}</Text>
+            </View>
+          )}
+          
         <View style={styles.rowSpaceBetween}>
-          <Text style={styles.pickupText}>Pick up time: {item.pickupTime}</Text>
-          <Text style={styles.dateText}>{item.date}</Text>
+          <Text style={[
+            styles.pickupText,
+            item.status === 'completed' ? styles.completedText : { color: Colors.primary }
+          ]}>
+            {item.status === 'completed' ? `Completed at: ${item.completedTime}` : `Pick up time: ${item.pickupTime}`}
+          </Text>
+          <Text style={[
+            styles.dateText,
+            item.status === 'completed' && styles.completedText
+          ]}>
+            {item.date}
+          </Text>
         </View>
       </View>
 
       {item.status === 'pending' && (
         <>
           <View style={styles.divider} />
-          
-          <View style={styles.requestSection}>
-              <Text style={styles.requestText}>{item.action}</Text>
-              <Text style={styles.offerPriceText}>{item.offerPrice}</Text>
-          </View>
 
           <View style={styles.buttonRow}>
             <TouchableOpacity 
@@ -144,10 +208,30 @@ const MyRequests = () => {
           </View>
         </>
       )}
+
+      {item.status === 'confirmed' && (
+        <>
+          <View style={styles.divider} />
+          <View style={styles.buttonRow}>
+            <TouchableOpacity 
+              style={[styles.confirmButton, { backgroundColor: Colors.green }]}
+              onPress={() => handleComplete(item.id)}
+            >
+              <Text style={styles.confirmText}>Mark as Completed</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+
+      {item.status === 'completed' && (
+        <View style={styles.completedBadgeContainer}>
+          <View style={styles.completedBadge}>
+            <Text style={styles.completedBadgeText}>Completed</Text>
+          </View>
+        </View>
+      )}
     </View>
   );
-
-  const filteredRequests = requests.filter(item => item.type === activeTab);
 
   return (
     <View style={styles.container}>
@@ -238,8 +322,21 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
+  completedCard: {
+    backgroundColor: 'white',
+  },
   cardHeader: {
-    marginBottom: 10,
+    // marginBottom: 10,
+  },
+  idRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  idText: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
   },
   titleRow: {
     flexDirection: 'row',
@@ -251,6 +348,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
+  },
+  completedText: {
+    color: Colors.Grey,
   },
   orderTypeBadge: {
     backgroundColor: Colors.primary,
@@ -274,7 +374,6 @@ const styles = StyleSheet.create({
   },
   pickupText: {
     fontSize: 14,
-    color: Colors.primary,
     fontWeight: '600',
   },
   dateText: {
@@ -299,8 +398,8 @@ const styles = StyleSheet.create({
   },
   offerPriceText: {
     fontSize: 14,
-    color: '#333',
-    marginTop: 5,
+    color: Colors.danger,
+    marginBottom: 5,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -346,19 +445,24 @@ const styles = StyleSheet.create({
   },
   emptySubtext: {
     fontSize: 14,
-    color: Colors.gray,
+    color: Colors.Grey,
     marginTop: 5,
     textAlign: 'center',
   },
-  idRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
+  completedBadgeContainer: {
+    alignItems: 'flex-end',
+    // marginTop: 10,
   },
-  idText: {
+  completedBadge: {
+    backgroundColor: Colors.Grey,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  completedBadgeText: {
+    color: Colors.White,
+    fontWeight: 'bold',
     fontSize: 12,
-    color: '#666',
-    fontStyle: 'italic',
   },
 });
 
