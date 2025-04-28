@@ -44,7 +44,8 @@ const riderSchema = new Schema({
     },
     pastVolunteerWork: [],
     cnic: {
-        url: { type: String },
+        front: { type: String },
+        back: { type: String },
         cnicNumber: { type: Number }
     }
 
