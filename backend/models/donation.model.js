@@ -82,5 +82,7 @@ const donationSchema = new Schema({
 }, {
     timestamps: true
 });
+// have to add impact fields in this model.js, and impacy calculation in donation.controller.js
+
 
 export const Donation = mongoose.model("Donation", donationSchema);
