@@ -29,9 +29,9 @@ const MyListings = () => {
       const token = await getToken();
       // Fetch local donations
       const storedDonations = await AsyncStorage.getItem('foodDonations');
-      if (storedDonations) {
-        setDonations(JSON.parse(storedDonations));
-      };
+      // if (storedDonations) {
+      //   setDonations(JSON.parse(storedDonations));
+      // };
       // Fetching donations from API.
       const response  = await apiClient.get('/api/donation/mine', {
         status: 'completed' // just during development will be changes to filer table in production
