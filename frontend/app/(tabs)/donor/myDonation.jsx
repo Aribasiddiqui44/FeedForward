@@ -34,6 +34,8 @@ const MyListings = () => {
       };
       // Fetching donations from API.
       const response  = await apiClient.get('/api/donation/mine', {
+        status: 'completed' // just during development will be changes to filer table in production
+      }, {
         headers: {
           Authorization: `Bearer ${token}`
         }
