@@ -52,9 +52,12 @@ const patchAddAvailableTimings = asyncHandler( async(req, res) => {
 
 });
 const patchCNIC = asyncHandler( async(req, res) => {
-
+    const { riderId } = req.body;
+    
 });
 
 export {
-
+  postRiderForm,
+  patchAddAvailableTimings,
+  patchCNIC
 }
