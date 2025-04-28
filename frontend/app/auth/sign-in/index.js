@@ -45,9 +45,9 @@ export default function SignIn() {
                 await SecureStore.setItemAsync('accessToken', response.data.data.accessToken);
                 await SecureStore.setItemAsync('refreshToken', response.data.data.refreshToken);
             }
-
+            console.log(response.data.data.user)
             // Get the user's role from the response
-            const userRole = response.data.data.userRole;
+            const userRole = response.data.data.user.userRole;
             if (userRole === 'receiver') {
               router.push({
                 pathname: '/(tabs)',
@@ -58,7 +58,7 @@ export default function SignIn() {
                 pathname: '/(tabs)/donor/myDonation',
                 params: { userType: userRole } 
               });
-            } else if (userRole === 'volunteer') {
+            } else if (userRole === 'rider') {
                 router.push('/receiver_dashboard');
             } else {
                 Alert.alert('Error', 'Unknown role');

@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import apiClient from './../../../utils/apiClient.js';
+import { store } from 'expo-router/build/global-state/router-store';
 const MyListings = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,13 +14,34 @@ const MyListings = () => {
   useEffect(() => {
     fetchDonations();
   }, []);
+  
+  const getToken = async () => {
+    if (Platform.OS === 'web') {
+      return await AsyncStorage.getItem('accessToken');
+    } else {
+      return await SecureStore.getItemAsync('accessToken');
+    }
+  };
 
   const fetchDonations = async () => {
     try {
+      setLoading(true);
+      const token = await getToken();
+      // Fetch local donations
       const storedDonations = await AsyncStorage.getItem('foodDonations');
       if (storedDonations) {
         setDonations(JSON.parse(storedDonations));
-      }
+      };
+      // Fetching donations from API.
+      const response  = await apiClient.get('/api/donation/mine', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const myDonations = response.data.data || [];
+      const donations = [...myDonations, ...storedDonations];
+      setDonations(donations);
+
     } catch (error) {
       console.error('Error fetching donations:', error);
     } finally {
