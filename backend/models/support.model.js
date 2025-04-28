@@ -17,9 +17,10 @@ const supportSchema = new Schema({
         id: {
             
         type: Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        default: null
         },
-        name: { type: String }
+        name: { type: String, default: null }
     },
     answeredAt: {
         type: Date,
