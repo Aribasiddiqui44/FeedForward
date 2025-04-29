@@ -38,7 +38,20 @@ const donationSchema = new Schema({
             }
         }
     ],
-
+    listingType: {
+        type: String,
+        // donation / selling
+        enum: ["donation", "selling"]
+    },
+    donationType: {
+        type: String,
+        enum: ["Hadiya", "Sadqa"] // have to add description as well of each.
+    },
+    listingStatus: {
+        type: String,
+        enum: ["open", "closed", "completed", "cancelled"],
+        default: "open"
+    },
     donationDescription: { type: String },
 
     donationUnitPrice: {
