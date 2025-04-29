@@ -35,6 +35,11 @@ const donationSchema = new Schema({
                 },
                 riderName: { type: String },
                 riderPhone: { type: String }
+            },
+            listingImages: {
+                url1: {type: String, default: null},
+                url2: {type: String, default: null},
+                url3: {type: String, default: null}
             }
         }
     ],
@@ -71,7 +76,7 @@ const donationSchema = new Schema({
 
     donationPickupInstructions: [{ type: String }],
 
-    goodnessOfFood: {
+    foodExpiry: {
         bestBefore: { type: Date, default: Date.now },
         listedFor: {
             period: { type: Number },
@@ -79,14 +84,14 @@ const donationSchema = new Schema({
         }
     },
 
-    rider: {
-        riderId: {
-            type: Schema.Types.ObjectId,
-            ref: 'Rider'
-        },
-        riderName: { type: String },
-        riderPhone: { type: String }
-    },
+    // rider: {
+    //     riderId: {
+    //         type: Schema.Types.ObjectId,
+    //         ref: 'Rider'
+    //     },
+    //     riderName: { type: String },
+    //     riderPhone: { type: String }
+    // },
 
     isDonationCompletedSuccessfully: {
         isCompleted: { type: Boolean, default: false },
