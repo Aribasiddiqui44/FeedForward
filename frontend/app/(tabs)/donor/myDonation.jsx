@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import apiClient from '../../../utils/apiClient';
 
 const MyListings = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -16,39 +17,93 @@ const MyListings = () => {
 
   const fetchDonations = async () => {
     try {
-      const storedDonations = await AsyncStorage.getItem('foodDonations');
-      if (storedDonations) {
-        setDonations(JSON.parse(storedDonations));
+      setLoading(true);
+      setError(null);
+      
+      const response = await apiClient.get('/api/donation/mine');
+      
+      if (response.data && response.data.data) {
+        // Transform the backend data to match your frontend structure
+        const formattedDonations = response.data.data.map(donation => ({
+          id: donation._id,
+          title: donation.donationFoodTitle,
+          description: donation.donationDescription,
+          price: donation.donationUnitPrice 
+            ? `${donation.donationUnitPrice.value} ${donation.donationUnitPrice.currency}`
+            : 'Free',
+          pickupTime: donation.donationInitialPickupTimeRange
+            ? `${donation.donationInitialPickupTimeRange.startingTime} - ${donation.donationInitialPickupTimeRange.endingTime}`
+            : 'Flexible',
+          images: donation.donationImages || [],
+          createdAt: donation.createdAt,
+          views: donation.views || 0,
+          requests: donation.requests || 0
+        }));
+        
+        setDonations(formattedDonations);
       }
-    } catch (error) {
-      console.error('Error fetching donations:', error);
+    } catch (err) {
+      console.error('Error fetching donations:', err);
+      setError('Failed to fetch donations');
     } finally {
       setLoading(false);
     }
   };
 
   const handleRefresh = () => {
-    setLoading(true);
     fetchDonations();
   };
 
-  const handleDelete = (id) => {    
-    deleteDonation(id.toString());
-  };
 
-  const deleteDonation = async (id) => {
+  const handleDelete = async (id) => {
     try {
-      console.log("Deleting donation with ID:", id);
-      const updatedDonations = donations.filter(item => item.id.toString() !== id);
-      console.log("Updated donations:", updatedDonations);
-  
-      await AsyncStorage.setItem('foodDonations', JSON.stringify(updatedDonations));
-      setDonations(updatedDonations);
+      const response = await apiClient.delete(`/api/donation/remove/${id}`);
+      
+      if (response.status === 200) {
+        setDonations(prev => prev.filter(donation => donation.id !== id));
+      }
     } catch (error) {
-      console.error('Error deleting donation:', error);
-      Alert.alert("Error", "Failed to delete the listing");
+      console.error('Delete error:', error);
     }
   };
+  // const handleDelete = async (id) => {
+  //   console.log('Attempting to delete donation with ID:', id); 
+  //   try {
+  //       Alert.alert(
+  //           'Confirm Deletion',
+  //           'Are you sure you want to delete this donation?',
+  //           [
+  //               {
+  //                   text: 'Cancel',
+  //                   style: 'cancel'
+  //               },
+  //               {
+  //                   text: 'Delete',
+  //                   onPress: async () => {
+  //                       try {
+  //                           console.log('Sending delete request for ID:', id); // Add this
+  //                           const response = await apiClient.delete(`/api/donation/remove/${id}`);
+                            
+  //                           if (response.status === 200) {
+  //                               Alert.alert('Success', response.data.message);
+  //                               fetchDonations();
+  //                           }
+  //                       } catch (error) {
+  //                           console.error('Delete error:', error);
+  //                           Alert.alert(
+  //                               'Error', 
+  //                               error.response?.data?.message || 'Failed to delete donation'
+  //                           );
+  //                       }
+  //                   },
+  //                   style: 'destructive'
+  //               }
+  //           ]
+  //       );
+  //   } catch (err) {
+  //       console.error('Error showing alert:', err);
+  //   }
+  // };
   
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -87,8 +142,6 @@ const MyListings = () => {
               <Text style={styles.detailText}>{item.pickupTime}</Text>
             </View>
           </View>
-          
-          {/* Views and Requests Containers */}
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
               <Ionicons name="eye" size={16} color={Colors.primary} />
@@ -97,7 +150,7 @@ const MyListings = () => {
             <TouchableOpacity
               onPress={() => router.push({
                 pathname: '/donor/myRequests',
-                params: { foodItemId: item.id } // Pass the specific food item ID
+                params: { foodItemId: item.id }
               })}
             >
               <View style={styles.statItem}>
@@ -131,7 +184,27 @@ const MyListings = () => {
           <Ionicons name="add" size={28} color="white" />
         </TouchableOpacity>
         <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
           <Text>Loading your listings...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>My Listing</Text>
+        <View style={styles.emptyContainer}>
+          <Ionicons name="warning" size={60} color={Colors.danger} />
+          <Text style={styles.emptyText}>Error loading donations</Text>
+          <Text style={styles.emptySubtext}>{error}</Text>
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={fetchDonations}
+          >
+            <Text style={styles.addButtonText}>Try Again</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -178,6 +251,7 @@ const MyListings = () => {
   );
 };
 
+// Keep all your existing styles exactly the same
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -197,7 +271,7 @@ const styles = StyleSheet.create({
   headerIcons: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15, // Space between icons
+    gap: 15,
     justifyContent: 'space-between',
     paddingHorizontal: 18,
     paddingVertical: 10

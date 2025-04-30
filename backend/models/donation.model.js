@@ -1,8 +1,9 @@
 import mongoose, { Schema } from "mongoose";
-import {Donor} from './../models/donor.model.js';
+import { Donor } from './../models/donor.model.js';
 import { User } from "./user.model.js";
-import {Receiver} from "./receiver.model.js";
+import { Receiver } from "./receiver.model.js";
 import { Rider } from "./rider.model.js";
+
 const donationSchema = new Schema({
     donationFoodTitle: { type: String },
 
@@ -18,7 +19,7 @@ const donationSchema = new Schema({
                 type: Schema.Types.ObjectId,
                 ref: 'Donor',
                 required: true
-            },            
+            },
             donatedTo: {
                 receiverId: {
                     type: Schema.Types.ObjectId,
@@ -62,7 +63,7 @@ const donationSchema = new Schema({
         bestBefore: { type: Date, default: Date.now },
         listedFor: {
             period: { type: Number },
-            timeUnit: { type: String } 
+            timeUnit: { type: String }
         }
     },
 
@@ -74,11 +75,27 @@ const donationSchema = new Schema({
         riderName: { type: String },
         riderPhone: { type: String }
     },
+    donatedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'Donor',
+        required: true
+    },
 
     isDonationCompletedSuccessfully: {
         isCompleted: { type: Boolean, default: false },
         comments: { type: String }
-    }
+    },
+
+    // storing images uploaded by the donor
+    // donationImages: {
+    //     type: [String], // Array of strings to store URLs of the images
+    //     validate: {
+    //         validator: function (value) {
+    //             return value.length <= 10; // Ensures that no more than 10 images are uploaded
+    //         },
+    //         message: 'You can upload a maximum of 10 images.'
+    //     }
+    // }
 }, {
     timestamps: true
 });

@@ -8,7 +8,6 @@ import apiClient from './../../../utils/apiClient.js';
 import { useLocalSearchParams } from 'expo-router';
 export default function SignUp() {
   const { role } = useLocalSearchParams();  // Get role passed from RoleSelection page
-  console.log(role);
 
   const [formData, setFormData] = useState({
     name: '',
