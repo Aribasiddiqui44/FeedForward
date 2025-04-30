@@ -7,6 +7,10 @@ import ApiResponse from '../utils/ApiResponse.js';
 export const createDonation = asyncHandler(async (req, res) => {
     const { donationFoodTitle, donationFoodList, donationDescription, donationUnitPrice, donationQuantity, donationInitialPickupTimeRange, donationPickupInstructions, goodnessOfFood, rider } = req.body;
 
+    if ( !req.user.userRole == "donor" ) {
+      throw new ApiError(400, "Bad Request, only donors and sellers can list food listing.");
+    };
+
     const newDonation = await Donation.create({
         donationFoodTitle,
         donationFoodList,
