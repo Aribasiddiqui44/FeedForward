@@ -2,6 +2,7 @@ import asyncHandler from '../utils/asyncHandler.js';
 import { Donation } from '../models/donation.model.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import uploadOnCloudinary from '../services/cloudinary.service.js';
 //import uploadOnCloudinary from './../services/cloudinary.service.js';
 
 // Add at top of file
@@ -13,6 +14,7 @@ const safeJsonParse = (str) => {
   }
 };
 
+// have to change donated by Id to donorId from userId.
 export const createDonation = asyncHandler(async (req, res) => {
   // 1. Validate required fields
   const requiredFields = [
@@ -23,44 +25,50 @@ export const createDonation = asyncHandler(async (req, res) => {
     'donationInitialPickupTimeRange'
   ];
 
+  // console.log("here");
   const missingFields = requiredFields.filter(field => !req.body[field]?.trim());
   if (missingFields.length > 0) {
     throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
   }
+  
 
   // 2. Validate images
-  // if (!req.files?.length) {
-  //   throw new ApiError(400, "At least one image is required");
-  // }
+  if ( !req.files ) {
+    throw new ApiError(400, "At least one image is required");
+  };
+  let ImagePath_1 = req.files?.donationImages[0]?.path;
+  let ImagePath_2 = req.files?.donationImages[1]?.path;
+  let ImagePath_3 = req.files?.donationImages[2]?.path;
+  if ( !ImagePath_1 && !ImagePath_2 && !ImagePath_3) {
+    throw new ApiError(400, "Image not found");
+  };
 
-  // 3. Process images
-  // const uploadedImageUrls = [];
-  // const filesToCleanup = [];
+  //uploading files.
+  let imageUrls = [];
+  if(ImagePath_1) {
+    let image1Upload = await uploadOnCloudinary(ImagePath_1);
+    if( !image1Upload ) {
+      throw new ApiError(500, "Internal Server Error, unable to upload files");
+    };
+    // console.log(image1Upload);
+    imageUrls.push(image1Upload.url);
 
-  //try {
-    // Upload all images in parallel for better performance
-  //   const uploadPromises = req.files.map(async file => {
-  //     filesToCleanup.push(file.path); // Track files for cleanup
-  //     const uploadedImage = await uploadOnCloudinary(file.path);
-  //     if (!uploadedImage?.url) {
-  //       throw new ApiError(500, "Cloudinary upload failed");
-  //     }
-  //     return uploadedImage.url;
-  //   });
-
-  //   // Wait for all uploads to complete
-  //   uploadedImageUrls.push(...(await Promise.all(uploadPromises)));
-  // } catch (error) {
-  //   // Cleanup any uploaded files
-  //   // await Promise.all(filesToCleanup.map(async path => {
-  //   //   try {
-  //   //     await fs.promises.unlink(path);
-  //   //   } catch (err) {
-  //   //     console.error('Failed to cleanup file:', path);
-  //   //   }
-  //   // }));
-  //   throw error;
-  // }
+  }
+  if(ImagePath_2) {
+    let image2Upload = await uploadOnCloudinary(ImagePath_2);
+    if( !image2Upload ) {
+      throw new ApiError(500, "Internal Server Error, unable to upload files");
+    };
+    imageUrls.push(image2Upload.url);
+  }
+  if(ImagePath_3) {
+    let image3Upload = await uploadOnCloudinary(ImagePath_3);
+    if( !image3Upload ) {
+      throw new ApiError(500, "Internal Server Error, unable to upload files");
+    };
+    imageUrls.push(image3Upload.url);
+  }
+ 
 
   // 4. Parse and validate fields
   const parseField = (field, defaultValue) => {
@@ -76,14 +84,18 @@ export const createDonation = asyncHandler(async (req, res) => {
     donationQuantity: parseField(req.body.donationQuantity, { quantity: 1, measurementUnit: "kg" }),
     donationInitialPickupTimeRange: parseField(req.body.donationInitialPickupTimeRange),
     donationPickupInstructions: parseField(req.body.donationPickupInstructions, []),
-    goodnessOfFood: parseField(req.body.goodnessOfFood, {
+    foodExpiry: parseField(req.body.goodnessOfFood, {
       bestBefore: new Date(),
       listedFor: { period: 5, timeUnit: "days" }
     }),
     //donationImages: uploadedImageUrls,
     donatedBy: req.user._id,
-    rider: req.body.rider || null
+    // rider: req.body.rider || null,
+    listingImages: imageUrls
   });
+  if( !newDonation ) {
+    throw new ApiError(500, "Internal Server Error, in listing food.");
+  };
 
   
 

@@ -69,7 +69,8 @@ export default function RestaurantListing() {
         description: donation.donationDescription || 'No description provided',
         pickupInstructions: donation.donationPickupInstructions || [],
         pickupTimeRange: timeRange,
-        expiryDate: donation.foodExpiry?.bestBefore || 'N/A'
+        expiryDate: donation.foodExpiry?.bestBefore || 'N/A',
+        image: donation.listingImages?.[0] || require('../../../assets/images/greenLogo.png')
       });
       
       // Update restaurant's time to show the earliest ending time
@@ -100,13 +101,13 @@ export default function RestaurantListing() {
           rest_phone: restaurant.phone,
           rest_time: restaurant.time,
           rest_dist: String(restaurant.distance),
-          
           // Food item details
           foodId: foodItem.id,
           foodName: foodItem.name,
           foodPrice: foodItem.price,
           foodDescription: foodItem.description,
           foodQuantity: foodItem.quantity,
+          foodImg: foodItem.image,
           
           // Additional details
           pickupInstructions: foodItem.pickupInstructions?.join(', ') || 'None',

@@ -21,6 +21,7 @@ export default function FoodDetails() {
           foodPrice,
           foodDescription,
           foodQuantity,
+          foodImg,
           // Additional details
           pickupInstructions,
           pickupTimeRange,
@@ -51,7 +52,7 @@ export default function FoodDetails() {
     !foodDescription ||
     !foodQuantity ||
     !restId ||
-    //!restImage ||
+    !foodImg ||
     !rest_time ||
     !rest_dist ||
     !rest_name
@@ -79,7 +80,7 @@ export default function FoodDetails() {
               onBackPress={handleBackPress}
             />
       {/* Food Image */}
-      {/* <Image source={restImage} style={styles.image} /> */}
+      <Image source={foodImg} style={styles.image} />
 
       {/* Food Details */}
       <View style={styles.detailsContainer}>

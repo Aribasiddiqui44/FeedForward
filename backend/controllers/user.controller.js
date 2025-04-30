@@ -71,10 +71,10 @@ const generateAccessAndRefreshTokens = async(userId) => {
 
 const post_CreateUser_SignUp_Register_Initial = asyncHandler(
     async (req, res) => {
-        const { fullName, email, password,userRole } = req.body; 
+        const { fullName, email, password,userRole,phoneNumber } = req.body; 
 
         if (
-            [fullName, email, password].some((field) => field?.trim() === "")
+            [fullName, email, password,phoneNumber].some((field) => field?.trim() === "")
         ) {
             throw new ApiError(400, "All fields are required");
         }
@@ -93,7 +93,8 @@ const post_CreateUser_SignUp_Register_Initial = asyncHandler(
             fullName,
             email,
             password,
-            userRole
+            userRole,
+            phoneNumber
         });
 
         if (!newUser._id) {
@@ -244,10 +245,26 @@ const logoutUser = asyncHandler( async(req, res) => {
         )
     )
 });
-
+// Add to user.controller.js
+const getCurrentUser = asyncHandler(async (req, res) => {
+    try {
+      const user = await User.findById(req.user._id).select('-password -refreshToken');
+      
+      if (!user) {
+        throw new ApiError(404, "User not found");
+      }
+  
+      return res.status(200).json(
+        new ApiResponse(200, user, "User profile fetched successfully")
+      );
+    } catch (error) {
+      throw new ApiError(500, error.message || "Error fetching user profile");
+    }
+  });
 export {
     post_CreateUser_SignUp_Register_Initial,
     postLoginUser,
     logoutUser,
-    patchAddRole
+    patchAddRole,
+    getCurrentUser
 }

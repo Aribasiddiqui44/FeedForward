@@ -42,7 +42,7 @@ const MyListings = () => {
           pickupTime: donation.donationInitialPickupTimeRange
             ? `${donation.donationInitialPickupTimeRange.startingTime} - ${donation.donationInitialPickupTimeRange.endingTime}`
             : 'Flexible',
-          images: donation.donationImages || [],
+          images: donation.listingImages || [],
           createdAt: donation.createdAt,
           views: donation.views || 0,
           requests: donation.requests || 0

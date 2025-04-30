@@ -108,7 +108,7 @@ export default function MakeDonationForm() {
         }
       }));
 
-      // Image uploads
+      // // Image uploads
       // await Promise.all(images.map(async (uri, index) => {
       //   const filename = uri.split('/').pop();
       //   const match = /\.(\w+)$/.exec(filename);
@@ -118,14 +118,32 @@ export default function MakeDonationForm() {
       //   const blob = await response.blob();
       //   formData.append('donationImages', blob, filename || `image_${index}.jpg`);
       // }));
+      // const uri = images[0]; // Take the first image (or whichever one you want to send)
+      // const filename = uri.split('/').pop();
+      // const match = /\.(\w+)$/.exec(filename);
+      // const type = match ? `image/${match[1]}` : 'image/jpeg';
 
-      const response = await apiClient.post('/api/donation/create', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // const img = await fetch(uri);
+      // const blob = await img.blob();
+      // formData.append('donationImages', blob, filename || 'image.jpg');
+// Take only the first 3 images (or fewer if less than 3 exist)
+      const imagesToUpload = images.slice(0, 3);
 
-      if (response.status === 201) {
+      await Promise.all(
+        imagesToUpload.map(async (uri, index) => {
+          const filename = uri.split('/').pop();
+          const match = /\.(\w+)$/.exec(filename);
+          const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+          const img = await fetch(uri);
+          const blob = await img.blob();
+          formData.append('donationImages', blob, filename || `image_${index}.jpg`);
+        })
+      );
+      console.log("calling api");
+      const response = await apiClient.post('/api/donation/create', formData);
+
+      if (response.status == 201) {
         Alert.alert('Success', 'Donation created successfully');
         router.push('/donor/myDonation');
       }

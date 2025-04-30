@@ -6,7 +6,7 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 import Head from '../../components/header';
 import { useRouter,useNavigation } from 'expo-router';
-
+import { useLocalSearchParams } from 'expo-router';
 export default function ProfilePage() {
     const navigation = useNavigation();
     const router= useRouter();
@@ -15,6 +15,14 @@ export default function ProfilePage() {
         headerShown: false,
       });
     }, []);
+
+    const searchParams = useLocalSearchParams();
+      const {
+        profileName,
+            mail,
+            phone
+         } = searchParams;
+
   // Handler for back button
   const handleBackPress = () => {
     router.back(); // Navigate back
@@ -43,8 +51,8 @@ export default function ProfilePage() {
           style={styles.profileImage}
         />
         <View style={styles.subTitle}>
-            <Text style={styles.profileName}>Zariya Foundation</Text>
-            <Text style={styles.profileEmail}>zariya@info.org</Text>
+            <Text style={styles.profileName}>{profileName}</Text>
+            <Text style={styles.profileEmail}>{mail}</Text>
         </View>
         
       </View>
@@ -56,7 +64,7 @@ export default function ProfilePage() {
           <Ionicons name="person-outline" size={24} color={Colors.primary} />
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoLabel}>Name</Text>
-            <Text style={styles.infoText}>Zariya Foundation</Text>
+            <Text style={styles.infoText}>{profileName}</Text>
           </View>
         </View>
 
@@ -65,7 +73,7 @@ export default function ProfilePage() {
           <MaterialIcons name="email" size={24} color={Colors.primary} />
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoLabel}>Email</Text>
-            <Text style={styles.infoText}>zariya@info.org</Text>
+            <Text style={styles.infoText}>{mail}</Text>
           </View>
         </View>
 
@@ -74,7 +82,7 @@ export default function ProfilePage() {
           <Ionicons name="call-outline" size={24} color={Colors.primary} />
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoLabel}>Contact No</Text>
-            <Text style={styles.infoText}>03072890612</Text>
+            <Text style={styles.infoText}>{phone}</Text>
           </View>
         </View>
       </View>

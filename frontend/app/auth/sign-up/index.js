@@ -45,7 +45,7 @@ export default function SignUp() {
         password: formData.password,
         userRole: formData.role,
         address: formData.address,
-        contactNumber: formData.contactNumber,
+        phoneNumber: formData.contactNumber,
       });
 
       if (response.status === 201) {
@@ -153,6 +153,8 @@ export default function SignUp() {
             <Text style={styles.inputLabel}>Contact Number</Text>
             <TextInput 
               style={styles.input_text} 
+              value={formData.contactNumber}
+              onChangeText={(text) => handleChange('contactNumber', text)}
               placeholder='Enter Contact Number' 
               placeholderTextColor={Colors.Grey} 
             />
