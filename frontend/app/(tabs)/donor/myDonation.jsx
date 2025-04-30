@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
-import { useRouter } from 'expo-router';
+import { useRouter,useNavigation } from 'expo-router';
 import apiClient from '../../../utils/apiClient';
 
 const MyListings = () => {
@@ -10,18 +10,18 @@ const MyListings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
-
+  const navigation=useNavigation();
+  useEffect(() => {
+      navigation.setOptions({
+        headerShown: false,
+      });
+    }, []);
+  
   useEffect(() => {
     fetchDonations();
   }, []);
   
-  const getToken = async () => {
-    if (Platform.OS === 'web') {
-      return await AsyncStorage.getItem('accessToken');
-    } else {
-      return await SecureStore.getItemAsync('accessToken');
-    }
-  };
+  
 
   const fetchDonations = async () => {
     try {

@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Head from '../../../components/header';
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import apiClient from '../../../utils/apiClient';
 
 export default function MakeDonationForm() {
@@ -20,7 +20,13 @@ export default function MakeDonationForm() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+  const navigation= useNavigation();
+  useEffect(() => {
+      navigation.setOptions({
+        headerShown: false,
+      });
+    }, []);
+  
   const handleQuantitySelect = (value) => {
     if (value === 'OTHER') {
       setQuantity(0);
