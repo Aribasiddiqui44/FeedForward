@@ -1,23 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../../constants/Colors';
-import FreeMealRequest from '../../reciever/recieverDonation/FreeMealRequest';
+import { Colors } from '../../constants/Colors';
+import FreeMealRequest from '../reciever/recieverDonation/FreeMealRequest';
+import Head from '../../components/header';
 export default function FoodDetails() {
   const router=useRouter();
   const searchParams = useLocalSearchParams();
   const {
-    foodName,
-    foodPrice,
-    foodDescription,
-    foodQuantity,
     restId,
-    restImage,
-    rest_name,
-    rest_time,
-    rest_dist,
-  } = searchParams;
+          rest_name,
+          rest_phone,
+          rest_time,
+          rest_dist,
+          
+          // Food item details
+          foodId,
+          foodName,
+          foodPrice,
+          foodDescription,
+          foodQuantity,
+          // Additional details
+          pickupInstructions,
+          pickupTimeRange,
+          expiryDate } = searchParams;
 
   // State to manage the selected quantity
   const [selectedQuantity, setSelectedQuantity] = useState(0);
@@ -44,7 +51,7 @@ export default function FoodDetails() {
     !foodDescription ||
     !foodQuantity ||
     !restId ||
-    !restImage ||
+    //!restImage ||
     !rest_time ||
     !rest_dist ||
     !rest_name
@@ -55,11 +62,24 @@ export default function FoodDetails() {
       </View>
     );
   }
-
+  const handleBackPress = () => {
+    router.back(); // Navigate back
+  };
+  const navigation= useNavigation();
+  useEffect(() => {
+        navigation.setOptions({
+          headerShown: false,
+        });
+      }, []);
   return (
     <View style={styles.container}>
+      <Head 
+              showBackOption={true}
+              label='Feed Forward'
+              onBackPress={handleBackPress}
+            />
       {/* Food Image */}
-      <Image source={restImage} style={styles.image} />
+      {/* <Image source={restImage} style={styles.image} /> */}
 
       {/* Food Details */}
       <View style={styles.detailsContainer}>

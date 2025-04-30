@@ -166,3 +166,26 @@ export const deleteDonation = asyncHandler(async (req, res) => {
       new ApiResponse(200, null, "Donation deleted successfully")
   );
 });
+
+// get avaibale donations for receiver
+export const getAvailableDonations = asyncHandler(async (req, res) => {
+  try {
+    const currentDate = new Date();
+    
+    const donations = await Donation.find({
+      "isDonationCompletedSuccessfully.isCompleted": false,
+      
+    })
+    .populate({
+      path: 'donatedBy',
+      select: 'fullName phoneNumber',
+      model: 'User'
+    })
+    .lean();
+    res.status(200).json(
+      new ApiResponse(200, { donations }, "Available donations fetched successfully")
+    );
+  } catch (error) {
+    throw new ApiError(500, "Error fetching available donations");
+  }
+});

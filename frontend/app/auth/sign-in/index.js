@@ -50,7 +50,7 @@ export default function SignIn() {
             const userRole = response.data.data.user.userRole;
             if (userRole === 'receiver') {
               router.push({
-                pathname: '/(tabs)',
+                pathname: '/(tabs)/receiver/restaurantListing',
                 params: { userType: userRole } 
               });
             } else if (userRole === 'donor') {
@@ -59,7 +59,7 @@ export default function SignIn() {
                 params: { userType: userRole } 
               });
             } else if (userRole === 'rider') {
-                router.push('/receiver_dashboard');
+                router.push('/(tabs)/receiver/restaurantListing');
             } else {
                 Alert.alert('Error', 'Unknown role');
             }

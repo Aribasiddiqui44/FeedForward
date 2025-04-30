@@ -16,14 +16,23 @@ const donationSchema = new Schema({
                 unitOfMeasurement: { type: String, default: "kg" }
             },
             donatedBy: {
-                type: Schema.Types.ObjectId,
-                ref: 'Donor',
-                required: true
+                donorId:{
+                    type: Schema.Types.ObjectId,
+                    ref: 'User',
+                    required: true
+                },
+                fullName: {
+                    type: String
+                },
+                phoneNumber: {
+                    type: String,
+                },
+
             },
             donatedTo: {
                 receiverId: {
                     type: Schema.Types.ObjectId,
-                    ref: 'Receiver'
+                    ref: 'User'
                 },
                 receiverOrgName: { type: String },
                 receiverOrgEmail: { type: String },
@@ -95,7 +104,7 @@ const donationSchema = new Schema({
     },
     donatedBy: {
         type: Schema.Types.ObjectId,
-        ref: 'Donor',
+        ref: 'User',
         required: true
     },
 
