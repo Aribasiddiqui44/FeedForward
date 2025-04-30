@@ -6,7 +6,13 @@ const router = express.Router();
 
 router.post('/create', 
   verifyJWT,
-  upload.array('donationImages', 10), // Handle up to 10 images
+  // upload.array('donationImages', 10), // Handle up to 10 images
+  upload.fields([
+    {
+      name: "donationImages",
+      maxCount: 3
+    }
+  ]),
   createDonation
 );
 

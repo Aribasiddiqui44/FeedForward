@@ -12,7 +12,10 @@ const safeJsonParse = (str) => {
     throw new ApiError(400, `Invalid JSON format: ${str}`);
   }
 };
-
+export const createDonation = asyncHandler( async(req, res) => {
+  res.end();
+})
+/*
 export const createDonation = asyncHandler(async (req, res) => {
   // 1. Validate required fields
   const requiredFields = [
@@ -90,7 +93,7 @@ export const createDonation = asyncHandler(async (req, res) => {
   return res.status(201).json(
     new ApiResponse(201, newDonation, "Donation created successfully")
   );
-});
+});*/
 // 2. Get donations for current user (Donor)
 export const getDonationsForUser = asyncHandler(async (req, res) => {
     const { status } = req.query;
