@@ -7,8 +7,6 @@ import { Rider } from "./rider.model.js";
 const donationSchema = new Schema({
     donationFoodTitle: { type: String },
 
-    donationFoodList: [
-        {
             foodItemName: { type: String },
             foodItemDescription: { type: String },
             foodItemQuantity: {
@@ -37,13 +35,13 @@ const donationSchema = new Schema({
                 riderName: { type: String },
                 riderPhone: { type: String }
             },
-            listingImages: {
-                url1: {type: String, default: null},
-                url2: {type: String, default: null},
-                url3: {type: String, default: null}
-            }
-        }
-    ],
+            // listingImages: {
+            //     url1: {type: String, default: null},
+            //     url2: {type: String, default: null},
+            //     url3: {type: String, default: null}
+            // }
+            listingImages: []
+        ,
     listingType: {
         type: String,
         // donation / selling
@@ -95,7 +93,8 @@ const donationSchema = new Schema({
     },
     donatedBy: {
         type: Schema.Types.ObjectId,
-        ref: 'Donor',
+        // ref: 'Donor',
+        ref: 'User',
         required: true
     },
 

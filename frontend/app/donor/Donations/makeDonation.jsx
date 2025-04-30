@@ -135,14 +135,15 @@ export default function MakeDonationForm() {
           const match = /\.(\w+)$/.exec(filename);
           const type = match ? `image/${match[1]}` : 'image/jpeg';
 
-          const response = await fetch(uri);
-          const blob = await response.blob();
+          const img = await fetch(uri);
+          const blob = await img.blob();
           formData.append('donationImages', blob, filename || `image_${index}.jpg`);
         })
       );
+      console.log("calling api");
       const response = await apiClient.post('/api/donation/create', formData);
 
-      if (response.status === 201) {
+      if (response.status == 201) {
         Alert.alert('Success', 'Donation created successfully');
         router.push('/donor/myDonation');
       }
