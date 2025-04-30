@@ -36,10 +36,28 @@ const donationSchema = new Schema({
                 },
                 riderName: { type: String },
                 riderPhone: { type: String }
+            },
+            listingImages: {
+                url1: {type: String, default: null},
+                url2: {type: String, default: null},
+                url3: {type: String, default: null}
             }
         }
     ],
-
+    listingType: {
+        type: String,
+        // donation / selling
+        enum: ["donation", "selling"]
+    },
+    donationType: {
+        type: String,
+        enum: ["Hadiya", "Sadqa"] // have to add description as well of each.
+    },
+    listingStatus: {
+        type: String,
+        enum: ["open", "closed", "completed", "cancelled"],
+        default: "open"
+    },
     donationDescription: { type: String },
 
     donationUnitPrice: {
@@ -59,7 +77,7 @@ const donationSchema = new Schema({
 
     donationPickupInstructions: [{ type: String }],
 
-    goodnessOfFood: {
+    foodExpiry: {
         bestBefore: { type: Date, default: Date.now },
         listedFor: {
             period: { type: Number },
@@ -99,5 +117,7 @@ const donationSchema = new Schema({
 }, {
     timestamps: true
 });
+// have to add impact fields in this model.js, and impacy calculation in donation.controller.js
+
 
 export const Donation = mongoose.model("Donation", donationSchema);

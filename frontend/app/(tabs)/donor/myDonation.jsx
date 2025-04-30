@@ -14,6 +14,14 @@ const MyListings = () => {
   useEffect(() => {
     fetchDonations();
   }, []);
+  
+  const getToken = async () => {
+    if (Platform.OS === 'web') {
+      return await AsyncStorage.getItem('accessToken');
+    } else {
+      return await SecureStore.getItemAsync('accessToken');
+    }
+  };
 
   const fetchDonations = async () => {
     try {

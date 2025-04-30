@@ -21,7 +21,7 @@ const postAppSupportQuestion = asyncHandler( async (req, res) => {
         throw new ApiError(500, "Internal Server Error.");
     };
     return res.status(201).json(
-        new ApiResponse,(201, newSupportQuery, "Successfully added support query.")
+        new ApiResponse(201, newSupportQuery, "Successfully added support query.")
     );
 });
 
