@@ -54,7 +54,8 @@ const receiverSchema = new Schema(
         ],
         receiverAchievements: [
 
-        ]
+        ],
+        orgImageUrl: {type: String}
     }
 );
 export const Receiver = mongoose.model("Receiver", receiverSchema);
