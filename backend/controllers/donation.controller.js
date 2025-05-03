@@ -30,7 +30,9 @@ export const createDonation = asyncHandler(async (req, res) => {
   if (missingFields.length > 0) {
     throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
   }
-  
+  const priceObj = typeof req.body.donationUnitPrice === 'string' 
+    ? JSON.parse(req.body.donationUnitPrice) 
+    : req.body.donationUnitPrice;
 
   // 2. Validate images
   if ( !req.files ) {
@@ -80,7 +82,11 @@ export const createDonation = asyncHandler(async (req, res) => {
   const newDonation = await Donation.create({
     donationFoodTitle: req.body.donationFoodTitle.trim(),
     donationDescription: req.body.donationDescription.trim(),
-    donationUnitPrice: parseField(req.body.donationUnitPrice, { value: 0, currency: "pkr" }),
+    donationUnitPrice: {
+      value: priceObj.value,
+      currency: priceObj.currency || "PKR",
+      minPricePerUnit: priceObj.minPricePerUnit
+  },
     donationQuantity: parseField(req.body.donationQuantity, { quantity: 1, measurementUnit: "kg" }),
     donationInitialPickupTimeRange: parseField(req.body.donationInitialPickupTimeRange),
     donationPickupInstructions: parseField(req.body.donationPickupInstructions, []),

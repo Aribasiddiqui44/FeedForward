@@ -36,61 +36,48 @@ export default function RestaurantListing() {
   const transformDonationsToRestaurantData = (donations) => {
     if (!Array.isArray(donations)) return [];
     
-    // Create a map to group donations by restaurant
     const restaurantsMap = new Map();
     
     donations.forEach(donation => {
       const donor = donation.donatedBy || {};
-      const restaurantId = donor._id || 'anonymous'; // Use donor ID as restaurant ID
+      const restaurantId = donor._id || 'anonymous';
       
       if (!restaurantsMap.has(restaurantId)) {
-        // Create new restaurant entry if it doesn't exist
         restaurantsMap.set(restaurantId, {
           id: restaurantId,
           name: donor.fullName || 'Anonymous Donor',
           phone: donor.phoneNumber || 'N/A',
-          distance: 1, // Default distance
-          time: 'N/A', // Will be updated with the earliest ending time
+          distance: 1,
+          time: formatTimeRange(donation.donationInitialPickupTimeRange),
           foodItems: []
         });
       }
       
       const restaurant = restaurantsMap.get(restaurantId);
-      const quantity = donation.donationQuantity || {};
-      const price = donation.donationUnitPrice || {};
-      const timeRange = donation.donationInitialPickupTimeRange || {};
-      
-      // Add this donation as a food item
       restaurant.foodItems.push({
         id: donation._id,
         name: donation.donationFoodTitle || 'Unnamed Donation',
-        quantity: quantity.quantity || 1,
-        price: price.value || 0,
+        quantity: donation.donationQuantity?.quantity || 1,
+        price: donation.donationUnitPrice?.value || 0,
+        // Add min price here
+        minPricePerUnit: donation.donationUnitPrice?.minPricePerUnit || 0,
         description: donation.donationDescription || 'No description provided',
         pickupInstructions: donation.donationPickupInstructions || [],
-        pickupTimeRange: timeRange,
+        pickupTimeRange: donation.donationInitialPickupTimeRange,
         expiryDate: donation.foodExpiry?.bestBefore || 'N/A',
         image: donation.listingImages?.[0] || require('../../../assets/images/greenLogo.png')
       });
       
-      // Update restaurant's time to show the earliest ending time
-      if (timeRange.endingTime) {
-        if (restaurant.time === 'N/A' || timeRange.endingTime < restaurant.time) {
-          restaurant.time = timeRange.endingTime;
-        }
-      }
+      // Update restaurant's time logic...
     });
     
-    // Convert the map to an array of restaurants
     return Array.from(restaurantsMap.values());
   };
-
-  const handleFoodItemPress = (foodItem, restaurant) => {
-    console.log('Navigating with:', { // Debug log
-      foodItem,
-      restaurant
-    });
-  
+  const formatTimeRange = (timeRange) => {
+    if (!timeRange) return 'Flexible';
+    return `${timeRange.startingTime || ''} - ${timeRange.endingTime || ''}`.trim() || 'Flexible';
+  };
+  const handleFoodItemPress = (foodItem, restaurant) => {  
     try {
       router.push({
         pathname: '/foodDetail/FoodDetails',
@@ -99,7 +86,7 @@ export default function RestaurantListing() {
           restId: restaurant.id,
           rest_name: restaurant.name,
           rest_phone: restaurant.phone,
-          rest_time: restaurant.time,
+          //rest_time: restaurant.time,
           rest_dist: String(restaurant.distance),
           // Food item details
           foodId: foodItem.id,
@@ -108,10 +95,10 @@ export default function RestaurantListing() {
           foodDescription: foodItem.description,
           foodQuantity: foodItem.quantity,
           foodImg: foodItem.image,
-          
+          minPricePerUnit: foodItem.minPricePerUnit || 0,
           // Additional details
           pickupInstructions: foodItem.pickupInstructions?.join(', ') || 'None',
-          pickupTimeRange: `${foodItem.pickupTimeRange?.startingTime || ''} - ${foodItem.pickupTimeRange?.endingTime || ''}`.trim(),
+          pickupTimeRange: formatTimeRange(foodItem.pickupTimeRange),
           expiryDate: foodItem.expiryDate || 'Not specified'
         }
       });

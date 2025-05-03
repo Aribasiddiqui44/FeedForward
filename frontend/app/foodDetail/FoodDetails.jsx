@@ -12,9 +12,8 @@ export default function FoodDetails() {
     restId,
           rest_name,
           rest_phone,
-          rest_time,
+          //rest_time,
           rest_dist,
-          
           // Food item details
           foodId,
           foodName,
@@ -22,6 +21,7 @@ export default function FoodDetails() {
           foodDescription,
           foodQuantity,
           foodImg,
+          minPricePerUnit,
           // Additional details
           pickupInstructions,
           pickupTimeRange,
@@ -53,7 +53,7 @@ export default function FoodDetails() {
     !foodQuantity ||
     !restId ||
     !foodImg ||
-    !rest_time ||
+    //!rest_time ||
     !rest_dist ||
     !rest_name
   ) {
@@ -96,11 +96,11 @@ export default function FoodDetails() {
         {/* Timing and Restaurant Info */}
         <View style={styles.infoRow}>
           <Ionicons name="time-outline" size={18} color="#888" style={styles.icon} />
-          <Text style={styles.infoText}>Order Before {rest_time}</Text>
+          <Text style={styles.infoText}>Order Time: {pickupTimeRange}</Text>
         </View>
         <View style={styles.infoRow}>
           <Ionicons name="calendar-outline" size={18} color="#888" style={styles.icon} />
-          <Text style={styles.infoText}>Pickup Before {rest_time}</Text>
+          <Text style={styles.infoText}>Pickup Time: {pickupTimeRange}</Text>
         </View>
         <View style={styles.infoRow}>
           <Ionicons name="location-outline" size={18} color="#888" style={styles.icon} />
@@ -139,13 +139,16 @@ export default function FoodDetails() {
           pathname:'./../reciever/recieverDonation/FreeMealRequest',
           params:{
             foodName,
+            foodId,
             foodPrice,
             foodDescription,
             foodQuantity,
+            minPricePerUnit,
             restId,
-            restImage,
+            foodImg,
             rest_name,
-            rest_time,
+            //rest_time,
+            pickupTimeRange,
             rest_dist,
             selectedQuantity,
             actionType: 'free',
@@ -158,13 +161,16 @@ export default function FoodDetails() {
           pathname:'./../reciever/recieverDonation/FreeMealRequest',
           params:{
             foodName,
+            foodId,
             foodPrice,
             foodDescription,
             foodQuantity,
             restId,
-            restImage,
+            foodImg,
+            minPricePerUnit,
             rest_name,
-            rest_time,
+            //rest_time,
+            pickupTimeRange,
             rest_dist,
             selectedQuantity,
             actionType: 'negotiate',

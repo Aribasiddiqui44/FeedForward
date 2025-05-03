@@ -1,20 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TextInput, 
+  TouchableOpacity, 
+  Image,
+  ActivityIndicator,
+  Alert,
+  ScrollView 
+} from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
 import Head from '../../../components/header';
-import { ScrollView } from 'react-native';
+import apiClient from '../../../utils/apiClient';
 
 export default function FreeMealRequest() {
   const searchParams = useLocalSearchParams();
-  const { foodName, foodPrice, rest_time, selectedQuantity, actionType } = searchParams; 
+  const { 
+    foodName = '', 
+    foodPrice = 0, 
+    pickupTimeRange = 'N/A',
+    foodImg = null,
+    selectedQuantity = 1, 
+    actionType = '',
+    foodId = '',
+    minPricePerUnit = 0 
+  } = searchParams; 
+  
   const navigation = useNavigation();
   const router = useRouter();
-
-  const [negotiatedPrice, setNegotiatedPrice] = useState(Number(foodPrice*selectedQuantity));
+  
+  const [negotiatedPrice, setNegotiatedPrice] = useState(
+    actionType === 'negotiate' ? Number(foodPrice) * Number(selectedQuantity) : 0
+  );
   const [reason, setReason] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [priceError, setPriceError] = useState('');
 
   useEffect(() => {
     navigation.setOptions({
@@ -22,22 +46,67 @@ export default function FreeMealRequest() {
     });
   }, []);
 
+  const handleSliderChange = (value) => {
+    const minTotal = Number(minPricePerUnit) * Number(selectedQuantity);
+    setNegotiatedPrice(value);
+    
+    if (value < minTotal) {
+      setPriceError(`Price cannot be below ${minTotal.toFixed(2)} PKR`);
+    } else {
+      setPriceError('');
+    }
+  };
+
+  const handleRequestSubmit = async () => {
+    if (!reason.trim()) {
+      Alert.alert('Error', 'Please provide a reason for your request');
+      return;
+    }
+
+    if (actionType === 'negotiate') {
+      const minTotal = Number(minPricePerUnit) * Number(selectedQuantity);
+      if (negotiatedPrice < minTotal) {
+        Alert.alert(
+          'Invalid Price',
+          `The minimum acceptable price is ${minTotal.toFixed(2)} PKR`
+        );
+        return;
+      }
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const payload = {
+        quantity: Number(selectedQuantity),
+        message: reason
+      };
+
+      if (actionType === 'negotiate') {
+        payload.proposedPrice = Number(negotiatedPrice);
+      }
+
+      const response = await apiClient.post(
+        `/request/donations/${foodId}/requests`,
+        payload
+      );
+
+      if (response.status === 201) {
+        router.push({pathname:'/(tabs)/receiver/restaurantListing'});
+      }
+    } catch (error) {
+      console.error('Request error:', error);
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || error.message || 'Failed to submit request'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleBackPress = () => {
     router.back(); 
-  };
-
-  const handleRequestSubmit = () => {
-    const requestData = {
-      foodName,
-      selectedQuantity,
-      reason,
-      negotiatedPrice: actionType == 'negotiate' ? negotiatedPrice : 0, // Only include price if negotiating
-    };
-    console.log('Request Submitted', requestData);
-  };
-
-  const handleSliderChange = (value) => {
-    setNegotiatedPrice(value);
   };
 
   return (
@@ -47,74 +116,98 @@ export default function FreeMealRequest() {
         label="Checkout"
         onBackPress={handleBackPress}
       />
-      <ScrollView>
-      {/* Content */}
-      <View style={styles.foodDetails}>
-        <Image source={require('./../../../assets/images/greenLogo.png')} style={styles.image} />
-        <Text style={styles.foodName}>{foodName}</Text>
-      </View>
-      <View style={styles.content}>
-        <View style={styles.foodDetails1}>
-          <View style={styles.infoRow}>
-            <Ionicons name="restaurant-outline" size={18} color="#000" />
-            <Text style={styles.infoText}>{selectedQuantity || '0'} portions</Text>
-          </View>
-          <Text style={styles.foodPrice}>{actionType == 'negotiate' ? negotiatedPrice : '0 PKR'}</Text>
-        </View>
-        <View style={styles.foodDetails1}>
-          <View style={styles.infoRow}>
-            <Ionicons name="time-outline" size={18} color="#000" />
-            <Text style={styles.infoText}>Pickup Time:</Text>
-          </View>
-          <Text style={styles.foodPrice}>{rest_time || 'N/A'}</Text>
-        </View>
-
-        {actionType == 'negotiate' && (
-          <View style={styles.sliderContainer}>
-            
-            <Text style={styles.sliderLabel}>Set Your Price:</Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={30*selectedQuantity}
-              maximumValue={Number(foodPrice*selectedQuantity)}
-              step={1}
-              value={negotiatedPrice}
-              onValueChange={handleSliderChange}
-              minimumTrackTintColor={Colors.primary}
-              maximumTrackTintColor="#ddd"
+      
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.foodDetails}>
+          {foodImg && (
+            <Image 
+              source={typeof foodImg === 'string' ? { uri: foodImg } : foodImg} 
+              style={styles.image} 
+              resizeMode="cover"
             />
-            <Text style={styles.sliderValue}>{negotiatedPrice} PKR</Text>
-            
-            
-          </View>
-        )}
-
-        {/* Free Meal Request Form */}
-        <View style={styles.textAreaContainer}>
-          <Text style={styles.questionText}>
-            {actionType === 'negotiate'
-              ? 'Why are you requesting for a price negotiation?'
-              : 'Why are you requesting for the free meal?'}
-          </Text>
-          <TextInput
-            style={styles.textArea}
-            multiline
-            numberOfLines={4}
-            placeholder="Type your reason here..."
-            placeholderTextColor="#888"
-            value={reason}
-            onChangeText={setReason}
-          />
+          )}
+          <Text style={styles.foodName}>{foodName}</Text>
         </View>
 
-        {/* Submit Button */}
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: Colors.primary }]}
-          onPress={handleRequestSubmit}
-        >
-          <Text style={styles.buttonText}>Send Request</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.content}>
+          <View style={styles.detailRow}>
+            <View style={styles.infoRow}>
+              <Ionicons name="restaurant-outline" size={18} color="#000" />
+              <Text style={styles.infoText}>{selectedQuantity} portion{selectedQuantity !== 1 ? 's' : ''}</Text>
+            </View>
+            <Text style={styles.foodPrice}>
+              {actionType === 'negotiate' ? negotiatedPrice.toFixed(2) : '0.00'} PKR
+            </Text>
+          </View>
+
+          <View style={styles.detailRow}>
+            <View style={styles.infoRow}>
+              <Ionicons name="time-outline" size={18} color="#000" />
+              <Text style={styles.infoText}>Pickup Time:</Text>
+            </View>
+            <Text style={styles.foodPrice}>{pickupTimeRange}</Text>
+          </View>
+
+          {actionType === 'negotiate' && (
+            <View style={styles.sliderContainer}>
+              <Text style={styles.sliderLabel}>Set Your Price:</Text>
+              <Slider
+                style={styles.slider}
+                minimumValue={Number(minPricePerUnit) * Number(selectedQuantity)}
+                maximumValue={Number(foodPrice) * Number(selectedQuantity)}
+                step={1}
+                value={negotiatedPrice}
+                onValueChange={handleSliderChange}
+                minimumTrackTintColor={Colors.primary}
+                maximumTrackTintColor="#ddd"
+              />
+              <View style={styles.priceInfoContainer}>
+                <Text style={styles.sliderValue}>{negotiatedPrice.toFixed(2)} PKR</Text>
+                <Text style={styles.minPriceText}>
+                  (Minimum: {(Number(minPricePerUnit) * Number(selectedQuantity)).toFixed(2)} PKR)
+                </Text>
+              </View>
+              {priceError ? (
+                <Text style={styles.errorText}>{priceError}</Text>
+              ) : null}
+            </View>
+          )}
+
+          <View style={styles.textAreaContainer}>
+            <Text style={styles.questionText}>
+              {actionType === 'negotiate'
+                ? 'Why are you requesting for a price negotiation?'
+                : 'Why are you requesting for the free meal?'}
+            </Text>
+            <TextInput
+              style={styles.textArea}
+              multiline
+              numberOfLines={4}
+              placeholder="Type your reason here..."
+              placeholderTextColor="#888"
+              value={reason}
+              onChangeText={setReason}
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.button, 
+              { 
+                backgroundColor: Colors.primary,
+                opacity: isLoading ? 0.7 : 1
+              }
+            ]}
+            onPress={handleRequestSubmit}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Send Request</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
@@ -125,25 +218,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   image: {
     width: 200,
     height: 170,
-    resizeMode: 'cover',
+    borderRadius: 8,
+    marginBottom: 10,
   },
   foodDetails: {
     alignItems: 'center',
     marginBottom: 20,
+    paddingTop: 20,
   },
   foodName: {
     fontSize: 20,
     fontWeight: '400',
     color: '#333',
+    textAlign: 'center',
   },
   content: {
     flex: 1,
     padding: 26,
   },
-  foodDetails1: {
+  detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -177,11 +276,27 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 40,
   },
+  priceInfoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4
+  },
   sliderValue: {
     textAlign: 'center',
     fontSize: 16,
     color: Colors.primary,
-    marginTop: 8,
+    fontWeight: 'bold',
+  },
+  minPriceText: {
+    fontSize: 14,
+    color: Colors.dark
+  },
+  errorText: {
+    color: Colors.danger,
+    textAlign: 'center',
+    marginTop: 5
   },
   textAreaContainer: {
     marginVertical: 16,

@@ -3,7 +3,7 @@ import { Donor } from './../models/donor.model.js';
 import { User } from "./user.model.js";
 import { Receiver } from "./receiver.model.js";
 import { Rider } from "./rider.model.js";
-
+import { DonationRequest } from "./donationRequest.model.js";
 const donationSchema = new Schema({
     donationFoodTitle: { type: String },
 
@@ -69,9 +69,9 @@ const donationSchema = new Schema({
 
     donationUnitPrice: {
         value: { type: Number },
-        currency: { type: String }
+        currency: { type: String },
+        minPricePerUnit: { type: Number } 
     },
-
     donationQuantity: {
         quantity: { type: Number },
         measurementUnit: { type: String, default: "kg" }
@@ -110,7 +110,10 @@ const donationSchema = new Schema({
         isCompleted: { type: Boolean, default: false },
         comments: { type: String }
     },
-
+    requests: [{
+        type: Schema.Types.ObjectId,
+        ref: 'DonationRequest'
+    }],
     // storing images uploaded by the donor
     // donationImages: {
     //     type: [String], // Array of strings to store URLs of the images

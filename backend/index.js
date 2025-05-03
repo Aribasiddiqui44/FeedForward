@@ -12,6 +12,8 @@ import donationRoutes from './routes/donation.router.js';
 import ReceiverRoutes from './routes/receiver.router.js';
 import SupportRouter from './routes/support.router.js';
 import RiderRouter from './routes/rider.router.js';
+import RequestRoutes from './routes/request.router.js';
+app.use("/request",RequestRoutes);
 app.use('/api/donation', donationRoutes);
 app.use("/receiver",ReceiverRoutes)
 app.use("/user", UserRouter);

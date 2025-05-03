@@ -19,6 +19,7 @@ export default function MakeDonationForm() {
   const [daysListed, setDaysListed] = useState(5);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [minPricePerUnit, setMinPricePerUnit] = useState('');
   const router = useRouter();
   const navigation= useNavigation();
   useEffect(() => {
@@ -83,7 +84,8 @@ export default function MakeDonationForm() {
       // Nested objects
       formData.append('donationUnitPrice', JSON.stringify({
         value: parseFloat(price) || 0,
-        currency: "pkr"
+        currency: "pkr",
+        minPricePerUnit: parseFloat(minPricePerUnit) || undefined // Only include if provided
       }));
 
       formData.append('donationQuantity', JSON.stringify({
@@ -216,6 +218,16 @@ export default function MakeDonationForm() {
             placeholder="e.g. 50"
             value={price}
             onChangeText={setPrice}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Minimum Acceptable Price (per kg)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="e.g. 30 (leave empty if not negotiable)"
+            value={minPricePerUnit}
+            onChangeText={setMinPricePerUnit}
             keyboardType="numeric"
           />
         </View>

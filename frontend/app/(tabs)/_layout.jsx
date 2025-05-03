@@ -6,13 +6,13 @@ import {
   Modal,
   StyleSheet,
   ScrollView,
-  Image,
+  Image, Alert
 } from 'react-native';
 import { Tabs, useRouter, useNavigation, useLocalSearchParams } from 'expo-router';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 import Head from '../../components/header';
-
+import apiClient from '../../utils/apiClient';
 export default function Layout() {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const navigation = useNavigation();
@@ -24,6 +24,36 @@ export default function Layout() {
       headerShown: false,
     });
   }, []);
+  
+  const logoutUser = async () => {
+    try {
+      Alert.alert(
+        'Logout',
+        'Are you sure you want to logout?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Logout',
+            onPress: async () => {
+              try {
+                await apiClient.post('/users/logout');
+                router.replace('/auth/sign-in');
+              } catch (error) {
+                console.error('Logout error:', error);
+                Alert.alert('Error', 'Failed to logout. Please try again.');
+              }
+            },
+            style: 'destructive',
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Error showing alert:', error);
+    }
+  };
 
   const { organizationName, organizationEmail, address, city, country, postalCode } = useLocalSearchParams();
 
@@ -37,7 +67,7 @@ export default function Layout() {
     { label: 'About', icon: 'info', screen: '/receiver/About' },
     { label: 'Settings', icon: 'settings', screen: '/receiver/Settings' },
     { label: 'Customer Support', icon: 'message-circle', screen: '/receiver/Support' },
-    { label: 'Logout', icon: 'log-out', screen: '/Login' },
+    { label: 'Logout', icon: 'log-out', action: logoutUser },
   ];
 
   // Menu items for donor navigation
@@ -48,7 +78,7 @@ export default function Layout() {
     { label: 'About', icon: 'info', screen: '/donor/About' },
     { label: 'Settings', icon: 'settings', screen: '/donor/Settings' },
     { label: 'Customer Support', icon: 'message-circle', screen: '/donor/Support' },
-    { label: 'Logout', icon: 'log-out', screen: '/Login' },
+    { label: 'Logout', icon: 'log-out', action: logoutUser },
   ];
 
   const menuItems = userType === 'donor' ? donorMenuItems : receiverMenuItems;
