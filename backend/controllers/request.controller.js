@@ -4,6 +4,9 @@ import { DonationRequest } from '../models/donationRequest.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import { Order } from '../models/order.model.js';
+import { Notification } from '../models/notification.model.js';
+//create request
 export const createRequest = asyncHandler(async (req, res) => {
     const { donationId } = req.params;
     const { quantity, proposedPrice, message } = req.body;
@@ -46,64 +49,17 @@ export const createRequest = asyncHandler(async (req, res) => {
         new ApiResponse(201, request, 'Request submitted successfully')
     );
 });
+
+
 export const getDonorRequests = asyncHandler(async (req, res) => {
     const requests = await DonationRequest.find({
         'donation.donatedBy.donorId': req.user._id
+        
     })
     .populate('donation', 'donationFoodTitle donationUnitPrice')
     .populate('requester', 'fullName phoneNumber');
 
     res.status(200).json(new ApiResponse(200, requests));
-});
-export const handleRequest = asyncHandler(async (req, res) => {
-    const { requestId } = req.params;
-    const { action, message, counterPrice } = req.body;
-    
-    const request = await DonationRequest.findById(requestId).populate('donation');
-    if (!request) throw new ApiError(404, 'Request not found');
-
-    // Verify donor owns the donation
-    if (request.donation.donatedBy.donorId.toString() !== req.user._id.toString()) {
-        throw new ApiError(403, 'Not authorized');
-    }
-
-    switch (action) {
-        case 'accept':
-            request.status = 'accepted';
-            request.finalPrice = request.proposedPrice;
-            request.donation.listingStatus = 'closed';
-            break;
-            
-        case 'counter':
-            if (!counterPrice) throw new ApiError(400, 'Counter price required');
-            request.status = 'negotiating';
-            request.messages.push({
-                senderType: 'donor',
-                message: message || 'Price counter offer',
-                priceOffer: counterPrice
-            });
-            break;
-            
-        case 'reject':
-            request.status = 'rejected';
-            if (message) {
-                request.messages.push({
-                    senderType: 'donor',
-                    message
-                });
-            }
-            break;
-            
-        default:
-            throw new ApiError(400, 'Invalid action');
-    }
-
-    await request.save();
-    await request.donation.save();
-
-    return res.status(200).json(
-        new ApiResponse(200, request, `Request ${action}ed successfully`)
-    );
 });
 export const completeRequest = asyncHandler(async (req, res) => {
     const { requestId } = req.params;
@@ -129,4 +85,196 @@ export const completeRequest = asyncHandler(async (req, res) => {
 
     await request.save();
     return res.status(200).json(new ApiResponse(200, request, 'Request completed'));
+});
+
+export const handleRequest = asyncHandler(async (req, res) => {
+    const { requestId } = req.params;
+    const { action, message, counterPrice, paymentMethod = 'cash_on_pickup' } = req.body;
+    
+    const request = await DonationRequest.findById(requestId)
+        .populate('donation')
+        .populate('requester');
+    if (!request) throw new ApiError(404, 'Request not found');
+
+    // Verify donor owns the donation
+    if (request.donation.donatedBy.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, 'Not authorized');
+    }
+
+    switch (action) {
+        case 'accept':
+            request.status = 'accepted';
+            request.finalPrice = request.proposedPrice;
+            request.donation.listingStatus = 'closed';
+            
+            // Create order
+            const order = await Order.create({
+                request: request._id,
+                donor: req.user._id,
+                receiver: request.requester._id,
+                donation: request.donation._id,
+                items: [{
+                    foodItem: request.donation.donationFoodTitle,
+                    foodItemId: request.donation._id,
+                    quantity: request.quantity,
+                    unitPrice: request.finalPrice / request.quantity,
+                    totalPrice: request.finalPrice
+                }],
+                orderTotal: request.finalPrice,
+                paymentMethod,
+                paymentStatus: paymentMethod === 'cash_on_pickup' ? 'completed' : 'pending',
+                orderStatus: 'processing',
+                pickupDetails: {
+                    scheduledTime: request.donation.donationInitialPickupTimeRange,
+                    address: req.user.address || '',
+                    contactNumber: req.user.phoneNumber || ''
+                },
+                tracking: [{
+                    status: 'processing',
+                    message: 'Order created from accepted request',
+                    updatedBy: 'donor'
+                }]
+            });
+
+            // Create notification for receiver
+            // await Notification.create({
+            //     user: request.requester._id,
+            //     title: 'Request Accepted',
+            //     message: `Your request for ${request.donation.donationFoodTitle} has been accepted`,
+            //     type: 'order',
+            //     relatedOrder: order._id
+            // });
+            break;
+            
+        case 'counter':
+            if (!counterPrice) throw new ApiError(400, 'Counter price required');
+            request.status = 'negotiating';
+            request.messages.push({
+                senderType: 'donor',
+                message: message || 'Price counter offer',
+                priceOffer: counterPrice,
+                createdAt: new Date()
+            });
+
+            // Create notification for receiver
+            // await Notification.create({
+            //     user: request.requester._id,
+            //     title: 'Counter Offer',
+            //     message: `Donor has made a counter offer for ${request.donation.donationFoodTitle}`,
+            //     type: 'request',
+            //     relatedRequest: request._id
+            // });
+            break;
+            
+        case 'reject':
+            request.status = 'rejected';
+            if (message) {
+                request.messages.push({
+                    senderType: 'donor',
+                    message,
+                    createdAt: new Date()
+                });
+            }
+
+            // Create notification for receiver
+            // await Notification.create({
+            //     user: request.requester._id,
+            //     title: 'Request Rejected',
+            //     message: `Your request for ${request.donation.donationFoodTitle} has been rejected`,
+            //     type: 'request',
+            //     relatedRequest: request._id
+            // });
+            break;
+            
+        default:
+            throw new ApiError(400, 'Invalid action');
+    }
+
+    await request.save();
+    await request.donation.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, request, `Request ${action}ed successfully`)
+    );
+});
+
+export const directCheckout = asyncHandler(async (req, res) => {
+    const { donationId } = req.params;
+    const { quantity, paymentMethod = 'cash_on_pickup' } = req.body;
+    const userId = req.user._id;
+
+    // Validate donation exists and is available
+    const donation = await Donation.findById(donationId);
+    if (!donation) throw new ApiError(404, 'Donation not found');
+    if (donation.listingStatus !== 'open') {
+        throw new ApiError(400, 'This donation is no longer available');
+    }
+
+    // Validate quantity
+    if (quantity > donation.donationQuantity.quantity) {
+        throw new ApiError(400, 'Requested quantity exceeds available amount');
+    }
+
+    // Calculate total price
+    const totalPrice = donation.donationUnitPrice.value * quantity;
+
+    // Update donation quantity
+    donation.donationQuantity.quantity -= quantity;
+    
+    // Only close listing if no quantity remains
+    if (donation.donationQuantity.quantity <= 0) {
+        donation.listingStatus = 'closed';
+    }
+
+    // Create request with immediate acceptance
+    const request = await DonationRequest.create({
+        donation: donationId,
+        requester: userId,
+        quantity,
+        proposedPrice: totalPrice,
+        status: "accepted",
+        finalPrice: totalPrice,
+        messages: [{
+            senderType: 'receiver',
+            message: 'Direct purchase - payment method: ' + paymentMethod,
+            createdAt: new Date()
+        }]
+    });
+
+    // Create order
+    const order = await Order.create({
+        request: request._id,
+        donor: donation.donatedBy,
+        receiver: userId,
+        donation: donation._id,
+        items: [{
+            foodItem: donation.donationFoodTitle,
+            foodItemId: donation._id,
+            quantity: quantity,
+            unitPrice: donation.donationUnitPrice.value,
+            totalPrice: totalPrice
+        }],
+        orderTotal: totalPrice,
+        paymentMethod,
+        paymentStatus: paymentMethod === 'cash_on_pickup' ? 'completed' : 'pending',
+        orderStatus: 'processing',
+        pickupDetails: {
+            scheduledTime: donation.donationInitialPickupTimeRange,
+            address: req.user.address || '',
+            contactNumber: req.user.phoneNumber || ''
+        },
+        tracking: [{
+            status: 'processing',
+            message: 'Direct checkout order created',
+            updatedBy: 'system'
+        }]
+    });
+
+    // Add request to donation
+    donation.requests.push(request._id);
+    await donation.save();
+
+    return res.status(201).json(
+        new ApiResponse(201, { request, order }, 'Purchase completed successfully')
+    );
 });

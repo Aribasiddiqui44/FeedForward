@@ -1,119 +1,236 @@
-import { View, Text, StyleSheet, TouchableOpacity,Image } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
+import React, { useState,useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import Head from '../../components/header';
 import { Colors } from '../../constants/Colors';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ScrollView } from 'react-native';
-export default function checkout() {
+import apiClient from '../../utils/apiClient';
+import { useNavigation } from 'expo-router';
+export default function Checkout() {
   const searchParams = useLocalSearchParams();
-  const { foodName, foodPrice, rest_time, selectedQuantity,rest_name } = searchParams;
-  const navigation = useNavigation();
+  const { 
+    foodName, 
+    foodPrice, 
+    pickupTimeRange, 
+    selectedQuantity,
+    rest_name,
+    foodImg,
+    foodId,
+    minPricePerUnit = 0
+  } = searchParams;
+  
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const handlePaymentMethod = async (paymentMethod) => {
+    if (!selectedQuantity || selectedQuantity <= 0) {
+      Alert.alert('Error', 'Please select at least one portion');
+      return;
+    }
+  
+    setIsLoading(true);
+    
+    try {
+      const response = await apiClient.post(
+        `/request/donations/${foodId}/direct-checkout`,
+        {
+          quantity: Number(selectedQuantity),
+          paymentMethod,
+          pickupTimeRange: typeof pickupTimeRange === 'string' 
+            ? { startingTime: pickupTimeRange.split(' - ')[0], endingTime: pickupTimeRange.split(' - ')[1] }
+            : pickupTimeRange
+        }
+      );
+  
+      // Debug logs to verify response structure
+      console.log('Full API response:', response);
+      console.log('Response data:', response.data);
+      console.log('Nested data:', response.data?.data);
+  
+      // Validate response structure
+      if (!response.data?.data?.order?._id || !response.data?.data?.request?._id) {
+        console.error('Missing IDs in response:', {
+          orderId: response.data?.data?.order?._id,
+          requestId: response.data?.data?.request?._id
+        });
+        throw new Error('Order or Request ID missing in server response');
+      }
+  
+      const { order, request } = response.data.data;
+      
+      console.log('Navigating with order ID:', order._id); // Verify order ID exists
+      
+      router.replace({
+        pathname: '/orderReceipt/OrderSuccess',
+        params: {
+          orderId: order._id.toString(), // Ensure it's a string
+          requestId: request._id.toString(),
+          foodName,
+          totalPrice: order.orderTotal,
+          quantity: selectedQuantity,
+          rest_name,
+          paymentMethod,
+          status: 'processing',
+          pickupTimeRange: JSON.stringify(pickupTimeRange) // Stringify if it's an object
+        }
+      });
+  
+    } catch (error) {
+      console.error('Checkout error:', error);
+      Alert.alert(
+        'Error', 
+        error.message || 'Checkout failed. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // const handlePaymentMethod = async (paymentMethod) => {
+  //   if (!selectedQuantity || selectedQuantity <= 0) {
+  //     Alert.alert('Error', 'Please select at least one portion');
+  //     return;
+  //   }
 
-  // Disable the header for this screen
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, []);
+  //   setIsLoading(true);
+    
+  //   try {
+  //     // Call the direct checkout endpoint
+  //     const response = await apiClient.post(
+  //       `/request/donations/${foodId}/direct-checkout`,
+  //       {
+  //         quantity: Number(selectedQuantity),
+  //         paymentMethod,
+  //         pickupTimeRange: pickupTimeRange
+  //       }
+  //     );
 
+  //     if (response.status === 201) {
+  //       const { order, request } = response.data;
+        
+  //       router.replace({
+  //         pathname: '/orderReceipt/OrderSuccess',
+  //         params: {
+  //           orderId: order._id,
+  //           requestId: request._id,
+  //           foodName,
+  //           totalPrice: order.orderTotal,
+  //           quantity: selectedQuantity,
+  //           rest_name,
+  //           paymentMethod,
+  //           status: 'processing'
+  //         }
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error('Checkout error:', error);
+  //     Alert.alert(
+  //       'Error', 
+  //       error.response?.data?.message || 'Checkout failed. Please try again.'
+  //     );
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
   const handleBackPress = () => {
     router.back(); // Navigate back
   };
-
+  const navigation= useNavigation();
+    useEffect(() => {
+          navigation.setOptions({
+            headerShown: false,
+          });
+        }, []);
   return (
     <View style={styles.container}>
       <Head 
-        showBackOption={true}
-        label="Checkout"
-        onBackPress={handleBackPress}
+          showBackOption={true}
+          label='Check Out'
+          onBackPress={handleBackPress}
       />
-    <ScrollView>
-      {/* Food Details */}
-      <View style={styles.foodDetails}>
-        <Image source={require('./../../assets/images/greenLogo.png')} style={styles.image}/>
-        <Text style={styles.foodName}>{foodName}</Text>
-        
+      
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={Colors.primary} />
         </View>
-        <View style={styles.det}>
-            <View style={styles.infoRow}>
-            <Ionicons name="location-outline" size={18} color="#000" />
-            <Text style={styles.portionsText}>Restaurant:</Text>
-            </View>
-            <View>
-            <Text style={styles.pickupTimeText}>{rest_name}</Text>
-            </View>
-        
-      </View>
-        <View style={styles.det}>
-            <View style={styles.infoRow}>
-            <Ionicons name="restaurant-outline" size={18} color="#000" />
-            <Text style={styles.portionsText}>{selectedQuantity} portions</Text>
-            </View>
-            <View>
-            <Text style={styles.pickupTimeText}>{foodPrice * selectedQuantity} PKR</Text>
-            </View>
-        
-      </View>
-        <View style={styles.det}>
-        <View style={[styles.infoRow, styles.pickupRow]}>
-        <Ionicons name="time-outline" size={18} color="#000000" />
-        <Text style={styles.portionsText}>Pickup Time: </Text>
-      </View>
-      <View>
-       <Text style={styles.pickupTimeText}> {rest_time}</Text>
-      </View>
+      )}
 
-        </View>
-
-      {/* Payment Options */}
-      
-      <View style={styles.paymentContainer}>
-      
-      <View style={styles.pay}><Text style={styles.paymentHeader}>Select Payment Method</Text></View>
-      
-        <View style={styles.paymentOpt}>
-        <TouchableOpacity style={styles.paymentOption} onPress={()=>router.push({
-            pathname:'./../orderReceipt/OrderSuccess',
-            params:{
-                foodName, foodPrice, rest_time, selectedQuantity,rest_name
-            },
-        }
-            )}>
-        <View style={styles.forward}>
-          <Ionicons name="card-outline" size={20} color="#000" />
-          <Text style={styles.paymentText}>Credit/Debit Card</Text>
-        </View>
-        <View><MaterialIcons name="arrow-forward-ios" size={20} color="#555" /></View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.paymentOption}>
-            <View style={styles.forward}>
-                <Ionicons name="cash-outline" size={20} color="#000" />
-                <Text style={styles.paymentText}>Bank Account</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Order Summary */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Order Summary</Text>
+          <View style={styles.foodItem}>
+            <Image 
+              source={typeof foodImg === 'string' ? { uri: foodImg } : foodImg} 
+              style={styles.foodImage}
+            />
+            <View style={styles.foodInfo}>
+              <Text style={styles.foodName}>{foodName}</Text>
+              <Text style={styles.foodPrice}>{foodPrice} PKR per portion</Text>
+            </View>
           </View>
-          <View><MaterialIcons name="arrow-forward-ios" size={20} color="#555" /></View>
-
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.paymentOption} onPress={()=>router.push({
-            pathname:'./../orderReceipt/OrderSuccess',
-            params:{
-                foodName, foodPrice, rest_time, selectedQuantity,rest_name
-            },
-        }
-            )}>
-            <View style={styles.forward}>
-                <Ionicons name="wallet-outline" size={20} color="#000" />
-                <Text style={styles.paymentText}>Cash On Pickup</Text>
-            </View>
-          <View><MaterialIcons name="arrow-forward-ios" size={20} color="#555" /></View>
           
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Restaurant:</Text>
+            <Text style={styles.summaryValue}>{rest_name}</Text>
+          </View>
           
-        </TouchableOpacity>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Quantity:</Text>
+            <Text style={styles.summaryValue}>{selectedQuantity}</Text>
+          </View>
+          
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Pickup Time:</Text>
+            <Text style={styles.summaryValue}>{pickupTimeRange || 'Flexible'}</Text>
+          </View>
+          
+          <View style={[styles.summaryRow, styles.totalRow]}>
+            <Text style={styles.totalLabel}>Total:</Text>
+            <Text style={styles.totalValue}>{foodPrice * selectedQuantity} PKR</Text>
+          </View>
         </View>
-       
-      </View>
+
+        {/* Payment Methods */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Payment Method</Text>
+          
+          <TouchableOpacity 
+            style={styles.paymentOption}
+            onPress={() => handlePaymentMethod('card')}
+            disabled={isLoading}
+          >
+            <View style={styles.paymentIcon}>
+              <Ionicons name="card-outline" size={24} color={Colors.primary} />
+            </View>
+            <Text style={styles.paymentText}>Credit/Debit Card</Text>
+            <MaterialIcons name="arrow-forward-ios" size={16} color={Colors.gray} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.paymentOption}
+            onPress={() => handlePaymentMethod('bank_transfer')}
+            disabled={isLoading}
+          >
+            <View style={styles.paymentIcon}>
+              <Ionicons name="cash-outline" size={24} color={Colors.primary} />
+            </View>
+            <Text style={styles.paymentText}>Bank Transfer</Text>
+            <MaterialIcons name="arrow-forward-ios" size={16} color={Colors.gray} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.paymentOption}
+            onPress={() => handlePaymentMethod('cash_on_pickup')}
+            disabled={isLoading}
+          >
+            <View style={styles.paymentIcon}>
+              <Ionicons name="wallet-outline" size={24} color={Colors.primary} />
+            </View>
+            <Text style={styles.paymentText}>Cash on Pickup</Text>
+            <MaterialIcons name="arrow-forward-ios" size={16} color={Colors.gray} />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
@@ -122,110 +239,104 @@ export default function checkout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    //paddingHorizontal: 16,
-    //paddingTop: 20,
+    backgroundColor: Colors.white,
   },
-  pay:{
-    alignItems:'center',
-    justifyContent:'center',
-    padding:9,
-    backgroundColor:Colors.primary,
-    borderRadius:20,
-    resizeMode:'contain'
-  },
-  forward:{
-    flexDirection:'row',
-    justifyContent:"space-between"
-  },
-  det:{
-    flexDirection:'row',
-    justifyContent:'space-between',
-    alignItems:'center',
-    shadowColor: "#000", 
-  shadowOffset: {
-    width: 0, 
-    height: 1, 
-  },
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-  elevation: 2, 
-  backgroundColor: "#fff", 
-  borderRadius: 8, 
-  padding: 8, 
-  marginHorizontal: 16, 
-  marginVertical: 4, 
-  },
-  image: {
-    width: 200,
-    height: 170,
-    resizeMode: 'cover',
-  },
-  foodDetails: {
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    zIndex: 1000
   },
-  foodName: {
-    fontSize: 20,
-    fontWeight: 400,
-    color: '#333',
-    //marginBottom: 4,
+  scrollContent: {
+    paddingBottom: 20,
   },
-  infoRow: {
+  section: {
+    backgroundColor: Colors.white,
+    borderRadius: 10,
+    margin: 16,
+    padding: 16,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.dark,
+    marginBottom: 16,
+  },
+  foodItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 16,
   },
-  portionsText: {
-    fontSize: 16,
-    color: Colors.primary,
-    fontWeight:500,
-    marginLeft: 8,
+  foodImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 16,
   },
-  foodPrice: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.primary,
-    //marginTop: 10,
-  },
-  pickupRow: {
+  foodInfo: {
+    flex: 1,
     justifyContent: 'center',
   },
-  pickupTimeText: {
+  foodName: {
     fontSize: 16,
-    color: '#888',
-    marginLeft: 8,
-    fontWeight:500,
-
+    fontWeight: '600',
+    color: Colors.dark,
+    marginBottom: 4,
   },
-  paymentContainer: {
-    marginTop: 20,
-    margin:20,
-    backgroundColor: '#f6f6f6',
-    //padding: 15,
-    borderRadius: 10,
+  foodPrice: {
+    fontSize: 14,
+    color: Colors.gray,
   },
-  paymentOpt:{
-    padding:15,
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
-  paymentHeader: {
-    fontSize: 18,
-    fontWeight: '450',
-    color: Colors.White,
-   
+  summaryLabel: {
+    fontSize: 14,
+    color: Colors.gray,
+  },
+  summaryValue: {
+    fontSize: 14,
+    color: Colors.dark,
+    fontWeight: '500',
+  },
+  totalRow: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.dark,
+  },
+  totalValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.primary,
   },
   paymentOption: {
     flexDirection: 'row',
-    justifyContent:'space-between',
-    paddingVertical: 12,
+    alignItems: 'center',
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    padding:9,
-    marginBottom:17,
+    borderBottomColor: Colors.lightGray,
+  },
+  paymentIcon: {
+    width: 40,
+    alignItems: 'center',
   },
   paymentText: {
+    flex: 1,
     fontSize: 16,
-    color: '#555',
-    marginLeft: 12,
+    color: Colors.dark,
+    marginLeft: 8,
   },
 });

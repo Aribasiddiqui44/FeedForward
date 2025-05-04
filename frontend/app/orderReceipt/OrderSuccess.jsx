@@ -11,7 +11,7 @@ export default function OrderSuccess() {
         });
       }, []);
       const searchParams = useLocalSearchParams();
-      const { foodName, foodPrice, rest_time, selectedQuantity,rest_name} = searchParams;
+      const { orderId,foodName, totalPrice, pickupTimeRange, quantity,rest_name,requestId,paymentMethod} = searchParams;
 
   return (
   
@@ -23,7 +23,15 @@ export default function OrderSuccess() {
       <TouchableOpacity style={styles.btn} onPress={()=>router.push({
         pathname:'./OrderReceipt',
         params:{
-            foodName, foodPrice, rest_time, selectedQuantity,rest_name
+          orderId,
+          requestId,
+          foodName,
+          totalPrice,
+          quantity,
+          rest_name,
+          paymentMethod,
+          pickupTimeRange,
+          status:'processing'
         }})}>
         <View>
             <Text style={styles.btnText}>Generate Receipt</Text>

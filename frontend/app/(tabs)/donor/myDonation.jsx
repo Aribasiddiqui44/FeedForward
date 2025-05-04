@@ -28,7 +28,7 @@ const MyListings = () => {
       setLoading(true);
       setError(null);
       
-      const response = await apiClient.get('/api/donation/mine');
+      const response = await apiClient.get('/api/donation/my-donations');
       
       if (response.data && response.data.data) {
         // Transform the backend data to match your frontend structure
@@ -65,7 +65,7 @@ const MyListings = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await apiClient.delete(`/api/donation/remove/${id}`);
+      const response = await apiClient.delete(`/api/donation/${id}`);
       
       if (response.status === 200) {
         setDonations(prev => prev.filter(donation => donation.id !== id));

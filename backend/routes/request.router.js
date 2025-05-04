@@ -1,16 +1,49 @@
-// routes.js
 import express from 'express';
-import { verifyJWT } from '../middlewares/authentication.middleware.js';
 import {
     createRequest,
     getDonorRequests,
     handleRequest,
-    completeRequest
+    completeRequest,
+    directCheckout
 } from '../controllers/request.controller.js';
+import { verifyJWT } from '../middlewares/authentication.middleware.js';
+import { checkRole } from '../middlewares/checkRole.middleware.js';
+
 const router = express.Router();
 
-router.post('/donations/:donationId/requests', verifyJWT, createRequest);
-router.get('/requests/donor', verifyJWT, getDonorRequests);
-router.patch('/requests/:requestId/handle', verifyJWT, handleRequest);
-router.patch('/requests/:requestId/complete', verifyJWT, completeRequest);
+// Create request (receiver only)
+router.post('/donations/:donationId/requests',
+    verifyJWT,
+    checkRole('receiver'),
+    createRequest
+);
+
+// Direct checkout (receiver only)
+router.post('/donations/:donationId/direct-checkout',
+    verifyJWT,
+    checkRole('receiver'),
+    directCheckout
+);
+
+// Get donor requests (donor only)
+router.get('/donor/requests',
+    verifyJWT,
+    checkRole('donor'),
+    getDonorRequests
+);
+
+// Handle request (donor only)
+router.patch('/requests/:requestId/handle',
+    verifyJWT,
+    checkRole('donor'),
+    handleRequest
+);
+
+// Complete request (donor or receiver)
+router.patch('/requests/:requestId/complete',
+    verifyJWT,
+    checkRole(['donor', 'receiver']),
+    completeRequest
+);
+
 export default router;

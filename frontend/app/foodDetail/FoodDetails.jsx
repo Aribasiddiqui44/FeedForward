@@ -188,9 +188,11 @@ export default function FoodDetails() {
               params: {
                 foodName,
                 foodPrice,
-                rest_time,
+                pickupTimeRange,
                 selectedQuantity,
-                rest_name
+                rest_name,
+                foodImg,
+                foodId
               },
             })
           }>

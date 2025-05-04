@@ -88,7 +88,8 @@ export default function FreeMealRequest() {
 
       const response = await apiClient.post(
         `/request/donations/${foodId}/requests`,
-        payload
+        payload,
+        foodName
       );
 
       if (response.status === 201) {
