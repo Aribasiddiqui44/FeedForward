@@ -26,11 +26,12 @@ router.post('/donations/:donationId/direct-checkout',
 );
 
 // Get donor requests (donor only)
-router.get('/donor/requests',
+router.get('/donor/requests/:foodItemId',
     verifyJWT,
     checkRole('donor'),
     getDonorRequests
 );
+
 
 // Handle request (donor only)
 router.patch('/requests/:requestId/handle',

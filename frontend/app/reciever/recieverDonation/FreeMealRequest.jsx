@@ -34,7 +34,7 @@ export default function FreeMealRequest() {
   const router = useRouter();
   
   const [negotiatedPrice, setNegotiatedPrice] = useState(
-    actionType === 'negotiate' ? Number(foodPrice) * Number(selectedQuantity) : 0
+    actionType === 'negotiation' ? Number(foodPrice) * Number(selectedQuantity) : 0
   );
   const [reason, setReason] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -62,8 +62,9 @@ export default function FreeMealRequest() {
       Alert.alert('Error', 'Please provide a reason for your request');
       return;
     }
-
-    if (actionType === 'negotiate') {
+  
+    // Validate negotiate request
+    if (actionType === 'negotiation') {
       const minTotal = Number(minPricePerUnit) * Number(selectedQuantity);
       if (negotiatedPrice < minTotal) {
         Alert.alert(
@@ -73,27 +74,46 @@ export default function FreeMealRequest() {
         return;
       }
     }
-
+  
     setIsLoading(true);
     
     try {
+      // Base payload for all request types
       const payload = {
+        requestType: actionType, 
+        foodId,
         quantity: Number(selectedQuantity),
-        message: reason
+        message: reason,
+        status: 'pending', // Initial status
+        createdAt: new Date().toISOString()
       };
-
-      if (actionType === 'negotiate') {
+  
+      // Add type-specific fields
+      if (actionType === 'negotiation') {
         payload.proposedPrice = Number(negotiatedPrice);
+        payload.originalPrice = Number(foodPrice) * Number(selectedQuantity);
+      } else if (actionType === 'checkout') {
+        payload.totalAmount = Number(foodPrice) * Number(selectedQuantity);
       }
-
+  
       const response = await apiClient.post(
         `/request/donations/${foodId}/requests`,
         payload,
-        foodName
       );
-
+  
       if (response.status === 201) {
-        router.push({pathname:'/(tabs)/receiver/restaurantListing'});
+        // Show success message and navigate
+        // Alert.alert(
+        //   'Success', 
+        //   `Your ${actionType} request has been submitted successfully`,
+        //   [
+        //     { 
+        //       text: 'OK', 
+        //       onPress: () => 
+        router.push('/(tabs)/receiver/restaurantListing') 
+        //     }
+        //   ]
+        // );
       }
     } catch (error) {
       console.error('Request error:', error);
@@ -137,7 +157,7 @@ export default function FreeMealRequest() {
               <Text style={styles.infoText}>{selectedQuantity} portion{selectedQuantity !== 1 ? 's' : ''}</Text>
             </View>
             <Text style={styles.foodPrice}>
-              {actionType === 'negotiate' ? negotiatedPrice.toFixed(2) : '0.00'} PKR
+              {actionType === 'negotiation' ? negotiatedPrice.toFixed(2) : '0.00'} PKR
             </Text>
           </View>
 
@@ -149,7 +169,7 @@ export default function FreeMealRequest() {
             <Text style={styles.foodPrice}>{pickupTimeRange}</Text>
           </View>
 
-          {actionType === 'negotiate' && (
+          {actionType === 'negotiation' && (
             <View style={styles.sliderContainer}>
               <Text style={styles.sliderLabel}>Set Your Price:</Text>
               <Slider
@@ -176,7 +196,7 @@ export default function FreeMealRequest() {
 
           <View style={styles.textAreaContainer}>
             <Text style={styles.questionText}>
-              {actionType === 'negotiate'
+              {actionType === 'negotiation'
                 ? 'Why are you requesting for a price negotiation?'
                 : 'Why are you requesting for the free meal?'}
             </Text>
@@ -328,3 +348,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+

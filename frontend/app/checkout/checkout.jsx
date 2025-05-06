@@ -32,39 +32,48 @@ export default function Checkout() {
     setIsLoading(true);
     
     try {
+      // Prepare the complete checkout payload
+      let scheduledTime;
+      if (typeof pickupTimeRange === 'string') {
+        const [start, end] = pickupTimeRange.split(' - ');
+        scheduledTime = { start, end }; // Simple string format
+      } else {
+        scheduledTime = pickupTimeRange; // Already in correct format
+      }
+  
+      const payload = {
+        requestType: 'direct',
+        donation: foodId, 
+        quantity: Number(selectedQuantity),
+        paymentMethod,
+        status: 'pending',
+        pickupDetails: {
+          scheduledTime 
+        },
+        finalPrice: Number(foodPrice) * Number(selectedQuantity) 
+      };
+  
+      console.log('Submitting checkout with payload:', payload); 
+  
       const response = await apiClient.post(
         `/request/donations/${foodId}/direct-checkout`,
-        {
-          quantity: Number(selectedQuantity),
-          paymentMethod,
-          pickupTimeRange: typeof pickupTimeRange === 'string' 
-            ? { startingTime: pickupTimeRange.split(' - ')[0], endingTime: pickupTimeRange.split(' - ')[1] }
-            : pickupTimeRange
-        }
+        payload
       );
   
       // Debug logs to verify response structure
-      console.log('Full API response:', response);
-      console.log('Response data:', response.data);
-      console.log('Nested data:', response.data?.data);
+      console.log('API Response:', response.data);
   
-      // Validate response structure
       if (!response.data?.data?.order?._id || !response.data?.data?.request?._id) {
-        console.error('Missing IDs in response:', {
-          orderId: response.data?.data?.order?._id,
-          requestId: response.data?.data?.request?._id
-        });
-        throw new Error('Order or Request ID missing in server response');
+        throw new Error('Missing order or request ID in response');
       }
   
       const { order, request } = response.data.data;
       
-      console.log('Navigating with order ID:', order._id); // Verify order ID exists
       
       router.replace({
         pathname: '/orderReceipt/OrderSuccess',
         params: {
-          orderId: order._id.toString(), // Ensure it's a string
+          orderId: order._id.toString(),
           requestId: request._id.toString(),
           foodName,
           totalPrice: order.orderTotal,
@@ -72,15 +81,18 @@ export default function Checkout() {
           rest_name,
           paymentMethod,
           status: 'processing',
-          pickupTimeRange: JSON.stringify(pickupTimeRange) // Stringify if it's an object
+          pickupTimeRange: JSON.stringify(pickupTimeRange),
+          requestType: 'checkout' // Pass type to receipt screen
         }
       });
   
     } catch (error) {
       console.error('Checkout error:', error);
       Alert.alert(
-        'Error', 
-        error.message || 'Checkout failed. Please try again.'
+        'Checkout Failed', 
+        error.response?.data?.message || 
+        error.message || 
+        'Unable to complete checkout. Please try again.'
       );
     } finally {
       setIsLoading(false);

@@ -45,7 +45,9 @@ const MyListings = () => {
           images: donation.listingImages || [],
           createdAt: donation.createdAt,
           views: donation.views || 0,
-          requests: donation.requests || 0
+          requests: donation.requests?.length || 0,
+          quantity:donation.donationQuantity.quantity || 0,
+          daysListed:donation.foodExpiry.listedFor.period
         }));
         
         setDonations(formattedDonations);

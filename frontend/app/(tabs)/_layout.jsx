@@ -17,7 +17,7 @@ export default function Layout() {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
-  const { userType } = useLocalSearchParams(); // Assuming you pass userType to determine donor/receiver
+  const { userType } = useLocalSearchParams(); 
   
   useEffect(() => {
     navigation.setOptions({
@@ -73,7 +73,7 @@ export default function Layout() {
   // Menu items for donor navigation
   const donorMenuItems = [
     { label: 'My Donations', icon: 'gift', screen: '/(tabs)/donor/myDonation' },
-    { label: 'Profile', icon: 'user', screen: '/(tabs)/receiver/profile' },
+    { label: 'Profile', icon: 'user', screen: '/(tabs)/donor/profileDonor' },
     { label: 'Donation History', icon: 'clock', screen: '/donor/donationHistory' },
     { label: 'About', icon: 'info', screen: '/donor/About' },
     { label: 'Settings', icon: 'settings', screen: '/donor/Settings' },

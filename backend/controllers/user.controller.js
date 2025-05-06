@@ -245,7 +245,6 @@ const logoutUser = asyncHandler( async(req, res) => {
         )
     )
 });
-// Add to user.controller.js
 const getCurrentUser = asyncHandler(async (req, res) => {
     try {
       const user = await User.findById(req.user._id).select('-password -refreshToken');

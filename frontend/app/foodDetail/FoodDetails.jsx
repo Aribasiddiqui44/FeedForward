@@ -173,7 +173,7 @@ export default function FoodDetails() {
             pickupTimeRange,
             rest_dist,
             selectedQuantity,
-            actionType: 'negotiate',
+            actionType: 'negotiation',
 
           }
         })}>
