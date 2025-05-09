@@ -196,10 +196,10 @@ const MyRequests = () => {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.outlinedButton, { borderColor: Colors.danger }]}
+              style={[styles.outlinedButton, { borderColor: Colors.primary }]}
               onPress={() => handleRequestAction(item.id, 'decline')}
             >
-              <Text style={[styles.outlinedButtonText, { color: Colors.danger }]}>
+              <Text style={[styles.outlinedButtonText, { color: Colors.primary }]}>
                 Decline
               </Text>
             </TouchableOpacity>

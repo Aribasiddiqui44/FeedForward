@@ -58,8 +58,8 @@ export default function SignIn() {
                 pathname: '/(tabs)/donor/myDonation',
                 params: { userType: userRole } 
               });
-            } else if (userRole === 'rider') {
-                router.push('/(tabs)/receiver/restaurantListing');
+            } else if (userRole === 'volunteer') {
+                router.push('/(tabs)/volunteer/home');
             } else {
                 Alert.alert('Error', 'Unknown role');
             }

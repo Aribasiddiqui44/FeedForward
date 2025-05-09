@@ -81,7 +81,21 @@ export default function Layout() {
     { label: 'Logout', icon: 'log-out', action: logoutUser },
   ];
 
-  const menuItems = userType === 'donor' ? donorMenuItems : receiverMenuItems;
+   //for volunteer
+   const volunteerMenuItems = [
+    { label: 'Available Orders', icon: 'list', screen: '/(tabs)/volunteer/availableOrders' },
+    { label: 'Accepted Orders', icon: 'check-circle', screen: '/(tabs)/volunteer/acceptedOrders' },
+    { label: 'Profile', icon: 'user', screen: '/(tabs)/volunteer/profile' },
+    { label: 'About', icon: 'info', screen: '/volunteer/About' },
+    { label: 'Settings', icon: 'settings', screen: '/volunteer/Settings' },
+    { label: 'Support', icon: 'message-circle', screen: '/volunteer/Support' },
+    { label: 'Logout', icon: 'log-out', screen: '/Login' },
+  ];
+  
+  const menuItems =
+  userType === 'donor' ? donorMenuItems :
+  userType === 'receiver' ? receiverMenuItems :
+  volunteerMenuItems;
 
   return (
     <View style={styles.container}>
@@ -110,7 +124,7 @@ export default function Layout() {
               }}
             />
           </>
-        ) : (
+        ) : userType === 'receiver' ? (
           // Receiver tabs
           <>
             <Tabs.Screen
@@ -129,6 +143,28 @@ export default function Layout() {
               name="donation"
               options={{
                 title: 'Donations',
+              }}
+            />
+          </>
+        ) : (
+          // Volunteer tabs
+          <>
+            <Tabs.Screen
+              name="availableOrders"
+              options={{
+                title: 'Available Orders',
+              }}
+            />
+            <Tabs.Screen
+              name="acceptedOrders"
+              options={{
+                title: 'Accepted Orders',
+              }}
+            />
+            <Tabs.Screen
+              name="profile"
+              options={{
+                title: 'Profile',
               }}
             />
           </>

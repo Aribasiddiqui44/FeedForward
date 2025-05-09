@@ -1,32 +1,151 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import FoodCard from '../../../components/foodCard';
+import apiClient from '../../../utils/apiClient';
+import { Colors } from '../../../constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
+
 export default function MyOrder() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Ongoing');
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleTrackPress = (foodDetails) => {
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await apiClient.get('/order/receiver');
+      console.log('Orders API Response:', response.data);
+
+      if (response.data?.success) {
+        const formattedOrders = response.data.data.map(order => ({
+          id: order._id,
+          foodName: order.donation?.donationFoodTitle || 'Food Item',
+          description: order.donation?.donationDescription || 'No description available',
+          total: order.orderTotal ? `${order.orderTotal} PKR` : '0 PKR',
+          portions: order.items?.[0]?.quantity || 1,
+          type: order.paymentStatus === 'completed' ? 'Paid' : 'Unpaid',
+          status: order.orderStatus,
+          date: new Date(order.createdAt).toLocaleDateString(),
+          imageSource: order.donation?.listingImages?.[0] || require('../../../assets/images/greenLogo.png'),
+          donorName: order.donor?.fullName || 'Anonymous Donor',
+          donorAddress: order.pickupDetails?.address || 'Address not specified',
+          donorPhone: order.pickupDetails?.contactNumber || 'Phone not available'
+        }));
+
+        setOrders(formattedOrders);
+      }
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+      setError(err.response?.data?.message || 'Failed to fetch orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTrackPress = (order) => {
     router.push({
       pathname: '../../TrackOrder/TrackOrder',
       params: {
-        foodName: foodDetails.foodName,
-        statusTime: foodDetails.statusTime,
-        imageSource: foodDetails.imageSource,
-        portions:foodDetails.portions,
-        total:foodDetails.total,
-        date:foodDetails.date,
-        orderFrom:foodDetails.orderFrom,
-        deliverTo:foodDetails.deliverTo
+        foodName: order.foodName,
+        statusTime: 'Tracking not implemented', // You can replace with actual tracking time
+        imageSource: order.imageSource,
+        portions: order.portions,
+        total: order.total,
+        date: order.date,
+        orderFrom: order.donorName,
+        deliverTo: 'Your Location' // Or use actual delivery address
       },
     });
   };
 
-  const handleCancelPress = () => {
-    router.push('/donation');
+  const handleCancelPress = async (orderId) => {
+    try {
+      const response = await apiClient.patch(`/order/${orderId}/status`, {
+        status: 'cancelled'
+      });
+      
+      if (response.data?.success) {
+        Alert.alert('Success', 'Order cancelled successfully');
+        fetchOrders(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to cancel order');
+    }
   };
 
-  
+  const filteredOrders = orders.filter(order => {
+    if (activeTab === 'Ongoing') {
+      return order.status !== 'delivered' && order.status !== 'cancelled';
+    } else {
+      return order.status === 'delivered' || order.status === 'cancelled';
+    }
+  });
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'Ongoing' && styles.activeTab]}
+            onPress={() => setActiveTab('Ongoing')}
+          >
+            <Text style={[styles.tabText, activeTab === 'Ongoing' && styles.activeTabText]}>Ongoing</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'History' && styles.activeTab]}
+            onPress={() => setActiveTab('History')}
+          >
+            <Text style={[styles.tabText, activeTab === 'History' && styles.activeTabText]}>History</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text>Loading orders...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'Ongoing' && styles.activeTab]}
+            onPress={() => setActiveTab('Ongoing')}
+          >
+            <Text style={[styles.tabText, activeTab === 'Ongoing' && styles.activeTabText]}>Ongoing</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'History' && styles.activeTab]}
+            onPress={() => setActiveTab('History')}
+          >
+            <Text style={[styles.tabText, activeTab === 'History' && styles.activeTabText]}>History</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.emptyContainer}>
+          <Ionicons name="warning" size={60} color={Colors.danger} />
+          <Text style={styles.emptyText}>{error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={fetchOrders}
+          >
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -48,58 +167,35 @@ export default function MyOrder() {
 
       {/* Content */}
       <ScrollView>
-        {activeTab === 'Ongoing' && (
-          <>
-            <FoodCard
-              foodName="Chicken Biryani"
-              description="Delicious surplus biryani available..."
-              total="350 PKR"
-              portions="7"
-              type="Paid"
-              statusTime="11:00 pm"
-              date="29/11/2024"
-              imageSource={require('../../../assets/images/biryaniPng.png')}
-              showTrackButton={true}
-              onTrackPress={() => handleTrackPress({
-                foodName:'Chicken Karhai',
-                portions:'15',
-                statusTime:'11:00 pm',
-                imageSource:'../../../assets/images/yum.png',
-                date:'29/11/2024',
-                total:'250 PKR',
-                orderFrom:'Haveli restaurant',
-                deliverTo:'Zariya Foundation',
-              })}
-              showCancelOption={true}
-              onCancelPress={handleCancelPress}
+        {filteredOrders.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons 
+              name={activeTab === 'Ongoing' ? "fast-food" : "time"} 
+              size={60} 
+              color={Colors.primary} 
             />
+            <Text style={styles.emptyText}>
+              {activeTab === 'Ongoing' ? 'No ongoing orders' : 'No order history'}
+            </Text>
+          </View>
+        ) : (
+          filteredOrders.map(order => (
             <FoodCard
-              foodName="Chicken Karahi"
-              description="Delicious surplus karahi available..."
-              total="550 PKR"
-              portions="15"
-              type="Unpaid"
-              statusTime="11:00 pm"
-              date="29/11/2024"
-              imageSource={require('../../../assets/images/yum.png')}
-              showTrackButton={true}
-              onTrackPress={() => handleTrackPress({
-                foodName:'Chicken Karhai',
-                portions:'15',
-                statusTime:'11:00 pm',
-                imageSource:'../../../assets/images/yum.png',
-                date:'29/11/2024',
-                total:'250 PKR',
-                orderFrom:'Haveli restaurant',
-                deliverTo:'Zariya Foundation',
-              })}
-              showCancelOption={true}
-              onCancelPress={handleCancelPress}
+              key={order.id}
+              foodName={order.foodName}
+              description={order.description}
+              total={order.total}
+              portions={order.portions}
+              type={order.type}
+              statusTime={order.date}
+              date={order.date}
+              imageSource={order.imageSource}
+              showTrackButton={activeTab === 'Ongoing'}
+              onTrackPress={() => handleTrackPress(order)}
+              showCancelOption={activeTab === 'Ongoing' && order.status !== 'cancelled'}
+              onCancelPress={() => handleCancelPress(order.id)}
             />
-          </>
-        )}
-        {activeTab === 'History' && (
-          <Text style={styles.emptyText}>No history available.</Text>
+          ))
         )}
       </ScrollView>
     </View>
@@ -109,15 +205,12 @@ export default function MyOrder() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa', // Light background color
+    backgroundColor: '#f8f9fa',
     paddingHorizontal: 10,
   },
   tabContainer: {
     flexDirection: 'row',
     marginVertical: 10,
-  },
-  side:{
-    flexDirection:'column'
   },
   tab: {
     flex: 1,
@@ -127,87 +220,42 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   activeTab: {
-    borderBottomColor: '#00aa95', // Active tab color
+    borderBottomColor: Colors.primary,
   },
   tabText: {
     fontSize: 16,
     color: '#777',
   },
   activeTabText: {
-    color: '#00aa95', // Active tab text color
+    color: Colors.primary,
     fontWeight: 'bold',
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3, // For Android shadow
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  image: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  textContainer: {
+  emptyContainer: {
     flex: 1,
-  },
-  foodName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  detailText: {
-    fontSize: 14,
-    color: '#555',
-  },
-  statusBadge: {
-    fontSize: 12,
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 5,
-    overflow: 'hidden',
-  },
-  paid: {
-    backgroundColor: '#e6f9f5',
-    color: '#00aa95',
-  },
-  unpaid: {
-    backgroundColor: '#ffe6e6',
-    color: '#e63946',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  trackButton: {
-    flex: 1,
-    backgroundColor: '#00aa95',
-    borderRadius: 20,
-    paddingVertical: 10,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
-    marginTop:8,
-  },
-  
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    padding: 20,
   },
   emptyText: {
-    textAlign: 'center',
-    color: '#aaa',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 15,
+    color: Colors.dark,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  retryButton: {
     marginTop: 20,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  retryButtonText: {
+    color: Colors.white,
+    fontWeight: 'bold',
   },
 });
