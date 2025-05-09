@@ -20,14 +20,16 @@ export default function MakeDonationForm() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [minPricePerUnit, setMinPricePerUnit] = useState('');
+  const [listingType, setListingType] = useState(null); // 'donation' or 'order'
   const router = useRouter();
-  const navigation= useNavigation();
-  useEffect(() => {
-      navigation.setOptions({
-        headerShown: false,
-      });
-    }, []);
+  const navigation = useNavigation();
   
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, []);
+
   const handleQuantitySelect = (value) => {
     if (value === 'OTHER') {
       setQuantity(0);
@@ -67,6 +69,11 @@ export default function MakeDonationForm() {
       return;
     }
 
+    if (!listingType) {
+      Alert.alert('Error', 'Please select listing type (Donation or Order)');
+      return;
+    }
+
     if (images.length === 0) {
       Alert.alert('Error', 'Please upload at least one image');
       return;
@@ -80,12 +87,13 @@ export default function MakeDonationForm() {
       // Basic fields
       formData.append('donationFoodTitle', title);
       formData.append('donationDescription', description);
+      formData.append('listingType', listingType);
 
       // Nested objects
       formData.append('donationUnitPrice', JSON.stringify({
-        value: parseFloat(price) || 0,
+        value: listingType === 'donation' ? 0 : parseFloat(price) || 0,
         currency: "pkr",
-        minPricePerUnit: parseFloat(minPricePerUnit) || undefined // Only include if provided
+        minPricePerUnit: listingType === 'donation' ? undefined : parseFloat(minPricePerUnit) || undefined
       }));
 
       formData.append('donationQuantity', JSON.stringify({
@@ -110,27 +118,7 @@ export default function MakeDonationForm() {
         }
       }));
 
-      // // Image uploads
-      // await Promise.all(images.map(async (uri, index) => {
-      //   const filename = uri.split('/').pop();
-      //   const match = /\.(\w+)$/.exec(filename);
-      //   const type = match ? `image/${match[1]}` : 'image/jpeg';
-        
-      //   const response = await fetch(uri);
-      //   const blob = await response.blob();
-      //   formData.append('donationImages', blob, filename || `image_${index}.jpg`);
-      // }));
-      // const uri = images[0]; // Take the first image (or whichever one you want to send)
-      // const filename = uri.split('/').pop();
-      // const match = /\.(\w+)$/.exec(filename);
-      // const type = match ? `image/${match[1]}` : 'image/jpeg';
-
-      // const img = await fetch(uri);
-      // const blob = await img.blob();
-      // formData.append('donationImages', blob, filename || 'image.jpg');
-// Take only the first 3 images (or fewer if less than 3 exist)
       const imagesToUpload = images.slice(0, 3);
-
       await Promise.all(
         imagesToUpload.map(async (uri, index) => {
           const filename = uri.split('/').pop();
@@ -142,6 +130,7 @@ export default function MakeDonationForm() {
           formData.append('donationImages', blob, filename || `image_${index}.jpg`);
         })
       );
+
       console.log("calling api");
       const response = await apiClient.post('/api/donation/create', formData);
 
@@ -161,8 +150,46 @@ export default function MakeDonationForm() {
     <View style={styles.headContainer}>
       <Head label="Feed Forward" showBackOption={true} onBackPress={() => router.back()} />
       <ScrollView style={styles.container}>
-        <Text style={styles.header}>Food Details:</Text>
         
+        {/* Listing Type Selection */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Select type</Text>
+          <View style={styles.typeSelectionContainer}>
+            <TouchableOpacity
+              style={[
+                styles.typeButton,
+                listingType === 'donation' && styles.selectedTypeButton
+              ]}
+              onPress={() => {
+                setListingType('donation');
+                setPrice('0');
+              }}
+            >
+              <Text style={[
+                styles.typeButtonText,
+                listingType === 'donation' && styles.selectedTypeButtonText
+              ]}>
+                Donate Food
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[
+                styles.typeButton,
+                listingType === 'order' && styles.selectedTypeButton
+              ]}
+              onPress={() => setListingType('order')}
+            >
+              <Text style={[
+                styles.typeButtonText,
+                listingType === 'order' && styles.selectedTypeButtonText
+              ]}>
+                Sell Food
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Image Upload Section */}
         <View style={styles.imageSection}>
           <Text style={styles.sectionTitle}>Add up to 10 images</Text>
@@ -210,27 +237,41 @@ export default function MakeDonationForm() {
           />
         </View>
 
-        {/* Price Section */}
+        {/* Price Section - Only shown for 'order' type */}
+        {listingType === 'order' ? (
+        <>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Price (in PKR)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. 50"
+              value={price}
+              onChangeText={setPrice}
+              keyboardType="numeric"
+            />
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Minimum Acceptable Price (per kg)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. 30 (leave empty if not negotiable)"
+              value={minPricePerUnit}
+              onChangeText={setMinPricePerUnit}
+              keyboardType="numeric"
+            />
+          </View>
+        </>
+      ) : listingType === 'donation' && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Price (in PKR)</Text>
+          <Text style={styles.sectionTitle}>Price (in pkr)</Text>
           <TextInput
-            style={styles.input}
-            placeholder="e.g. 50"
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="numeric"
+            style={[styles.input, styles.disabledInput]}
+            value="0"
+            editable={false}
           />
         </View>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Minimum Acceptable Price (per kg)</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g. 30 (leave empty if not negotiable)"
-            value={minPricePerUnit}
-            onChangeText={setMinPricePerUnit}
-            keyboardType="numeric"
-          />
-        </View>
+      )}
+
 
         {/* Quantity Section */}
         <View style={styles.section}>
@@ -355,8 +396,36 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    marginBottom: 10,
     color: Colors.dark,
+    marginBottom: 15
+  },
+  typeSelectionContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  typeButton: {
+    flex: 1,
+    padding: 15,
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    borderRadius: 8,
+    padding: 15,
+    borderRadius: 25,
+    alignItems: 'center'
+  },
+  selectedTypeButton: {
+    backgroundColor: Colors.primary,
+    padding: 15,
+    borderRadius: 25,
+    alignItems: 'center'
+  },
+  typeButtonText: {
+    color: Colors.primary,
+    fontWeight: 'bold',
+  },
+  selectedTypeButtonText: {
+    color: Colors.White,
   },
   input: {
     borderWidth: 1,
@@ -469,5 +538,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  disabledInput: {
+    backgroundColor: '#e9e9e9',
+    color: '#666',
   },
 });
