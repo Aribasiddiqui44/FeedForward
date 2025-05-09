@@ -638,3 +638,55 @@ export const completeRequest = asyncHandler(async (req, res) => {
         new ApiResponse(200, request, 'Request completed successfully')
     );
 });
+
+// Get receiver requests (negotiation and free)
+export const getReceiverRequests = asyncHandler(async (req, res) => {
+    const { status } = req.query;
+    const userId = req.user._id;
+    
+    const filter = {
+        requester: userId,
+        requestType: { $in: ['negotiation', 'free'] }
+    };
+
+    if (status) {
+        filter.status = status;
+    }
+
+    const requests = await DonationRequest.find(filter)
+        .populate({
+            path: 'donation',
+            select: 'donationFoodTitle donationDescription donationUnitPrice listingImages donatedBy',
+            populate: {
+                path: 'donatedBy',
+                select: 'fullName address'
+            }
+        })
+        .sort({ createdAt: -1 });
+
+    const formattedRequests = requests.map(request => ({
+        _id: request._id,
+        requestType: request.requestType,
+        status: request.status,
+        quantity: request.quantity,
+        proposedPrice: request.proposedPrice,
+        createdAt: request.createdAt,
+        foodItem: {
+            id: request.donation._id,
+            title: request.donation.donationFoodTitle,
+            description: request.donation.donationDescription,
+            price: request.donation.donationUnitPrice,
+            images: request.donation.listingImages
+        },
+        donor: {
+            id: request.donation.donatedBy._id,
+            name: request.donation.donatedBy.fullName,
+            address: request.donation.donatedBy.address
+        },
+        messages: request.messages || []
+    }));
+
+    res.status(200).json(
+        new ApiResponse(200, formattedRequests, 'Receiver requests fetched successfully')
+    );
+});

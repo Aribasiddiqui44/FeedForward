@@ -1,102 +1,84 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+
+
 import React, { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import FoodCard from '../../../components/foodCard';
-import axios from 'axios'; 
-
-const getToken = async () => {
-  if (Platform.OS === 'web') {
-    return await AsyncStorage.getItem('accessToken');
-  } else {
-    return await SecureStore.getItemAsync('accessToken');
-  }
-};
+import apiClient from '../../../utils/apiClient';
+import { Colors } from '../../../constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function MyRequest() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Lower Price');
-  const [donations, setDonations] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const fetchDonations = async () => {
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const fetchRequests = async () => {
     try {
-      const token = await getToken();
+      setLoading(true);
+      setError(null);
+      
+      const response = await apiClient.get('/request/receiver/requests');
+      
+      if (response.data?.success) {
+        const formattedRequests = response.data.data.map(request => ({
+          id: request._id,
+          foodName: request.foodItem?.title || 'Food Item',
+          description: request.foodItem?.description || 'No description available',
+          price: request.proposedPrice ? `${request.proposedPrice} PKR` : '0 PKR',
+          originalPrice: request.foodItem?.price?.value ? 
+                        `${request.foodItem.price.value} PKR` : '0 PKR',
+          portions: request.quantity || 1,
+          status: request.status,
+          requestType: request.requestType,
+          date: new Date(request.createdAt).toLocaleDateString(),
+          imageSource: request.foodItem?.images?.[0] || require('../../../assets/images/logo.png'),
+          donorName: request.donor?.name || 'Anonymous Donor',
+          donorAddress: request.donor?.address || 'Address not specified',
+          messages: request.messages || []
+        }));
 
-      const response = await axios.get('http://localhost:8000/api/donation/receiver', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      setDonations(response.data.donations || []);
-    } catch (error) {
-      console.error("Failed to fetch receiver donations", error);
+        setRequests(formattedRequests);
+      }
+    } catch (err) {
+      console.error('Error fetching requests:', err);
+      setError(err.response?.data?.message || 'Failed to fetch requests');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchDonations();
-  }, []);
-
-  const handleTrackPress = (foodDetails) => {
-    router.push({
-      pathname: '../../TrackOrder/TrackOrder',
-      params: {
-        foodName: foodDetails.foodName,
-        statusTime: foodDetails.statusTime,
-        imageSource: foodDetails.imageSource,
-        portions: foodDetails.portions,
-        total: foodDetails.total,
-        date: foodDetails.date,
-        orderFrom: foodDetails.orderFrom,
-        deliverTo: foodDetails.deliverTo
-      },
-    });
-  };
-
-  const handleCancelPress = () => {
-    router.push('/donation');
-  };
-
-  const handleRatePress = () => {
-    router.push('/donation');
-  };
-
-  const handleCompletePress = () => {
-    router.push('/donation');
-  };
-
-  const renderDonations = (statusFilter) => {
-    const filtered = donations.filter((donation) => donation.donationStatus === statusFilter.toLowerCase());
-
-    if (filtered.length === 0) {
-      return <Text style={styles.emptyText}>No {statusFilter.toLowerCase()} donations.</Text>;
+  const handleCancelRequest = async (requestId) => {
+    try {
+      const response = await apiClient.patch(`/request/requests/${requestId}/handle`, {
+        action: 'reject'
+      });
+      
+      if (response.data?.success) {
+        Alert.alert('Success', 'Request cancelled successfully');
+        fetchRequests();
+      }
+    } catch (error) {
+      console.error('Error cancelling request:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to cancel request');
     }
-
-    return filtered.map((donation, index) => (
-      <FoodCard
-        key={donation._id || index}
-        foodName={donation.foodName}
-        description={donation.pickupInstructions}
-        total={donation.price ? `${donation.price} PKR` : '0 PKR'}
-        portions={donation.portions}
-        type={donation.donationType}
-        statusTime={donation.expiry}
-        date={new Date(donation.createdAt).toLocaleDateString()}
-        imageSource={require('../../../assets/images/biryaniPng.png')}
-        showRateOption={statusFilter === 'History'}
-        onRatePress={handleRatePress}
-        showCompleteOption={statusFilter === 'Ongoing'}
-        onCompletePress={handleCompletePress}
-      />
-    ));
   };
 
+  const filteredRequests = requests.filter(request => {
+    if (activeTab === 'Lower Price') {
+      return request.requestType === 'negotiation';
+    } else {
+      return request.requestType === 'free';
+    }
+  });
+
+  // ... rest of your component remains the same
   return (
     <View style={styles.container}>
       {/* Tabs */}
@@ -105,30 +87,58 @@ export default function MyRequest() {
           style={[styles.tab, activeTab === 'Lower Price' && styles.activeTab]}
           onPress={() => setActiveTab('Lower Price')}
         >
-          <Text style={[styles.tabText, activeTab === 'Lower Price' && styles.activeTabText]}>Lower Price</Text>
+          <Text style={[styles.tabText, activeTab === 'Lower Price' && styles.activeTabText]}>
+            Lower Price ({requests.filter(r => r.requestType === 'negotiation').length})
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'Donation' && styles.activeTab]}
           onPress={() => setActiveTab('Donation')}
         >
-          <Text style={[styles.tabText, activeTab === 'Donation' && styles.activeTabText]}>Donation</Text>
+          <Text style={[styles.tabText, activeTab === 'Donation' && styles.activeTabText]}>
+            Donation ({requests.filter(r => r.requestType === 'free').length})
+          </Text>
         </TouchableOpacity>
       </View>
 
       {/* Content */}
       <ScrollView>
-        {loading ? (
-          <ActivityIndicator size="large" color="#00aa95" />
+        {filteredRequests.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons 
+              name={activeTab === 'Lower Price' ? "pricetag" : "gift"} 
+              size={60} 
+              color={Colors.primary} 
+            />
+            <Text style={styles.emptyText}>
+              {activeTab === 'Lower Price' ? 'No price negotiation requests' : 'No free donation requests'}
+            </Text>
+          </View>
         ) : (
-          <>
-            {activeTab === 'Lower Price' && renderDonations('Ongoing')}
-            {activeTab === 'Donation' && renderDonations('Ongoing')}
-          </>
+          filteredRequests.map(request => (
+            <FoodCard
+              key={request.id}
+              foodName={request.foodName}
+              description={request.description}
+              total={request.price}
+              originalPrice={request.originalPrice}
+              portions={request.portions}
+              type={request.requestType === 'free' ? 'Free' : 'Negotiated'}
+              status={request.status}
+              date={request.date}
+              imageSource={request.imageSource}
+              showCancelOption={request.status === 'pending'}
+              onCancelPress={() => handleCancelRequest(request.id)}
+              showPriceComparison={activeTab === 'Lower Price'}
+            />
+          ))
         )}
       </ScrollView>
     </View>
   );
 }
+
+// ... keep your existing styles
 
 const styles = StyleSheet.create({
   container: {
@@ -148,20 +158,42 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   activeTab: {
-    borderBottomColor: '#00aa95',
+    borderBottomColor: Colors.primary,
   },
   tabText: {
     fontSize: 16,
     color: '#777',
   },
   activeTabText: {
-    color: '#00aa95',
+    color: Colors.primary,
     fontWeight: 'bold',
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
   emptyText: {
-    textAlign: 'center',
-    color: '#aaa',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 15,
+    color: Colors.dark,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  retryButton: {
     marginTop: 20,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  retryButtonText: {
+    color: Colors.white,
+    fontWeight: 'bold',
   },
 });

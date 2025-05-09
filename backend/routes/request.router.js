@@ -4,7 +4,8 @@ import {
     getDonorRequests,
     handleRequest,
     completeRequest,
-    directCheckout
+    directCheckout,
+    getReceiverRequests
 } from '../controllers/request.controller.js';
 import { verifyJWT } from '../middlewares/authentication.middleware.js';
 import { checkRole } from '../middlewares/checkRole.middleware.js';
@@ -45,6 +46,12 @@ router.patch('/requests/:requestId/complete',
     verifyJWT,
     checkRole(['donor', 'receiver']),
     completeRequest
+);
+
+router.get('/receiver/requests',
+    verifyJWT,
+    checkRole('receiver'),
+    getReceiverRequests
 );
 
 export default router;
