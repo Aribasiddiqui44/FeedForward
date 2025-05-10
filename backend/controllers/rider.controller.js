@@ -6,25 +6,90 @@ import ApiError from "./../utils/ApiError.js";
 import ApiResponse from "./../utils/ApiResponse.js";
 import uploadOnCloudinary from "../services/cloudinary.service.js";
 
+const uploadCNIC = asyncHandler( async(req, res) => {
+  
+    const CNIC_front_image_path = req.files?.CNIC_front[0]?.path;
+    const CNIC_back_image_path = req.files?.CNIC_back[0]?.path;
+    if ( !CNIC_front_image_path || !CNIC_back_image_path ) {
+      throw new ApiError(400, "Image not found")
+    };
+    //uploading on Cloudinary.
+    const frontCNICImg = await uploadOnCloudinary(CNIC_front_image_path);
+    const backCNICImg = await uploadOnCloudinary(CNIC_back_image_path)
+    if ( !frontCNICImg || !backCNICImg ) {
+      throw new ApiError(
+        500,
+        "Internal Server Error! Somehting went wrong when uploading files, try again."
+      );
+    return {
+      frontCNICImg,
+      backCNICImg
+    };
+
+}});
+const uploadFormPictures = async(req, res) => {
+  try {
+    const CNIC_front_image_path = req.files?.CNIC_front[0]?.path;
+    const CNIC_back_image_path = req.files?.CNIC_back[0]?.path;
+    const profile_pic_path = req.files?.profilePic[0]?.path;
+    const license_image_path = req.files?.license[0]?.path;
+
+    if( !CNIC_front_image_path || !CNIC_back_image_path || !profile_pic_path || !license_image_path) {
+      throw new ApiError(
+        401,
+        "Provide the required images."
+      );
+    };
+
+    const [cnic_front_upload, cnic_back_upload, profile_pic_upload, license_upload] = await Promise.all([
+      uploadOnCloudinary(CNIC_front_image_path),
+      uploadOnCloudinary(CNIC_back_image_path),
+      uploadOnCloudinary(profile_pic_path),
+      uploadOnCloudinary(license_image_path)
+    ]);
+    if( !cnic_front_upload || !cnic_back_upload || !profile_pic_upload || !license_upload) {
+      throw new ApiError(500, "Internal Server Error, when uploading files.")
+    };
+
+    return {
+      cnic_front_upload,
+      cnic_back_upload,
+      profile_pic_upload,
+      license_upload
+    };
+  } catch (error) {
+    throw new ApiError(500, "Internal Server Error,", error);
+  }
+};
 const postRiderForm = asyncHandler( async(req, res) => {
-    const {riderName, riderContact, contactDes, riderEmail} = req.body;
-    let checkExistingRider = await Rider.findOne({riderEmail});
+    const { riderName, reason, vehicletype } = req.body;
+    let checkExistingRider = await Rider.findOne({riderEmail: req.user.email});
     if(checkExistingRider){
         return new ApiError(401, "Bad Request ! volunteer with this email already existed.");
     };
+    const { cnic_front_upload, cnic_back_upload, profile_pic_upload, license_upload } = await uploadFormPictures(req, res);
     let newRider = new Rider({
         riderName,
-        riderEmail,
-        volunteerUserId: req.user._id
+        riderEmail: req.user.email,
+        vehicleType: vehicletype,
+        intentionToBeFeedForward: reason,
+        volunteerUserId: req.user._id,
+        cnic: {
+          front: cnic_front_upload.url,
+          back: cnic_back_upload.url
+        },
+        profilePhotoUrl: profile_pic_upload.url,
+        drivingLicenseUrl: license_upload.url
     });
     newRider.riderContacts.push({
-        contact: riderContact,
-        description: contactDes
+        phoneNumber: req.user.phoneNumber
     });
+    // add logic for uploading three images , CNIC front, CNIC back, and profile photo.
     await newRider.save();
     res.status(201, newRider,"Volunteer successfully created.")
-
 });
+
+
 const patchAddAvailableTimings = asyncHandler( async(req, res) => {
     const {riderId, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday} = req.body;
     let rider = await Rider.findById(riderId);

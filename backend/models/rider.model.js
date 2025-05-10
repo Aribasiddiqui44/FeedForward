@@ -45,10 +45,21 @@ const riderSchema = new Schema({
     pastVolunteerWork: [],
     cnic: {
         front: { type: String },
-        back: { type: String },
-        cnicNumber: { type: Number }
+        back: { type: String }
+    },
+    profilePhotoUrl: {
+        type: String
+    },
+    drivingLicenseUrl: {
+        type: String
+    },
+    vehicleType: {
+        type: String,
+        enum: ["bike", "bicycle", "car"]
+    },
+    intentionToBeFeedForward: {
+        type: String
     }
-
 }, {
     timestamps: true
 });

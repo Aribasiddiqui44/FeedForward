@@ -19,6 +19,14 @@ router.route("/cnic").patch(
         {
             name: 'CNIC_back',
             count: 1
+        },
+        {
+            name: 'profilePic',
+            count: 1
+        },
+        {
+            name: 'license',
+            count: 1
         }
     ]),
     patchCNIC
