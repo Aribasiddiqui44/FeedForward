@@ -45,7 +45,7 @@ export default function SignIn() {
                 await SecureStore.setItemAsync('accessToken', response.data.data.accessToken);
                 await SecureStore.setItemAsync('refreshToken', response.data.data.refreshToken);
             }
-            console.log(response.data.data.user)
+            // console.log(response.data.data.user)
             // Get the user's role from the response
             const userRole = response.data.data.user.userRole;
             if (userRole === 'receiver') {
