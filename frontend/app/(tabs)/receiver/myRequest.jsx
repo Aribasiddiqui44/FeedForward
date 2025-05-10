@@ -74,7 +74,7 @@ export default function MyRequest() {
     if (activeTab === 'Lower Price') {
       return request.requestType === 'negotiation';
     } else {
-      return request.requestType === 'free';
+      return request.requestType === 'free' || request.requestType === 'explicit_free';
     }
   });
 

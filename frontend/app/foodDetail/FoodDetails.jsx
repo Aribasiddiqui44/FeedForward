@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity,Alert } from 'react-native';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 import FreeMealRequest from '../reciever/recieverDonation/FreeMealRequest';
 import Head from '../../components/header';
+import apiClient from '../../utils/apiClient';
 export default function FoodDetails() {
   const router=useRouter();
   const searchParams = useLocalSearchParams();
@@ -25,7 +26,8 @@ export default function FoodDetails() {
           // Additional details
           pickupInstructions,
           pickupTimeRange,
-          expiryDate } = searchParams;
+          expiryDate,
+          listingType } = searchParams;
 
   // State to manage the selected quantity
   const [selectedQuantity, setSelectedQuantity] = useState(0);
@@ -134,72 +136,101 @@ export default function FoodDetails() {
         </View>
 
         {/* Checkout Section */}
-        <View style={styles.request}>
-        <TouchableOpacity style={styles.checkoutButton} onPress={()=>router.push({
-          pathname:'./../reciever/recieverDonation/FreeMealRequest',
-          params:{
-            foodName,
-            foodId,
-            foodPrice,
-            foodDescription,
-            foodQuantity,
-            minPricePerUnit,
-            restId,
-            foodImg,
-            rest_name,
-            //rest_time,
-            pickupTimeRange,
-            rest_dist,
-            selectedQuantity,
-            actionType: 'free',
-          }
-        })}>
-          <Text style={styles.requestText}>Request for free meals</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.checkoutButton} onPress={()=>router.push({
-          pathname:'./../reciever/recieverDonation/FreeMealRequest',
-          params:{
-            foodName,
-            foodId,
-            foodPrice,
-            foodDescription,
-            foodQuantity,
-            restId,
-            foodImg,
-            minPricePerUnit,
-            rest_name,
-            //rest_time,
-            pickupTimeRange,
-            rest_dist,
-            selectedQuantity,
-            actionType: 'negotiation',
-
-          }
-        })}>
-          <Text style={styles.requestText}>Request To Negotiate</Text>
-        </TouchableOpacity>
-        </View>
-
-
-        <TouchableOpacity style={styles.checkoutButton}onPress={() =>
-            router.push({
-              pathname: '/checkout/checkout',
-              params: {
-                foodName,
-                foodPrice,
-                pickupTimeRange,
-                selectedQuantity,
-                rest_name,
-                foodImg,
-                foodId
-              },
-            })
-          }>
-          <Text style={styles.checkoutText}>Checkout</Text>
-          <Text style={styles.checkoutText}>Total: {selectedQuantity * foodPrice} PKR</Text>
-        </TouchableOpacity>
+        {foodPrice==="Free" ? (
+            <TouchableOpacity 
+    style={styles.checkoutButton} 
+    onPress={async () => {
+      try {
+        const response = await apiClient.post(`/request/donations/${foodId}/requests`, {
+          requestType: 'explicit_free',
+        quantity: Number(selectedQuantity)
         
+        });
+        
+        // Show success message
+        Alert.alert('Success', 'Donation request submitted!');
+        
+        router.push('/(tabs)/receiver/restaurantListing') 
+      } catch (error) {
+        Alert.alert('Error', error.response?.data?.message || 'Failed to submit request');
+      }
+    }}
+  >
+    <Text style={styles.requestText}>Request for Donation</Text>
+  </TouchableOpacity>
+
+        ) : (
+          <>
+            <View style={styles.request}>
+              <TouchableOpacity 
+                style={styles.checkoutButton} 
+                onPress={() => router.push({
+                  pathname: '/reciever/recieverDonation/FreeMealRequest',
+                  params: {
+                    foodName,
+                    foodId,
+                    foodPrice,
+                    foodDescription,
+                    foodQuantity,
+                    minPricePerUnit,
+                    restId,
+                    foodImg,
+                    rest_name,
+                    pickupTimeRange,
+                    rest_dist,
+                    selectedQuantity,
+                    actionType: 'free',
+                  }
+                })}
+              >
+                <Text style={styles.requestText}>Request for free meals</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.checkoutButton]} 
+                onPress={() => router.push({
+                  pathname: '/reciever/recieverDonation/FreeMealRequest',
+                  params: {
+                    foodName,
+                    foodId,
+                    foodPrice,
+                    foodDescription,
+                    foodQuantity,
+                    restId,
+                    foodImg,
+                    minPricePerUnit,
+                    rest_name,
+                    pickupTimeRange,
+                    rest_dist,
+                    selectedQuantity,
+                    actionType: 'negotiation',
+                  }
+                })}
+              >
+                <Text style={styles.requestText}>Request To Negotiate</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity 
+              style={styles.checkoutButton}
+              onPress={() => router.push({
+                pathname: '/checkout/checkout',
+                params: {
+                  foodName,
+                  foodPrice,
+                  pickupTimeRange,
+                  selectedQuantity,
+                  rest_name,
+                  foodImg,
+                  foodId
+                },
+              })}
+            >
+              <Text style={styles.checkoutText}>Checkout</Text>
+              <Text style={styles.checkoutText}>Total: {selectedQuantity * parseFloat(foodPrice)} PKR</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </View>
   );

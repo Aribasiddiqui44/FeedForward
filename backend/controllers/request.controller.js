@@ -309,7 +309,7 @@ export const createRequest = asyncHandler(async (req, res) => {
     const donation = await validateDonation(donationId);
     
     // Validate request type
-    if (!['free', 'negotiation'].includes(requestType)) {
+    if (!['free', 'negotiation','explicit_free'].includes(requestType)) {
         throw new ApiError(400, 'Invalid request type');
     }
 
@@ -317,7 +317,23 @@ export const createRequest = asyncHandler(async (req, res) => {
     if (quantity > donation.donationQuantity.quantity) {
         throw new ApiError(400, 'Requested quantity exceeds available amount');
     }
+     if (requestType === 'explicit_free') {
+        const request = await DonationRequest.create({
+            donation: donationId,
+            requester: userId,
+            requestType: 'explicit_free',
+            quantity,
+            proposedPrice: 0,
+            status: 'pending'
+        });
 
+        donation.requests.push(request._id);
+        await donation.save();
+
+        return res.status(201).json(
+            new ApiResponse(201, request, 'Free donation request submitted')
+        );
+    }
     // Validate price for negotiation requests
     if (requestType === 'negotiation') {
         if (!proposedPrice) {
@@ -336,7 +352,7 @@ export const createRequest = asyncHandler(async (req, res) => {
         requester: userId,
         requestType,
         quantity,
-        proposedPrice: requestType === 'free' ? 0 : proposedPrice,
+        proposedPrice: requestType === 'free' || requestType==='explicit_free' ? 0 : proposedPrice,
         status: 'pending',
         negotiationHistory: requestType === 'negotiation' ? [{
             type: 'offer',

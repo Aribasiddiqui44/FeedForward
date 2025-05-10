@@ -60,6 +60,10 @@ const donationSchema = new Schema({
         type: String,
         enum: ["Hadiya", "Sadqa"] // have to add description as well of each.
     },
+    allowFreeRequests: {
+        type: Boolean,
+        default: false 
+    },
     listingStatus: {
         type: String,
         enum: ["open", "closed", "completed", "cancelled"],

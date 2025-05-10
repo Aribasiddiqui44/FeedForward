@@ -33,46 +33,51 @@ export default function RestaurantListing() {
     fetchDonations();
   }, []);
 
-  const transformDonationsToRestaurantData = (donations) => {
-    if (!Array.isArray(donations)) return [];
+// Update the transformDonationsToRestaurantData function in restaurantListing.jsx
+const transformDonationsToRestaurantData = (donations) => {
+  if (!Array.isArray(donations)) return [];
+  
+  const restaurantsMap = new Map();
+  
+  donations.forEach(donation => {
+    const donor = donation.donatedBy || {};
+    const restaurantId = donor._id || 'anonymous';
     
-    const restaurantsMap = new Map();
-    
-    donations.forEach(donation => {
-      const donor = donation.donatedBy || {};
-      const restaurantId = donor._id || 'anonymous';
-      
-      if (!restaurantsMap.has(restaurantId)) {
-        restaurantsMap.set(restaurantId, {
-          id: restaurantId,
-          name: donor.fullName || 'Anonymous Donor',
-          phone: donor.phoneNumber || 'N/A',
-          distance: 1,
-          time: formatTimeRange(donation.donationInitialPickupTimeRange),
-          foodItems: []
-        });
-      }
-      
-      const restaurant = restaurantsMap.get(restaurantId);
-      restaurant.foodItems.push({
-        id: donation._id,
-        name: donation.donationFoodTitle || 'Unnamed Donation',
-        quantity: donation.donationQuantity?.quantity || 1,
-        price: donation.donationUnitPrice?.value || 0,
-        // Add min price here
-        minPricePerUnit: donation.donationUnitPrice?.minPricePerUnit || 0,
-        description: donation.donationDescription || 'No description provided',
-        pickupInstructions: donation.donationPickupInstructions || [],
-        pickupTimeRange: donation.donationInitialPickupTimeRange,
-        expiryDate: donation.foodExpiry?.bestBefore || 'N/A',
-        image: donation.listingImages?.[0] || require('../../../assets/images/greenLogo.png')
+    if (!restaurantsMap.has(restaurantId)) {
+      restaurantsMap.set(restaurantId, {
+        id: restaurantId,
+        name: donor.fullName || 'Anonymous Donor',
+        phone: donor.phoneNumber || 'N/A',
+        distance: 1,
+        time: formatTimeRange(donation.donationInitialPickupTimeRange),
+        foodItems: []
       });
-      
-      // Update restaurant's time logic...
-    });
+    }
     
-    return Array.from(restaurantsMap.values());
-  };
+    const restaurant = restaurantsMap.get(restaurantId);
+    const isFree = donation.listingType === "donation" || donation.donationUnitPrice?.value===0;
+    const hasNegotiation = donation.donationUnitPrice?.minPricePerUnit > 0;
+    
+    restaurant.foodItems.push({
+      id: donation._id,
+      name: donation.donationFoodTitle || 'Unnamed Donation',
+      quantity: donation.donationQuantity?.quantity || 1,
+      price: isFree ? 'Free' : donation.donationUnitPrice?.value || 0,
+      priceValue: donation.donationUnitPrice?.value || 0, 
+      minPricePerUnit: donation.donationUnitPrice?.minPricePerUnit || 0,
+      description: donation.donationDescription || 'No description provided',
+      pickupInstructions: donation.donationPickupInstructions || [],
+      pickupTimeRange: donation.donationInitialPickupTimeRange,
+      expiryDate: donation.foodExpiry?.bestBefore || 'N/A',
+      image: donation.listingImages?.[0] || require('../../../assets/images/greenLogo.png'),
+      isFree,
+      hasNegotiation,
+      listingType: donation.listingType || 'donation'
+    });
+  });
+  
+  return Array.from(restaurantsMap.values());
+};
   const formatTimeRange = (timeRange) => {
     if (!timeRange) return 'Flexible';
     return `${timeRange.startingTime || ''} - ${timeRange.endingTime || ''}`.trim() || 'Flexible';
@@ -96,6 +101,7 @@ export default function RestaurantListing() {
           foodQuantity: foodItem.quantity,
           foodImg: foodItem.image,
           minPricePerUnit: foodItem.minPricePerUnit || 0,
+          listingType:foodItem.listingType,
           // Additional details
           pickupInstructions: foodItem.pickupInstructions?.join(', ') || 'None',
           pickupTimeRange: formatTimeRange(foodItem.pickupTimeRange),
