@@ -662,7 +662,7 @@ export const getReceiverRequests = asyncHandler(async (req, res) => {
     
     const filter = {
         requester: userId,
-        requestType: { $in: ['negotiation', 'free'] }
+        requestType: { $in: ['negotiation', 'free','explicit_free'] }
     };
 
     if (status) {

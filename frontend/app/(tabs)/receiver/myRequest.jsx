@@ -78,7 +78,6 @@ export default function MyRequest() {
     }
   });
 
-  // ... rest of your component remains the same
   return (
     <View style={styles.container}>
       {/* Tabs */}
