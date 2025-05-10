@@ -143,7 +143,7 @@ export default function Profile() {
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate('Messages')}
+          onPress={() => router.push('./../donor/messages')}
         >
           <View style={styles.iconContainer}>
             <MaterialIcons name="email" size={24} color={Colors.primary} />

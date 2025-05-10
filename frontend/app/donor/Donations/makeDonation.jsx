@@ -169,7 +169,7 @@ export default function MakeDonationForm() {
                 styles.typeButtonText,
                 listingType === 'donation' && styles.selectedTypeButtonText
               ]}>
-                Donate Food
+                Donation
               </Text>
             </TouchableOpacity>
             
@@ -184,7 +184,7 @@ export default function MakeDonationForm() {
                 styles.typeButtonText,
                 listingType === 'order' && styles.selectedTypeButtonText
               ]}>
-                Sell Food
+                Order
               </Text>
             </TouchableOpacity>
           </View>

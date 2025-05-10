@@ -11,6 +11,7 @@ export const Colors = {
   Grey:'#7d7d7d',
   primary:'#14a88b',
   danger:'#ff0000',
+  lightGray:'#e8e9eb',
   light: {
     text: '#11181C',
     background: '#fff',
