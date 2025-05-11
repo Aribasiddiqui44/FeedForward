@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import FoodCard from '../../../components/foodCard';
 import apiClient from '../../../utils/apiClient';
@@ -64,22 +64,7 @@ const filteredRequests = requests.filter(request => {
   }
 });
 
-  const handleCancelRequest = async (requestId) => {
-    try {
-      const response = await apiClient.patch(`/request/requests/${requestId}/handle`, {
-        action: 'reject'
-      });
-      
-      if (response.data?.success) {
-        Alert.alert('Success', 'Request cancelled successfully');
-        fetchRequests();
-      }
-    } catch (error) {
-      console.error('Error cancelling request:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to cancel request');
-    }
-  };
-  
+
 
 
   return (
@@ -130,8 +115,7 @@ const filteredRequests = requests.filter(request => {
               status={request.status}
               date={request.date}
               imageSource={request.imageSource}
-              showCancelOption={request.status === 'pending'}
-              onCancelPress={() => handleCancelRequest(request.id)}
+              
               showPriceComparison={activeTab === 'Lower Price'}
               onPress={request.status === 'accepted' ? () => {
     router.push({
