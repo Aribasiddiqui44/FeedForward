@@ -1,3 +1,11 @@
+// import React, { useState, useEffect } from 'react';
+// import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
+// import { useRouter } from 'expo-router';
+// import FoodCard from '../../../components/foodCard';
+// import apiClient from '../../../utils/apiClient';
+// import { Colors } from '../../../constants/Colors';
+// import { Ionicons } from '@expo/vector-icons';
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -22,9 +30,8 @@ export default function MyDonation() {
       setLoading(true);
       setError(null);
       
-      const response = await apiClient.get('/request/receiver/requests', {
-        params: { requestType: 'explicit_free' }
-      });
+      // Add query parameter to only fetch explicit_free requests
+      const response = await apiClient.get('/request/receiver/requests');
       
       if (response.data?.success) {
         const formattedRequests = response.data.data.map(request => ({
@@ -41,8 +48,8 @@ export default function MyDonation() {
           imageSource: request.foodItem?.images?.[0] || require('../../../assets/images/logo.png'),
           donorName: request.donor?.name || 'Anonymous Donor',
           donorAddress: request.donor?.address || 'Address not specified',
-          messages: request.messages || []
-          
+          messages: request.messages || [],
+          pickupTime: request.pickupDetails?.scheduledTime
         }));
 
         setRequests(formattedRequests);
@@ -71,11 +78,12 @@ export default function MyDonation() {
     }
   };
 
+  // Filter requests by status and ensure they're explicit_free
   const filteredRequests = requests.filter(request => {
     if (activeTab === 'Ongoing') {
-      return request.status !== 'completed' && request.status !== 'rejected';
+      return request.status !== 'completed' && request.status !== 'rejected' && request.requestType==='explicit_free';
     } else {
-      return request.status === 'completed';
+      return request.status === 'completed'&& request.requestType==='explicit_free';
     }
   });
 
@@ -110,7 +118,7 @@ export default function MyDonation() {
           onPress={() => setActiveTab('Ongoing')}
         >
           <Text style={[styles.tabText, activeTab === 'Ongoing' && styles.activeTabText]}>
-            Ongoing ({requests.filter(r => r.status !== 'completed' && r.status !== 'rejected').length})
+            Ongoing 
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -118,7 +126,7 @@ export default function MyDonation() {
           onPress={() => setActiveTab('History')}
         >
           <Text style={[styles.tabText, activeTab === 'History' && styles.activeTabText]}>
-            History ({requests.filter(r => r.status === 'completed').length})
+            History 
           </Text>
         </TouchableOpacity>
       </View>
@@ -133,7 +141,7 @@ export default function MyDonation() {
               color={Colors.primary} 
             />
             <Text style={styles.emptyText}>
-              {activeTab === 'Ongoing' ? 'No ongoing free donations' : 'No history of free donations'}
+              {activeTab === 'Ongoing' ? 'No ongoing explicit free donations' : 'No history of explicit free donations'}
             </Text>
           </View>
         ) : (
@@ -162,6 +170,8 @@ export default function MyDonation() {
     </View>
   );
 }
+
+// ... keep your existing styles ...
 
 const styles = StyleSheet.create({
   container: {

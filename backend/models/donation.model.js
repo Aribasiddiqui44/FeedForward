@@ -54,7 +54,7 @@ const donationSchema = new Schema({
     listingType: {
         type: String,
         // donation / selling
-        enum: ["donation", "selling"]
+        enum: ["donation", "order"]
     },
     donationType: {
         type: String,

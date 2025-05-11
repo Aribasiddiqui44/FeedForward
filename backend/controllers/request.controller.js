@@ -317,23 +317,23 @@ export const createRequest = asyncHandler(async (req, res) => {
     if (quantity > donation.donationQuantity.quantity) {
         throw new ApiError(400, 'Requested quantity exceeds available amount');
     }
-     if (requestType === 'explicit_free') {
-        const request = await DonationRequest.create({
-            donation: donationId,
-            requester: userId,
-            requestType: 'explicit_free',
-            quantity,
-            proposedPrice: 0,
-            status: 'pending'
-        });
+    //  if (requestType === 'explicit_free') {
+    //     const request = await DonationRequest.create({
+    //         donation: donationId,
+    //         requester: userId,
+    //         requestType: 'explicit_free',
+    //         quantity,
+    //         proposedPrice: 0,
+    //         status: 'pending'
+    //     });
 
-        donation.requests.push(request._id);
-        await donation.save();
+    //     donation.requests.push(request._id);
+    //     await donation.save();
 
-        return res.status(201).json(
-            new ApiResponse(201, request, 'Free donation request submitted')
-        );
-    }
+    //     return res.status(201).json(
+    //         new ApiResponse(201, request, 'Free donation request submitted')
+    //     );
+    // }
     // Validate price for negotiation requests
     if (requestType === 'negotiation') {
         if (!proposedPrice) {
@@ -352,6 +352,7 @@ export const createRequest = asyncHandler(async (req, res) => {
         requester: userId,
         requestType,
         quantity,
+        
         proposedPrice: requestType === 'free' || requestType==='explicit_free' ? 0 : proposedPrice,
         status: 'pending',
         negotiationHistory: requestType === 'negotiation' ? [{
@@ -656,18 +657,68 @@ export const completeRequest = asyncHandler(async (req, res) => {
 });
 
 // Get receiver requests (negotiation and free)
+// export const getReceiverRequests = asyncHandler(async (req, res) => {
+//     const { status } = req.query;
+//     const userId = req.user._id;
+    
+//     const filter = {
+//         requester: userId,
+//         requestType: { $in: ['negotiation', 'free','explicit_free'] }
+//     };
+
+//     if (status) {
+//         filter.status = status;
+//     }
+
+//     const requests = await DonationRequest.find(filter)
+//         .populate({
+//             path: 'donation',
+//             select: 'donationFoodTitle donationDescription donationUnitPrice listingImages donatedBy',
+//             populate: {
+//                 path: 'donatedBy',
+//                 select: 'fullName address'
+//             }
+//         })
+//         .sort({ createdAt: -1 });
+
+//     const formattedRequests = requests.map(request => ({
+//         _id: request._id,
+//         requestType: request.requestType,
+//         status: request.status,
+//         quantity: request.quantity,
+//         proposedPrice: request.proposedPrice,
+//         createdAt: request.createdAt,
+//         foodItem: {
+//             id: request.donation._id,
+//             title: request.donation.donationFoodTitle,
+//             description: request.donation.donationDescription,
+//             price: request.donation.donationUnitPrice,
+//             images: request.donation.listingImages
+//         },
+//         donor: {
+//             id: request.donation.donatedBy._id,
+//             name: request.donation.donatedBy.fullName,
+//             address: request.donation.donatedBy.address
+//         },
+//         messages: request.messages || []
+//     }));
+
+//     res.status(200).json(
+//         new ApiResponse(200, formattedRequests, 'Receiver requests fetched successfully')
+//     );
+// });
+// Get receiver requests with filtering by type
 export const getReceiverRequests = asyncHandler(async (req, res) => {
-    const { status } = req.query;
+    const { type } = req.query; // 'negotiation' or 'donation'
     const userId = req.user._id;
     
-    const filter = {
-        requester: userId,
-        requestType: { $in: ['negotiation', 'free','explicit_free'] }
-    };
+    const filter = { requester: userId };
 
-    if (status) {
-        filter.status = status;
-    }
+    if (type === 'donation') {
+        filter.requestType = { $in: ['free', 'explicit_free'] };
+    } else if (type === 'negotiation') {
+        filter.requestType = 'negotiation';
+    } 
 
     const requests = await DonationRequest.find(filter)
         .populate({
@@ -686,6 +737,7 @@ export const getReceiverRequests = asyncHandler(async (req, res) => {
         status: request.status,
         quantity: request.quantity,
         proposedPrice: request.proposedPrice,
+        originalPrice: request.donation.donationUnitPrice.value, // Added for frontend
         createdAt: request.createdAt,
         foodItem: {
             id: request.donation._id,
@@ -699,10 +751,11 @@ export const getReceiverRequests = asyncHandler(async (req, res) => {
             name: request.donation.donatedBy.fullName,
             address: request.donation.donatedBy.address
         },
-        messages: request.messages || []
+        messages: request.messages || [],
+        negotiationHistory: request.negotiationHistory || []
     }));
 
     res.status(200).json(
-        new ApiResponse(200, formattedRequests, 'Receiver requests fetched successfully')
+        new ApiResponse(200, formattedRequests, 'Requests fetched successfully')
     );
 });

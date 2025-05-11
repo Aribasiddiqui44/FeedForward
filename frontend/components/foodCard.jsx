@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { TouchableOpacity } from "react-native";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { TouchableOpacity, View, Text, Image, StyleSheet } from "react-native";
 import { Colors } from "../constants/Colors";
 
 export default function FoodCard({
@@ -16,23 +15,27 @@ export default function FoodCard({
   showCancelOption,
   showRateOption,
   showCompleteOption,
+  showCheckoutOption,
   onTrackPress,
   onCancelPress,
   onCompletePress,
   onRatePress,
+  onCheckoutPress,
+  onPress, // New prop for card press
 }) {
   // States for button presses
   const [trackPressed, setTrackPressed] = useState(false);
   const [cancelPressed, setCancelPressed] = useState(false);
   const [ratePressed, setRatePressed] = useState(false);
   const [completePressed, setCompletePressed] = useState(false);
+  const [checkoutPressed, setCheckoutPressed] = useState(false);
 
-  return (
-    <View style={styles.headContainer}>
+  // Card content component to avoid duplication
+  const CardContent = () => (
+    <>
       <View style={styles.cardContainer}>
         <Image source={imageSource} style={styles.foodImage} />
         <View style={styles.detailsContainer}>
-          {/* Food Name and Type */}
           <View style={styles.header}>
             <Text style={styles.foodName}>{foodName}</Text>
             <Text style={[styles.type, type === "Free" && styles.freeType]}>
@@ -40,7 +43,6 @@ export default function FoodCard({
             </Text>
           </View>
 
-          {/* Description */}
           <Text style={styles.description} numberOfLines={1}>
             {description}
           </Text>
@@ -55,6 +57,31 @@ export default function FoodCard({
         </View>
       </View>
       <View style={styles.btnContainer}>
+        {showCheckoutOption && (
+          <TouchableOpacity
+            style={[
+              styles.btn,
+              checkoutPressed
+                ? { backgroundColor: Colors.primary }
+                : { backgroundColor: Colors.White, borderColor: Colors.primary, borderWidth: 1 },
+            ]}
+            onPress={() => {
+              setCheckoutPressed(!checkoutPressed);
+              onCheckoutPress?.();
+            }}
+          >
+            <Text
+              style={[
+                styles.btnText,
+                checkoutPressed
+                  ? { color: Colors.White }
+                  : { color: Colors.primary },
+              ]}
+            >
+              Checkout
+            </Text>
+          </TouchableOpacity>
+        )}
         {showTrackButton && (
           <TouchableOpacity
             style={[
@@ -156,6 +183,18 @@ export default function FoodCard({
           </TouchableOpacity>
         )}
       </View>
+    </>
+  );
+
+  return (
+    <View style={styles.headContainer}>
+      {onPress ? (
+        <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+          <CardContent />
+        </TouchableOpacity>
+      ) : (
+        <CardContent />
+      )}
     </View>
   );
 }
@@ -167,8 +206,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     margin: 10,
-    elevation: 3, // For shadow on Android
-    shadowColor: "#000", // For shadow on iOS
+    elevation: 3,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1,
@@ -199,10 +238,10 @@ const styles = StyleSheet.create({
   type: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#009688", // Default color for "Paid"
+    color: "#009688",
   },
   freeType: {
-    color: "#4CAF50", // Different color for "Free"
+    color: "#4CAF50",
   },
   description: {
     fontSize: 12,
@@ -223,24 +262,26 @@ const styles = StyleSheet.create({
   },
   status: {
     fontSize: 12,
-    color: "#009688", // Green for statuses like "Pick up time"
+    color: "#009688",
     marginTop: 5,
   },
   btnContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    flexWrap: 'wrap',
   },
   btn: {
     borderRadius: 20,
-    width: 150,
+    minWidth: 120,
     height: 37,
     alignItems: "center",
     justifyContent: "center",
-    margin: 15,
-    marginTop: 24,
+    marginVertical: 5,
+    marginHorizontal: 5,
+    paddingHorizontal: 10,
   },
   btnText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "400",
   },
 });

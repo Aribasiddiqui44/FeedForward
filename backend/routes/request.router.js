@@ -37,14 +37,14 @@ router.get('/donor/requests/:foodItemId',
 // Handle request (donor only)
 router.patch('/requests/:requestId/handle',
     verifyJWT,
-    checkRole('donor'),
+    checkRole(['donor','receiver']),
     handleRequest
 );
 
 // Complete request (donor or receiver)
 router.patch('/requests/:requestId/complete',
     verifyJWT,
-    checkRole(['donor', 'receiver']),
+    checkRole(['donor']),
     completeRequest
 );
 
