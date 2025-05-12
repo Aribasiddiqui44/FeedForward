@@ -3,64 +3,89 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 
-export default function onBoardOne() {
+export default function OnBoardFour() {
   const router = useRouter();
   const navigation = useNavigation();
 
-  
-    // Safe navigation handling
-    const safeNavigate = (path) => {
-      if (router) {
-        router.push(path);
+  // Safe navigation handling
+  const safeNavigate = (path) => {
+    if (router) {
+      router.push(path);
+    }
+  };
+
+  // Handle header visibility safely
+  useEffect(() => {
+    if (!navigation?.setOptions) return;
+
+    navigation.setOptions({ headerShown: false });
+
+    return () => {
+      if (navigation?.setOptions) {
+        navigation.setOptions({ headerShown: true });
       }
     };
-  
-    // Handle header visibility safely
-    useEffect(() => {
-      if (!navigation?.setOptions) return;
-  
-      navigation.setOptions({ headerShown: false });
-  
-      return () => {
-        if (navigation?.setOptions) {
-          navigation.setOptions({ headerShown: true });
-        }
-      };
-    }, [navigation]);
-  
-    const handleNextPress = () => safeNavigate('./onBoardThree');
-    const handleSkipPress = () => safeNavigate('auth/sign-in');
-  
+  }, [navigation]);
+
+  const handleNextPress = () => safeNavigate('./onBoardThree');
+  const handleSkipPress = () => safeNavigate('auth/sign-in');
 
   return (
     <View style={styles.container}>
-      {/* Image Section */}
       <View style={styles.imageContainer}>
-        <Image
+        <Image 
           source={require('./../../assets/images/on4.png')} 
           style={styles.image}
+          resizeMode="contain"
+          accessibilityLabel="Food saving illustration"
         />
       </View>
 
-      {/* Text Section */}
       <Text style={styles.quoteText}>
-      {'\n'}<Text style={styles.highlight}>Save Quality Food from Becoming Waste {'\n'}</Text>Feed Forward helps you save quality food from restaurants, cafes, and factories before it becomes waste.
-        
+        {'\n'}
+        <Text style={styles.highlight}>
+          Save Quality Food from Becoming Waste {'\n'}
+        </Text>
+        Feed Forward helps you save quality food from restaurants, cafes, and factories before it becomes waste.
       </Text>
 
-      {/* Pagination Dots */}
-      <View style={styles.paginationContainer}>
-        <View style={[styles.dot, { backgroundColor: '#00aa95' }]} />
-        <View style={[styles.dot, { backgroundColor: '#d4f7f1' }]} />
-        <View style={[styles.dot, { backgroundColor: '#d4f7f1' }]} />
-        <View style={[styles.dot, { backgroundColor: '#d4f7f1' }]} />
+      <View style={styles.paginationContainer} accessibilityRole="tablist">
+        <View 
+          style={[styles.dot, { backgroundColor: '#d4f7f1' }]} 
+          accessibilityRole="tab"
+          accessibilityLabel="Step 1"
+        />
+        <View 
+          style={[styles.dot, { backgroundColor: '#d4f7f1' }]} 
+          accessibilityRole="tab"
+          accessibilityLabel="Step 2"
+        />
+        <View 
+          style={[styles.dot, { backgroundColor: '#00aa95' }]} 
+          accessibilityRole="tab"
+          accessibilityLabel="Current step"
+        />
+        <View 
+          style={[styles.dot, { backgroundColor: '#d4f7f1' }]} 
+          accessibilityRole="tab"
+          accessibilityLabel="Step 4"
+        />
       </View>
 
-      {/* Buttons */}
-      <TouchableOpacity style={styles.nextButton} onPress={handleNextPress}>
+      <TouchableOpacity 
+        style={styles.nextButton} 
+        onPress={handleNextPress}
+        accessibilityRole="button"
+        accessibilityLabel="Go to next screen"
+      >
         <Text style={styles.nextButtonText}>NEXT</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleSkipPress}>
+      
+      <TouchableOpacity 
+        onPress={handleSkipPress}
+        accessibilityRole="button"
+        accessibilityLabel="Skip onboarding"
+      >
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
     </View>
@@ -78,7 +103,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height:'40%',
+    height: '40%',
     alignItems: 'center',
     marginTop: 50,
   },

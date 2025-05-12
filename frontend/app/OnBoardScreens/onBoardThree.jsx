@@ -3,63 +3,82 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 
-export default function onBoardTwo() {
+export default function OnBoardThree() {
   const router = useRouter();
   const navigation = useNavigation();
 
-  
-    // Safe navigation handling
-    const safeNavigate = (path) => {
-      if (router) {
-        router.push(path);
+  // Safe navigation handling
+  const safeNavigate = (path) => {
+    if (router) {
+      router.push(path);
+    }
+  };
+
+  // Handle header visibility safely
+  useEffect(() => {
+    if (!navigation?.setOptions) return;
+
+    navigation.setOptions({ headerShown: false });
+
+    return () => {
+      if (navigation?.setOptions) {
+        navigation.setOptions({ headerShown: true });
       }
     };
-  
-    // Handle header visibility safely
-    useEffect(() => {
-      if (!navigation?.setOptions) return;
-  
-      navigation.setOptions({ headerShown: false });
-  
-      return () => {
-        if (navigation?.setOptions) {
-          navigation.setOptions({ headerShown: true });
-        }
-      };
-    }, [navigation]);
-  
-    const handleNextPress = () => safeNavigate('auth/sign-in');
+  }, [navigation]);
 
+  const handleNextPress = () => safeNavigate('auth/sign-in');
 
   return (
     <View style={styles.container}>
-      {/* Image Section */}
       <View style={styles.imageContainer}>
-        <Image
+        <Image 
           source={require('./../../assets/images/on3.png')}
           style={styles.image}
+          resizeMode="contain"
+          accessibilityLabel="Food donation notifications illustration"
         />
       </View>
 
-      {/* Text Section */}
       <Text style={styles.quoteText}>
-        {'\n'}<Text style={styles.highlight}>Stay Updated with Nearby Offers</Text>{'\n'}
+        {'\n'}
+        <Text style={styles.highlight}>
+          Stay Updated with Nearby Offers {'\n'}
+        </Text>
         Get notified about food donation offers near you! Stay informed on available donations from local restaurants and businesses, making it easier to act fast and help your community.
       </Text>
 
-      {/* Pagination Dots */}
-      <View style={styles.paginationContainer}>
-        <View style={[styles.dot, { backgroundColor: '#00aa95' }]} />
-        <View style={[styles.dot, { backgroundColor: '#d4f7f1' }]} />
-        <View style={[styles.dot, { backgroundColor: '#d4f7f1' }]} />
-        <View style={[styles.dot, { backgroundColor: '#d4f7f1' }]} />
+      <View style={styles.paginationContainer} accessibilityRole="tablist">
+        <View 
+          style={[styles.dot, { backgroundColor: '#d4f7f1' }]} 
+          accessibilityRole="tab"
+          accessibilityLabel="Step 1"
+        />
+        <View 
+          style={[styles.dot, { backgroundColor: '#d4f7f1' }]} 
+          accessibilityRole="tab"
+          accessibilityLabel="Step2"
+        />
+        <View 
+          style={[styles.dot, { backgroundColor: '#d4f7f1' }]} 
+          accessibilityRole="tab"
+          accessibilityLabel="Step 3"
+        />
+        <View 
+          style={[styles.dot, { backgroundColor: '#00aa95' }]} 
+          accessibilityRole="tab"
+          accessibilityLabel="Current step"
+        />
       </View>
 
-      {/* Buttons */}
-      <TouchableOpacity style={styles.nextButton} onPress={handleNextPress}>
-        <Text style={styles.nextButtonText}>NEXT</Text>
+      <TouchableOpacity 
+        style={styles.nextButton} 
+        onPress={handleNextPress}
+        accessibilityRole="button"
+        accessibilityLabel="Next"
+      >
+        <Text style={styles.nextButtonText}>Next</Text>
       </TouchableOpacity>
-      
     </View>
   );
 }
@@ -75,12 +94,13 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
+    height: '40%',
     alignItems: 'center',
     marginTop: 50,
   },
   image: {
     width: 307,
-    height: 290,
+    height: '100%',
     borderRadius: 15,
   },
   quoteText: {
