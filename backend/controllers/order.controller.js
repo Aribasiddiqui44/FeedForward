@@ -5,7 +5,7 @@ import { User } from '../models/user.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
-
+import mongoose from 'mongoose';
 // Get orders for donor
 export const getDonorOrders = asyncHandler(async (req, res) => {
     const { status } = req.query;
@@ -175,4 +175,94 @@ export const markOrderDelivered = asyncHandler(async (req, res) => {
     });
 
     res.status(200).json(new ApiResponse(200, order, 'Order marked as delivered'));
+});
+
+// Cancel order by receiver with single click (no message required)
+export const cancelOrderByReceiver = asyncHandler(async (req, res) => {
+    const { orderId } = req.params;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        // Find the order with related documents in transaction
+        const order = await Order.findById(orderId)
+            .populate('donation')
+            .populate('request')
+            .session(session);
+
+        if (!order) {
+            throw new ApiError(404, 'Order not found');
+        }
+
+        // Verify the requesting user is the receiver
+        if (order.receiver.toString() !== req.user._id.toString()) {
+            throw new ApiError(403, 'Not authorized to cancel this order');
+        }
+
+        // Check if order can be cancelled
+        const cancellableStatuses = ['processing', 'ready_for_pickup'];
+        if (!cancellableStatuses.includes(order.orderStatus)) {
+            throw new ApiError(400, `Order can only be cancelled in statuses: ${cancellableStatuses.join(', ')}`);
+        }
+
+        // Update order status
+        order.orderStatus = 'cancelled';
+        order.cancellationReason = 'Cancelled by receiver';
+        order.cancelledBy = 'receiver';
+        order.cancelledAt = new Date();
+        order.tracking.push({
+            status: 'cancelled',
+            message: 'Order cancelled by receiver',
+            updatedBy: 'receiver',
+            timestamp: new Date()
+        });
+
+        // Update related donation if exists
+        if (order.donation) {
+            // Get the total quantity from all items in the order
+            const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+            
+            // Restore quantity - using the correct path from your schema
+            order.donation.donationQuantity.quantity += totalQuantity;
+            
+            // Reopen donation if it was closed
+            if (order.donation.listingStatus === 'closed') {
+                order.donation.listingStatus = 'open';
+            }
+            
+            // Only remove order reference if orders field exists and is an array
+            if (order.donation.orders && Array.isArray(order.donation.orders)) {
+                order.donation.orders = order.donation.orders.filter(
+                    orderRef => orderRef.toString() !== order._id.toString()
+                );
+            }
+            
+            await order.donation.save({ session });
+        }
+
+        // Update related request if exists
+        if (order.request) {
+            order.request.status = 'cancelled';
+            order.request.cancelledAt = new Date();
+            await order.request.save({ session });
+        }
+
+        // Save the updated order
+        await order.save({ session });
+
+        // Commit the transaction
+        await session.commitTransaction();
+
+        res.status(200).json(
+            new ApiResponse(200, order, 'Order cancelled successfully. Quantity restored to donation.')
+        );
+    } catch (error) {
+        // If an error occurs, abort the transaction
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        // End the session
+        session.endSession();
+    }
 });

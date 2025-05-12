@@ -67,19 +67,24 @@ export default function MyOrder() {
     });
   };
 
-  const handleCancelPress = async (orderId) => {
+  const handleCancelPress = async (orderId, donationId, portions) => {
     try {
-      const response = await apiClient.patch(`/order/${orderId}/status`, {
-        status: 'cancelled'
-      });
+      const response = await apiClient.patch(`/order/receiver/cancel/${orderId}`);
       
       if (response.data?.success) {
-        Alert.alert('Success', 'Order cancelled successfully');
-        fetchOrders(); // Refresh the list
+        // Optimistically update the UI
+        setOrders(prevOrders => 
+          prevOrders.map(order => 
+            order.id === orderId 
+              ? { ...order, orderStatus: 'cancelled' } 
+              : order
+          )
+        );
+        //Alert.alert('Success', 'Order cancelled successfully');
       }
     } catch (error) {
       console.error('Error cancelling order:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to cancel order');
+      //Alert.alert('Error', error.response?.data?.message || 'Failed to cancel order');
     }
   };
 
@@ -193,7 +198,7 @@ export default function MyOrder() {
               showTrackButton={activeTab === 'Ongoing'}
               onTrackPress={() => handleTrackPress(order)}
               showCancelOption={activeTab === 'Ongoing' && order.status !== 'cancelled'}
-              onCancelPress={() => handleCancelPress(order.id)}
+              onCancelPress={() => handleCancelPress(order.id, order.donationId, order.portions)}
             />
           ))
         )}

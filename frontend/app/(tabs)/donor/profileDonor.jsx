@@ -132,7 +132,7 @@ export default function Profile() {
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('./../reciever/recieverImpact/RecieverImpact')}
+          //onPress={() => router.push('./../reciever/recieverImpact/RecieverImpact')}
         >
           <View style={styles.iconContainer}>
             <Ionicons name="stats-chart-outline" size={24} color={Colors.primary} />

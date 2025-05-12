@@ -26,7 +26,17 @@ export default function RestaurantCard({ restaurant, onFoodItemPress }) {
                                 <Text style={styles.quantity}>{item.quantity}</Text>
                             </View>
                             <View style={styles.priceContainer}>
-                                <Text style={styles.price}>{item.price} pkr</Text>
+                                <Text style={styles.priceText}>
+                                {item.price === 'Free' ? (
+                                    <Text style={styles.freeText}>Free</Text>
+                                ) : (
+                                    <Text>
+                                    {item.price} PKR
+                                    
+                                    </Text>
+                                )}
+                                </Text>
+                                {/* <Text style={styles.price}>{item.price} pkr</Text> */}
                             </View>
                         </View>
                     </TouchableOpacity>
@@ -49,6 +59,21 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 4,
     },
+
+    priceText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color:Colors.primary,
+    marginTop: 4,
+  },
+  freeText: {
+    color: Colors.primary, // Or any color you prefer for free items
+    fontWeight: 'bold',
+  },
+ 
+
+
+
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',

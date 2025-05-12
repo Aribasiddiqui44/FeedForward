@@ -52,7 +52,8 @@ const MyRequests = () => {
             status: request.status || 'pending',
             requestType: request.requestType || 'free',
             orderType: request.requestType === 'free' ? 'Free' : 
-                      request.requestType === 'direct' ? 'Direct' : 'Negotiated',
+                      request.requestType === 'direct' ? 'Direct' :
+                      request.requestType === 'explicit_free' ? 'Donation' :  'Negotiated',
             offerPrice: request.requestType === 'negotiation' ? `${request.proposedPrice} PKR` : request.finalPrice
           };
         });

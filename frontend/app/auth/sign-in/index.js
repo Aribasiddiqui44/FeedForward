@@ -147,7 +147,7 @@ export default function SignIn() {
         </TouchableOpacity>
 
         {/* Create Account Button */}
-        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('role_selection')}>
+        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('screen.js')}>
 
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>

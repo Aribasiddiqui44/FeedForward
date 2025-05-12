@@ -72,7 +72,7 @@ const donationRequestSchema = new Schema({
     },
     requestType: {
         type: String,
-        enum: ["free", "negotiation", "direct"],
+        enum: ["explicit_free","free", "negotiation", "direct"],
         required: true
     },
     quantity: {
@@ -89,7 +89,7 @@ const donationRequestSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ["pending", "negotiating", "accepted", "rejected", "completed"],
+        enum: ["pending", "negotiating", "accepted", "rejected", "completed","cancelled"],
         default: "pending"
     },
     finalPrice: {

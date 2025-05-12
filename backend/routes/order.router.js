@@ -5,7 +5,9 @@ import {
     getOrderDetails,
     updateOrderStatus,
     assignRiderToOrder,
-    markOrderDelivered
+    markOrderDelivered,
+    cancelOrderByReceiver
+
 } from '../controllers/order.controller.js';
 import { verifyJWT } from '../middlewares/authentication.middleware.js';
 import { checkRole } from '../middlewares/checkRole.middleware.js';
@@ -51,5 +53,10 @@ router.get('/:orderId',
     checkRole(['donor', 'receiver', 'rider']),
     getOrderDetails
 );
-
+router.patch(
+    '/receiver/cancel/:orderId',
+    verifyJWT,
+    checkRole('receiver'),
+    cancelOrderByReceiver
+);
 export default router;
