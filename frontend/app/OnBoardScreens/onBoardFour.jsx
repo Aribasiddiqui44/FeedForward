@@ -7,19 +7,30 @@ export default function onBoardOne() {
   const router = useRouter();
   const navigation = useNavigation();
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, []);
-
-  const handleNextPress = () => {
-    router.push('./onBoardThree');
-  };
-
-  const handleSkipPress = () => {
-    router.push('auth/sign-in');
-  };
+  
+    // Safe navigation handling
+    const safeNavigate = (path) => {
+      if (router) {
+        router.push(path);
+      }
+    };
+  
+    // Handle header visibility safely
+    useEffect(() => {
+      if (!navigation?.setOptions) return;
+  
+      navigation.setOptions({ headerShown: false });
+  
+      return () => {
+        if (navigation?.setOptions) {
+          navigation.setOptions({ headerShown: true });
+        }
+      };
+    }, [navigation]);
+  
+    const handleNextPress = () => safeNavigate('./onBoardThree');
+    const handleSkipPress = () => safeNavigate('auth/sign-in');
+  
 
   return (
     <View style={styles.container}>

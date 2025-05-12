@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image,
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import Head from '../../../components/header';
 import { useNavigation, useRouter } from 'expo-router';
 import apiClient from '../../../utils/apiClient';

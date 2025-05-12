@@ -7,15 +7,28 @@ export default function onBoardTwo() {
   const router = useRouter();
   const navigation = useNavigation();
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, []);
-
-  const handleNextPress = () => {
-    router.push('auth/sign-in');
-  };
+  
+    // Safe navigation handling
+    const safeNavigate = (path) => {
+      if (router) {
+        router.push(path);
+      }
+    };
+  
+    // Handle header visibility safely
+    useEffect(() => {
+      if (!navigation?.setOptions) return;
+  
+      navigation.setOptions({ headerShown: false });
+  
+      return () => {
+        if (navigation?.setOptions) {
+          navigation.setOptions({ headerShown: true });
+        }
+      };
+    }, [navigation]);
+  
+    const handleNextPress = () => safeNavigate('auth/sign-in');
 
 
   return (
