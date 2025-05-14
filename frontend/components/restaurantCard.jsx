@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
+import ChatButton from './ChatButton';
 
 export default function RestaurantCard({ restaurant, onFoodItemPress }) {
     return (
@@ -9,8 +10,12 @@ export default function RestaurantCard({ restaurant, onFoodItemPress }) {
             {/* Restaurant Header */}
             <View style={styles.header}>
                 <Text style={styles.restaurantName}>{restaurant.name}</Text>
+                <View style={styles.divider} />
                 <Text style={styles.distance}>{restaurant.distance} Km</Text>
+                <View style={styles.divider} />
                 <Text style={styles.time}>{restaurant.time}</Text>
+                <View style={styles.divider} />
+                <ChatButton receiverId="3" /> 
             </View>
 
             {/* Food Items List */}
@@ -59,12 +64,17 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 4,
     },
-
+     divider: {
+        width: 1,
+        height: '60%',
+        backgroundColor: Colors.Grey,
+        marginHorizontal: 10
+    },
     priceText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color:Colors.primary,
-    marginTop: 4,
+        fontSize: 14,
+        fontWeight: 'bold',
+        color:Colors.primary,
+        marginTop: 4,
   },
   freeText: {
     color: Colors.primary, // Or any color you prefer for free items

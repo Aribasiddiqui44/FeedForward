@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 
 // Mock data - Replace with real API calls later
@@ -17,20 +17,18 @@ const mockConversations = {
 };
 
 const mockUserData = {
-  'user1': { name: 'Volunteer', avatar: require('../../../assets/images/th (2).jpg') },
-  'user2': { name: 'Donor', avatar: require('../../../assets/images/th (2).jpg') },
+  'user1': { name: 'Volunteer', avatar: require('../../assets/images/th (2).jpg') },
+  'user2': { name: 'Donor', avatar: require('../../assets/images/th (2).jpg') },
 };
 
 const ChatScreen = () => {
-  const { userId } = useLocalSearchParams();
   const navigation = useNavigation();
+  const { userId } = useLocalSearchParams();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [currentUser] = useState({ id: 'currentUser' }); // Replace with real auth later
 
-  // Mock fetch messages - Replace with API call
   useEffect(() => {
-    // Simulate loading
+    // Load messages and set header
     setTimeout(() => {
       setMessages(mockConversations[userId] || []);
     }, 300);
@@ -39,7 +37,7 @@ const ChatScreen = () => {
       headerTitle: () => (
         <View style={styles.headerContent}>
           <Image 
-            source={mockUserData[userId]?.avatar || require('../../../assets/images/th (2).jpg')} 
+            source={mockUserData[userId]?.avatar} 
             style={styles.headerImage} 
           />
           <Text style={styles.headerTitle}>{mockUserData[userId]?.name || 'User'}</Text>
@@ -51,7 +49,7 @@ const ChatScreen = () => {
         </TouchableOpacity>
       ),
     });
-  }, [userId]);
+  }, [userId, navigation]);
 
   // Mock send message - Replace with API call
   const handleSend = () => {
@@ -119,6 +117,9 @@ const ChatScreen = () => {
       <Text style={styles.messageTime}>{item.time}</Text>
     </View>
   );
+  const handleBackPress = () => {
+      router.back(); // Navigate back
+    };
 
   return (
     <View style={styles.container}>
