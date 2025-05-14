@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'rea
 import { useRouter, useNavigation } from 'expo-router';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useEffect } from 'react';
+import { Colors } from '../../../constants/Colors';
+import ChatButton from '../../../components/ChatButton';
 
 const AvailableOrdersScreen = () => {
   const navigation = useNavigation();
@@ -19,7 +21,7 @@ const AvailableOrdersScreen = () => {
       foodName: 'Chicken Biryani',
       foodPic: require('../../../assets/images/biryaniPng.png'),
       pickupTime: '11:00 PM',
-      price: '350 PKR',
+      price: '0 PKR',
       type: 'free',
       orgId: 'ORG-789'
     },
@@ -37,7 +39,7 @@ const AvailableOrdersScreen = () => {
       foodName: 'Pizza',
       foodPic: require('../../../assets/images/burger.jpeg'),
       pickupTime: '09:15 PM',
-      price: '500 PKR',
+      price: '100 PKR',
       type: 'negotiated',
       orgId: 'ORG-123'
     }
@@ -58,7 +60,6 @@ const AvailableOrdersScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.screenTitle}>Available Orders</Text>
       
       {orders.map((order) => (
         <TouchableOpacity 
@@ -79,10 +80,7 @@ const AvailableOrdersScreen = () => {
             <Text style={styles.pickupTime}>Pickup by: {order.pickupTime}</Text>
             <Text style={styles.price}>{order.price}</Text>
           </View>
-          
-          <TouchableOpacity style={styles.chatButton}>
-            <Ionicons name="chatbubble-ellipses" size={24} color="#4CAF50" />
-          </TouchableOpacity>
+           <ChatButton receiverId="3" /> 
         </TouchableOpacity>
       ))}
     </ScrollView>
@@ -94,12 +92,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
     padding: 15,
-  },
-  screenTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
   },
   orderCard: {
     backgroundColor: 'white',
@@ -117,36 +109,37 @@ const styles = StyleSheet.create({
   foodImage: {
     width: 70,
     height: 70,
-    borderRadius: 8,
+    borderRadius: 50,
     marginRight: 15,
   },
   orderInfo: {
     flex: 1,
   },
   titleContainer: {
+    width: '110%',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
+    justifyContent: 'space-between',
+    marginBottom: 5
   },
   foodName: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#333',
     marginRight: 10,
   },
   orderId: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666',
     marginBottom: 5,
   },
   pickupTime: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666',
     marginBottom: 5,
   },
   price: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 13,
     color: '#FF5722',
     marginBottom: 5,
   },
