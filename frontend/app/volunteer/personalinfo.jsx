@@ -251,6 +251,7 @@ const VolunteerPersonalInfo = () => {
     }
   };
 
+if (!isSubmitted) {
   return (
     <View style={styles.container}>
       <Head label="Personal Information" showBackOption={true} onBackPress={() => router.back()} />
@@ -354,6 +355,28 @@ const VolunteerPersonalInfo = () => {
       </ScrollView>
     </View>
   );
+}
+return (
+      <View style={styles.container}>
+        <Head label="Personal Information" showBackOption={true} onBackPress={handleBackPress} />
+        
+        <View style={styles.successContainer}>
+          <Text style={styles.successMessage}>
+            Your personal information has been submitted successfully!
+          </Text>
+          <Text style={styles.nextStepMessage}>
+            Please proceed to document submission to complete your application.
+          </Text>
+          
+          <TouchableOpacity 
+            style={styles.submitButton} 
+            onPress={handleSubmit}
+          >
+            <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
 };
 
 const styles = StyleSheet.create({
@@ -446,6 +469,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginRight: 10,
+  },
+  successContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  successMessage: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    color: Colors.dark,
+  },
+  nextStepMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 30,
+    color: Colors.Grey,
   },
 });
 

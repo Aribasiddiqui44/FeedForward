@@ -56,8 +56,9 @@ const VolunteerApplication = () => {
           
           {/* Document Submission Option */}
           <TouchableOpacity 
-            style={styles.optionCard}
+            style={[styles.optionCard, (styles.disabledButton)]}
             onPress={navigateToDocumentSubmission}
+            disabled
           >
             <View style={styles.optionContent}>
               <MaterialIcons name="description" size={24} color={Colors.primary} />
@@ -114,6 +115,9 @@ const styles = StyleSheet.create({
     color: Colors.dark,
     marginLeft: 15,
   },
+  disabledButton: {
+      backgroundColor: Colors.lightGray,
+    },
 });
 
 export default VolunteerApplication;
