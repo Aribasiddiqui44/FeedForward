@@ -28,8 +28,10 @@ export default function MyOrder() {
       if (response.data?.success) {
         const formattedOrders = response.data.data.map(order => ({
           id: order._id,
+          time: order.pickupDetails?.scheduledTime ? 
+            `${order.pickupDetails.scheduledTime.startingTime || 'N/A'} - ${order.pickupDetails.scheduledTime.endingTime || 'N/A'}` : 
+            '1pm',
           foodName: order.donation?.donationFoodTitle || 'Food Item',
-          description: order.donation?.donationDescription || 'No description available',
           total: order.orderTotal ? `${order.orderTotal} PKR` : '0 PKR',
           portions: order.items?.[0]?.quantity || 1,
           type: order.paymentStatus === 'completed' ? 'Paid' : 'Unpaid',
@@ -67,19 +69,24 @@ export default function MyOrder() {
     });
   };
 
-  const handleCancelPress = async (orderId) => {
+  const handleCancelPress = async (orderId, donationId, portions) => {
     try {
-      const response = await apiClient.patch(`/order/${orderId}/status`, {
-        status: 'cancelled'
-      });
+      const response = await apiClient.patch(`/order/receiver/cancel/${orderId}`);
       
       if (response.data?.success) {
-        Alert.alert('Success', 'Order cancelled successfully');
-        fetchOrders(); // Refresh the list
+        // Optimistically update the UI
+        setOrders(prevOrders => 
+          prevOrders.map(order => 
+            order.id === orderId 
+              ? { ...order, orderStatus: 'cancelled' } 
+              : order
+          )
+        );
+        //Alert.alert('Success', 'Order cancelled successfully');
       }
     } catch (error) {
       console.error('Error cancelling order:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to cancel order');
+      //Alert.alert('Error', error.response?.data?.message || 'Failed to cancel order');
     }
   };
 
@@ -187,13 +194,16 @@ export default function MyOrder() {
               total={order.total}
               portions={order.portions}
               type={order.type}
+              status={order.time}
+              rest_name={order.donorName}
+              phone={order.donorPhone}
+              showPhoneNumber={activeTab === 'Ongoing'}
               statusTime={order.date}
-              date={order.date}
               imageSource={order.imageSource}
               showTrackButton={activeTab === 'Ongoing'}
               onTrackPress={() => handleTrackPress(order)}
               showCancelOption={activeTab === 'Ongoing' && order.status !== 'cancelled'}
-              onCancelPress={() => handleCancelPress(order.id)}
+              onCancelPress={() => handleCancelPress(order.id, order.donationId, order.portions)}
             />
           ))
         )}

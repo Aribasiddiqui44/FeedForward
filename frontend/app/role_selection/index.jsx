@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Alert, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
-import { Colors } from './../../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import Head from '../../components/header';
 
 export default function RoleSelection() {
@@ -72,7 +72,7 @@ export default function RoleSelection() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.LightGrey,
+    backgroundColor: Colors.White,
   },
   header: {
     width: '100%',

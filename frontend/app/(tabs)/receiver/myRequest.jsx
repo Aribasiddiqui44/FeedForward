@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import FoodCard from '../../../components/foodCard';
 import apiClient from '../../../utils/apiClient';
@@ -19,66 +19,54 @@ export default function MyRequest() {
     fetchRequests();
   }, []);
 
-  const fetchRequests = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await apiClient.get('/request/receiver/requests');
-      
-      if (response.data?.success) {
-        const formattedRequests = response.data.data.map(request => ({
-          id: request._id,
-          foodName: request.foodItem?.title || 'Food Item',
-          description: request.foodItem?.description || 'No description available',
-          price: request.proposedPrice ? `${request.proposedPrice} PKR` : '0 PKR',
-          originalPrice: request.foodItem?.price?.value ? 
-                        `${request.foodItem.price.value} PKR` : '0 PKR',
-          portions: request.quantity || 1,
-          status: request.status,
-          requestType: request.requestType,
-          date: new Date(request.createdAt).toLocaleDateString(),
-          imageSource: request.foodItem?.images?.[0] || require('../../../assets/images/logo.png'),
-          donorName: request.donor?.name || 'Anonymous Donor',
-          donorAddress: request.donor?.address || 'Address not specified',
-          messages: request.messages || []
-        }));
 
-        setRequests(formattedRequests);
-      }
-    } catch (err) {
-      console.error('Error fetching requests:', err);
-      setError(err.response?.data?.message || 'Failed to fetch requests');
-    } finally {
-      setLoading(false);
+const fetchRequests = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    const response = await apiClient.get('/request/receiver/requests');
+    
+    if (response.data?.success) {
+      const formattedRequests = response.data.data.map(request => ({
+        id: request._id,
+        foodName: request.foodItem?.title || 'Food Item',
+        description: request.foodItem?.description || 'No description available',
+        price: request.proposedPrice ? `${request.proposedPrice} PKR` : '0 PKR',
+        originalPrice: request.originalPrice ? `${request.originalPrice} PKR` : '0 PKR',
+        portions: request.quantity || 1,
+        status: request.status,
+        requestType: request.requestType,
+        date: new Date(request.createdAt).toLocaleDateString(),
+        imageSource: request.foodItem?.images?.[0] || require('../../../assets/images/logo.png'),
+        donorName: request.donor?.name || 'Anonymous Donor',
+        donorAddress: request.donor?.address || 'Address not specified',
+        messages: request.messages || [],
+        negotiationHistory: request.negotiationHistory || []
+      }));
+
+      setRequests(formattedRequests);
     }
-  };
+  } catch (err) {
+    console.error('Error fetching requests:', err);
+    setError(err.response?.data?.message || 'Failed to fetch requests');
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const handleCancelRequest = async (requestId) => {
-    try {
-      const response = await apiClient.patch(`/request/requests/${requestId}/handle`, {
-        action: 'reject'
-      });
-      
-      if (response.data?.success) {
-        Alert.alert('Success', 'Request cancelled successfully');
-        fetchRequests();
-      }
-    } catch (error) {
-      console.error('Error cancelling request:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to cancel request');
-    }
-  };
+// Update the filteredRequests logic
+const filteredRequests = requests.filter(request => {
+  if (activeTab === 'Lower Price') {
+    return request.requestType === 'negotiation';
+  } else {
+    return request.requestType === 'free';
+  }
+});
 
-  const filteredRequests = requests.filter(request => {
-    if (activeTab === 'Lower Price') {
-      return request.requestType === 'negotiation';
-    } else {
-      return request.requestType === 'free';
-    }
-  });
 
-  // ... rest of your component remains the same
+
+
   return (
     <View style={styles.container}>
       {/* Tabs */}
@@ -88,16 +76,16 @@ export default function MyRequest() {
           onPress={() => setActiveTab('Lower Price')}
         >
           <Text style={[styles.tabText, activeTab === 'Lower Price' && styles.activeTabText]}>
-            Lower Price ({requests.filter(r => r.requestType === 'negotiation').length})
+            Negotiation Requests
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'Donation' && styles.activeTab]}
-          onPress={() => setActiveTab('Donation')}
+          style={[styles.tab, activeTab === 'Free Meal Request' && styles.activeTab]}
+          onPress={() => setActiveTab('Free Meal Request')}
         >
-          <Text style={[styles.tabText, activeTab === 'Donation' && styles.activeTabText]}>
-            Donation ({requests.filter(r => r.requestType === 'free').length})
-          </Text>
+          <Text style={[styles.tabText, activeTab === 'Free Meal Request' && styles.activeTabText]}>
+  Free Meal Requests 
+</Text>
         </TouchableOpacity>
       </View>
 
@@ -127,9 +115,23 @@ export default function MyRequest() {
               status={request.status}
               date={request.date}
               imageSource={request.imageSource}
-              showCancelOption={request.status === 'pending'}
-              onCancelPress={() => handleCancelRequest(request.id)}
+              
               showPriceComparison={activeTab === 'Lower Price'}
+              onPress={request.status === 'accepted' ? () => {
+    router.push({
+      pathname: '/orderReceipt/OrderReceipt',
+      params: {
+        requestId: request.id,
+        foodName: request.foodName,
+        totalPrice: request.price.replace(' PKR', ''),
+        quantity: request.portions,
+        rest_name: request.donorName,
+        paymentMethod: 'cash_on_pickup',
+        status: 'accepted'
+      }
+    });
+  } : undefined}
+              
             />
           ))
         )}
@@ -137,8 +139,6 @@ export default function MyRequest() {
     </View>
   );
 }
-
-// ... keep your existing styles
 
 const styles = StyleSheet.create({
   container: {

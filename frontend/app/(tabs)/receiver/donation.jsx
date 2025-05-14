@@ -1,99 +1,113 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Platform,
-} from 'react-native';
-import React, { useEffect, useState } from 'react';
+// import React, { useState, useEffect } from 'react';
+// import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
+// import { useRouter } from 'expo-router';
+// import FoodCard from '../../../components/foodCard';
+// import apiClient from '../../../utils/apiClient';
+// import { Colors } from '../../../constants/Colors';
+// import { Ionicons } from '@expo/vector-icons';
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import FoodCard from '../../../components/foodCard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import apiClient from '../../../utils/apiClient';
+import { Colors } from '../../../constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
 
-const getToken = async () => {
-  if (Platform.OS === 'web') {
-    return await AsyncStorage.getItem('accessToken');
-  } else {
-    return await SecureStore.getItemAsync('accessToken');
-  }
-};
-
-export default function MyOrder() {
+export default function MyDonation() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Ongoing');
-  const [donations, setDonations] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const fetchDonations = async () => {
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const fetchRequests = async () => {
     try {
-      const token = await getToken();
-      const response = await axios.get('http://localhost:8000/api/donation/receiver', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setDonations(response.data.donations || []);
-    } catch (error) {
-      console.error('Failed to fetch receiver donations', error);
+      setLoading(true);
+      setError(null);
+      
+      // Add query parameter to only fetch explicit_free requests
+      const response = await apiClient.get('/request/receiver/requests');
+      
+      if (response.data?.success) {
+        const formattedRequests = response.data.data.map(request => ({
+          id: request._id,
+          foodName: request.foodItem?.title || 'Food Item',
+          description: request.foodItem?.description || 'No description available',
+          price: request.proposedPrice ? `${request.proposedPrice} PKR` : '0 PKR',
+          originalPrice: request.foodItem?.price?.value ? 
+                        `${request.foodItem.price.value} PKR` : '0 PKR',
+          portions: request.quantity || 1,
+          status: request.status,
+          requestType: request.requestType,
+          date: new Date(request.createdAt).toLocaleDateString(),
+          imageSource: request.foodItem?.images?.[0] || require('../../../assets/images/logo.png'),
+          donorName: request.donor?.name || 'Anonymous Donor',
+          donorAddress: request.donor?.address || 'Address not specified',
+          messages: request.messages || [],
+          pickupTime: request.pickupDetails?.scheduledTime
+        }));
+
+        setRequests(formattedRequests);
+      }
+    } catch (err) {
+      console.error('Error fetching explicit free requests:', err);
+      setError(err.response?.data?.message || 'Failed to fetch requests');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchDonations();
-  }, []);
-
-  const handleRatePress = (donationId) => {
-    router.push(`receiver/donation/${donationId}/rate`);
-  };
-
-  const handleCompletePress = (donationId) => {
-    router.push(`receiver/donation/${donationId}/complete`);
-  };
-
-  const renderDonations = (statusFilter) => {
-    const filtered = donations.filter(
-      (donation) => donation.donationStatus?.toLowerCase() === statusFilter.toLowerCase()
-    );
-
-    if (filtered.length === 0) {
-      return (
-        <Text style={styles.emptyText}>
-          No {statusFilter.toLowerCase()} donations.
-        </Text>
-      );
+  const handleCancelRequest = async (requestId) => {
+    try {
+      const response = await apiClient.patch(`/request/requests/${requestId}/handle`, {
+        action: 'reject'
+      });
+      
+      if (response.data?.success) {
+        Alert.alert('Success', 'Request cancelled successfully');
+        fetchRequests();
+      }
+    } catch (error) {
+      console.error('Error cancelling request:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to cancel request');
     }
-
-    return filtered.map((donation, index) => (
-      <FoodCard
-        key={donation._id || index}
-        foodName={donation.foodItems?.join(', ') || 'N/A'}
-        description={donation.pickupInstructions || 'No instructions'}
-        total={
-          donation.donationPricing
-            ? `${donation.donationPricing} PKR`
-            : '0 PKR'
-        }
-        portions={donation.portions || 1}
-        type={donation.donationType || 'General'}
-        statusTime={donation.expiry || 'Unknown'}
-        date={
-          donation.createdAt
-            ? new Date(donation.createdAt).toLocaleDateString()
-            : 'N/A'
-        }
-        imageSource={require('../../../assets/images/biryaniPng.png')}
-        showRateOption={statusFilter === 'History'}
-        onRatePress={() => handleRatePress(donation._id)}
-        showCompleteOption={statusFilter === 'Ongoing'}
-        onCompletePress={() => handleCompletePress(donation._id)}
-      />
-    ));
   };
+
+  // Filter requests by status and ensure they're explicit_free
+  const filteredRequests = requests.filter(request => {
+    if (activeTab === 'Ongoing') {
+      return request.status !== 'completed' && request.status !== 'rejected' && request.requestType==='explicit_free';
+    } else {
+      return request.status === 'completed'&& request.requestType==='explicit_free';
+    }
+  });
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>{error}</Text>
+        <TouchableOpacity 
+          style={styles.retryButton}
+          onPress={fetchRequests}
+        >
+          <Text style={styles.retryButtonText}>Try Again</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -103,44 +117,62 @@ export default function MyOrder() {
           style={[styles.tab, activeTab === 'Ongoing' && styles.activeTab]}
           onPress={() => setActiveTab('Ongoing')}
         >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'Ongoing' && styles.activeTabText,
-            ]}
-          >
-            Ongoing
+          <Text style={[styles.tabText, activeTab === 'Ongoing' && styles.activeTabText]}>
+            Ongoing 
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'History' && styles.activeTab]}
           onPress={() => setActiveTab('History')}
         >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'History' && styles.activeTabText,
-            ]}
-          >
-            History
+          <Text style={[styles.tabText, activeTab === 'History' && styles.activeTabText]}>
+            History 
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Content */}
       <ScrollView>
-        {loading ? (
-          <ActivityIndicator size="large" color="#00aa95" />
+        {filteredRequests.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons 
+              name="gift" 
+              size={60} 
+              color={Colors.primary} 
+            />
+            <Text style={styles.emptyText}>
+              {activeTab === 'Ongoing' ? 'No ongoing explicit free donations' : 'No history of explicit free donations'}
+            </Text>
+          </View>
         ) : (
-          <>
-            {activeTab === 'Ongoing' && renderDonations('Ongoing')}
-            {activeTab === 'History' && renderDonations('Completed')}
-          </>
+          filteredRequests.map(request => (
+            <FoodCard
+              key={request.id}
+              foodName={request.foodName}
+              description={request.description}
+              total={request.price}
+              portions={request.portions}
+              rest_name={request.donorName}
+              type="Donation"
+              status={request.status}
+              date={request.date}
+              imageSource={request.imageSource}
+              donorName={request.donorName}
+              donorAddress={request.donorAddress}
+              pickupTime={request.pickupTime}
+              showCancelOption={request.status === 'pending' && activeTab === 'Ongoing'}
+              onCancelPress={() => handleCancelRequest(request.id)}
+              showRateOption={activeTab === 'History'}
+              onRatePress={() => router.push(`/receiver/request/${request.id}/rate`)}
+            />
+          ))
         )}
       </ScrollView>
     </View>
   );
 }
+
+// ... keep your existing styles ...
 
 const styles = StyleSheet.create({
   container: {
@@ -160,20 +192,42 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   activeTab: {
-    borderBottomColor: '#00aa95',
+    borderBottomColor: Colors.primary,
   },
   tabText: {
     fontSize: 16,
     color: '#777',
   },
   activeTabText: {
-    color: '#00aa95',
+    color: Colors.primary,
     fontWeight: 'bold',
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
   emptyText: {
-    textAlign: 'center',
-    color: '#aaa',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 15,
+    color: Colors.dark,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  retryButton: {
     marginTop: 20,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  retryButtonText: {
+    color: Colors.white,
+    fontWeight: 'bold',
   },
 });

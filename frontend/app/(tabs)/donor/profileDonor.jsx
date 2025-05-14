@@ -132,7 +132,7 @@ export default function Profile() {
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push('./../reciever/recieverImpact/RecieverImpact')}
+          //onPress={() => router.push('./../reciever/recieverImpact/RecieverImpact')}
         >
           <View style={styles.iconContainer}>
             <Ionicons name="stats-chart-outline" size={24} color={Colors.primary} />
@@ -143,7 +143,7 @@ export default function Profile() {
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate('Messages')}
+          onPress={() => router.push('./../donor/messages')}
         >
           <View style={styles.iconContainer}>
             <MaterialIcons name="email" size={24} color={Colors.primary} />

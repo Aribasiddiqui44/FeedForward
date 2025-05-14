@@ -228,7 +228,7 @@ const MyListings = () => {
           <Text style={styles.emptyText}>No listings yet</Text>
           <Text style={styles.emptySubtext}>Your food donations will appear here</Text>
           <TouchableOpacity 
-            style={styles.addButton}
+            style={styles.addButton1}
             onPress={() => router.push('/donor/Donations/makeDonation')}
           >
             <Text style={styles.addButtonText}>Add Your First Listing</Text>
@@ -378,13 +378,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   addButton: {
-    width: 200,
+    width: 50,
     height: 50,
     backgroundColor: Colors.primary,
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 15,
+    marginTop: 5,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  addButton1:{
+    width: 180,
+    height: 50,
+    backgroundColor: Colors.primary,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 5,
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

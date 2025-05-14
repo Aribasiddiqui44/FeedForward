@@ -45,14 +45,17 @@ const MyRequests = () => {
             userName: request.requester?.name || 'Anonymous User',
             type: tab,
             foodItem: request.foodItem?.title || 'Food Item',
-            total: request.finalPrice ? `${request.finalPrice} PKR` : '0 PKR',
+            total: request.requestType === 'negotiation' ? `${request.proposedPrice} PKR` :
+                  request.requestType==='direct' ? `${request.finalPrice} PKR`:
+                  '0 pkr',
             pickupTime: request.pickupDetails?.scheduledTime?.start || 'To be scheduled',
             portions: request.quantity || 1,
             date: request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'Unknown date',
             status: request.status || 'pending',
             requestType: request.requestType || 'free',
             orderType: request.requestType === 'free' ? 'Free' : 
-                      request.requestType === 'direct' ? 'Direct' : 'Negotiated',
+                      request.requestType === 'direct' ? 'Direct' :
+                      request.requestType === 'explicit_free' ? 'Donation' :  'Negotiated',
             offerPrice: request.requestType === 'negotiation' ? `${request.proposedPrice} PKR` : request.finalPrice
           };
         });

@@ -59,7 +59,7 @@ export default function SignIn() {
                 params: { userType: userRole } 
               });
             } else if (userRole === 'volunteer') {
-                router.push('/(tabs)/volunteer/home');
+                router.push('/volunteer/Vol_application');
             } else {
                 Alert.alert('Error', 'Unknown role');
             }
@@ -147,7 +147,7 @@ export default function SignIn() {
         </TouchableOpacity>
 
         {/* Create Account Button */}
-        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('role_selection')}>
+        <TouchableOpacity style={styles.createAccountButton} onPress={()=>router.push('/role_selection')}>
 
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>

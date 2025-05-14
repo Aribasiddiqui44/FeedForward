@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image,
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import Head from '../../../components/header';
 import { useNavigation, useRouter } from 'expo-router';
 import apiClient from '../../../utils/apiClient';
@@ -169,7 +168,7 @@ export default function MakeDonationForm() {
                 styles.typeButtonText,
                 listingType === 'donation' && styles.selectedTypeButtonText
               ]}>
-                Donate Food
+                Donation
               </Text>
             </TouchableOpacity>
             
@@ -184,7 +183,7 @@ export default function MakeDonationForm() {
                 styles.typeButtonText,
                 listingType === 'order' && styles.selectedTypeButtonText
               ]}>
-                Sell Food
+                Order
               </Text>
             </TouchableOpacity>
           </View>
@@ -192,7 +191,7 @@ export default function MakeDonationForm() {
 
         {/* Image Upload Section */}
         <View style={styles.imageSection}>
-          <Text style={styles.sectionTitle}>Add up to 10 images</Text>
+          <Text style={styles.sectionTitle}>Add up to 3 images</Text>
           <View style={styles.imageContainer}>
             {images.map((uri, index) => (
               <View key={index} style={styles.imageWrapper}>
@@ -241,7 +240,7 @@ export default function MakeDonationForm() {
         {listingType === 'order' ? (
         <>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Price (in PKR)</Text>
+            <Text style={styles.sectionTitle}>Price per Unit (in PKR)</Text>
             <TextInput
               style={styles.input}
               placeholder="e.g. 50"
@@ -251,7 +250,7 @@ export default function MakeDonationForm() {
             />
           </View>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Minimum Acceptable Price (per kg)</Text>
+            <Text style={styles.sectionTitle}>Minimum Acceptable Price (per unit)</Text>
             <TextInput
               style={styles.input}
               placeholder="e.g. 30 (leave empty if not negotiable)"

@@ -13,18 +13,43 @@ import { Ionicons, Feather } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 import Head from '../../components/header';
 import apiClient from '../../utils/apiClient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Layout() {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [isSearchVisible, setSearchVisible] = useState(false);
+  const [userType, setUserType] = useState(null);
   const navigation = useNavigation();
   const router = useRouter();
-  const { userType } = useLocalSearchParams(); 
-  
+  const params = useLocalSearchParams();
+
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
-  }, []);
-  
+
+    // Initialize user type
+    const initUserType = async () => {
+      try {
+        // First check route params
+        if (params.userType) {
+          setUserType(params.userType);
+          await AsyncStorage.setItem('userType', params.userType);
+          return;
+        }
+
+        // Then check AsyncStorage
+        const storedUserType = await AsyncStorage.getItem('userType');
+        if (storedUserType) {
+          setUserType(storedUserType);
+        }
+      } catch (error) {
+        console.error('Error initializing user type:', error);
+      }
+    };
+
+    initUserType();
+  }, [params.userType]);
+
   const logoutUser = async () => {
     try {
       Alert.alert(
@@ -40,6 +65,7 @@ export default function Layout() {
             onPress: async () => {
               try {
                 await apiClient.post('/users/logout');
+                await AsyncStorage.removeItem('userType');
                 router.replace('/auth/sign-in');
               } catch (error) {
                 console.error('Logout error:', error);
@@ -96,10 +122,28 @@ export default function Layout() {
   userType === 'donor' ? donorMenuItems :
   userType === 'receiver' ? receiverMenuItems :
   volunteerMenuItems;
+ 
 
   return (
     <View style={styles.container}>
-      <Head label='Feed Forward' showMenuOption={true} onMenuPress={() => setIsDrawerVisible(true)} showSearchOption={true}></Head>
+      {/* <Head label='Feed Forward' showMenuOption={true} onMenuPress={() => setIsDrawerVisible(true)} showSearchOption={userType === 'receiver'}></Head> */}
+      <Head
+  label='Feed Forward'
+  showMenuOption={true}
+  showSearchOption={userType === 'receiver'}
+  onSearchPress={() => {
+  const newSearchState = params?.showSearch !== 'true';
+  router.push({
+    pathname: '/(tabs)/receiver/restaurantListing',
+    params: { 
+      showSearch: String(newSearchState),
+      // Add a timestamp to force update
+      refresh: Date.now().toString() 
+    },
+  });
+}}
+  onMenuPress={() => setIsDrawerVisible(true)}
+/>
 
       {/* Bottom Tabs - Different tabs based on user type */}
       <Tabs

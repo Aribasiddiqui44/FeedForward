@@ -54,11 +54,15 @@ const donationSchema = new Schema({
     listingType: {
         type: String,
         // donation / selling
-        enum: ["donation", "selling"]
+        enum: ["donation", "order"]
     },
     donationType: {
         type: String,
         enum: ["Hadiya", "Sadqa"] // have to add description as well of each.
+    },
+    allowFreeRequests: {
+        type: Boolean,
+        default: false 
     },
     listingStatus: {
         type: String,

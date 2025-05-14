@@ -87,6 +87,7 @@ export const createDonation = asyncHandler(async (req, res) => {
       currency: priceObj.currency || "PKR",
       minPricePerUnit: priceObj.minPricePerUnit
   },
+  listingType:req.body.listingType,
     donationQuantity: parseField(req.body.donationQuantity, { quantity: 1, measurementUnit: "kg" }),
     donationInitialPickupTimeRange: parseField(req.body.donationInitialPickupTimeRange),
     donationPickupInstructions: parseField(req.body.donationPickupInstructions, []),

@@ -1,0 +1,306 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Picker } from 'react-native';
+import { Colors } from '../../constants/Colors';
+import Head from '../../components/header';
+import { useRouter, useNavigation } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Alert } from 'react-native';
+
+const VolunteerPersonalInfo = () => {
+  const navigation = useNavigation();
+  const router = useRouter();
+  const [cnicNumber, setCnicNumber] = useState('');
+  const [age, setAge] = useState('');
+  const [vehicle, setVehicle] = useState('');
+  const [experience, setExperience] = useState('');
+  const [motivation, setMotivation] = useState('');
+  const [hours, setHours] = useState('5');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleBackPress = () => {
+    router.back();
+  };
+  const incrementHours = () => {
+    setHours(prev => {
+      const num = Number(prev); // Ensure numeric type
+      return num + 1;
+    });
+  };
+
+  const decrementHours = () => {
+    setHours(prev => {
+      const num = Number(prev); // Ensure numeric type
+      return num > 1 ? num - 1 : 1; // Minimum value of 1
+    });
+  };
+
+  useEffect(() => {
+        navigation.setOptions({
+          headerShown: false,
+        });
+      }, []);
+
+  const handleSubmit = () => {
+  // Check if any required field is empty
+  if (
+    cnicNumber.trim() === '' ||
+    age.trim() === '' ||
+    vehicle.trim() === '' ||
+    experience.trim() === '' ||
+    motivation.trim() === '' ||
+    motivation.trim() === ''
+  ){
+    Alert.alert(
+      'Incomplete Form',
+      'Please fill in all the required fields before continuing.'
+    );
+    return; // Exit the function if form is incomplete
+  }
+
+  // If all fields are filled, navigate
+  router.push('/volunteer/submissionsuccess');
+  setIsSubmitted(true);
+};
+
+if (!isSubmitted) {
+  return (
+    <View style={styles.container}>
+      <Head label="Personal Information" showBackOption={true} onBackPress={handleBackPress} />
+      
+      <ScrollView contentContainerStyle={styles.content}>
+    
+        <View style={styles.section}>
+          <Text style={styles.label}>Enter your CNIC number</Text>
+          <TextInput
+            style={styles.input}
+            value={cnicNumber}
+            onChangeText={setCnicNumber}
+            keyboardType="numeric"
+            placeholder="42211-2953987-6"
+            placeholderTextColor={Colors.Grey}
+          />
+        </View>
+
+        {/* Age */}
+        <View style={styles.section}>
+          <Text style={styles.label}>What's your age?</Text>
+          <TextInput
+            style={styles.input}
+            value={age}
+            onChangeText={setAge}
+            keyboardType="numeric"
+            placeholder="22"
+            placeholderTextColor={Colors.Grey}
+          />
+        </View>
+
+        {/* Vehicle */}
+        <View style={styles.section}>
+          <Text style={styles.label}>What vehicle do you have?</Text>
+          <TextInput
+            style={styles.input}
+            value={vehicle}
+            onChangeText={setVehicle}
+            placeholder="e.g. Motorcycle, Car, Bicycle"
+            placeholderTextColor={Colors.Grey}
+          />
+        </View>
+
+        {/* Previous Experience */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Have you worked as a rider before?</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={experience}
+              onValueChange={(itemValue) => setExperience(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select an option" value="" color={Colors.Grey} />
+              <Picker.Item label="Yes" value="yes" />
+              <Picker.Item label="No" value="no" />
+              <Picker.Item label="Some experience" value="some" />
+            </Picker>
+          </View>
+        </View>
+
+        {/* Motivation */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Why do you want to join Feed Forward as a Volunteer?</Text>
+          <TextInput
+            style={[styles.input, styles.multilineInput]}
+            value={motivation}
+            onChangeText={setMotivation}
+            multiline
+            numberOfLines={4}
+            placeholder="I want to do as a social work.."
+            placeholderTextColor={Colors.Grey}
+          />
+        </View>
+         <View style={styles.section}>
+          <Text style={styles.label}>How many hours can you dedicate to volunteer service?</Text>
+          <View style={styles.hoursContainer}>
+            <TouchableOpacity 
+              style={styles.hoursButton} 
+              onPress={decrementHours}
+            >
+              <MaterialIcons name="remove" size={24} color={Colors.primary} />
+            </TouchableOpacity>
+            
+            <Text style={styles.hoursValue}>{hours}</Text>
+            
+            <TouchableOpacity 
+              style={styles.hoursButton} 
+              onPress={incrementHours}
+            >
+              <MaterialIcons name="add" size={24} color={Colors.primary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Submit Button */}
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
+  );
+}
+return (
+      <View style={styles.container}>
+        <Head label="Personal Information" showBackOption={true} onBackPress={handleBackPress} />
+        
+        <View style={styles.successContainer}>
+          <Text style={styles.successMessage}>
+            Your personal information has been submitted successfully!
+          </Text>
+          <Text style={styles.nextStepMessage}>
+            Please proceed to document submission to complete your application.
+          </Text>
+          
+          <TouchableOpacity 
+            style={styles.submitButton} 
+            onPress={handleSubmit}
+          >
+            <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.White,
+  },
+  content: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.dark,
+    marginBottom: 15,
+  },
+  input: {
+    color: Colors.dark,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 12,
+    fontSize: 13,
+    borderWidth: 1,
+    borderColor: Colors.Grey,
+    marginBottom: 15
+  },
+  
+  multilineInput: {
+    height: 100,
+    textAlignVertical: 'top',
+    color: Colors.dark,
+    marginBottom: 10
+  },
+  pickerContainer: {
+    backgroundColor: 'white',
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+    overflow: 'hidden',
+    padding: 10
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+    borderRadius: 20,
+    color: Colors.dark,
+    fontSize: 12
+  },
+  submitButton: {
+    backgroundColor: Colors.primary,
+    padding: 15,
+    borderRadius: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  hoursContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
+  },
+  hoursButton: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  hoursValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginHorizontal: 20,
+    minWidth: 40,
+    textAlign: 'center',
+    color: Colors.Grey,
+  },
+  hoursLabel: {
+    textAlign: 'center',
+    color: Colors.Grey,
+    fontSize: 14,
+  },
+  submitButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 10,
+  },
+  successContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  successMessage: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    color: Colors.dark,
+  },
+  nextStepMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 30,
+    color: Colors.Grey,
+  },
+});
+
+export default VolunteerPersonalInfo;
