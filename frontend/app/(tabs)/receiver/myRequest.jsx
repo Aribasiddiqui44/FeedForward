@@ -60,7 +60,7 @@ const filteredRequests = requests.filter(request => {
   if (activeTab === 'Lower Price') {
     return request.requestType === 'negotiation';
   } else {
-    return request.requestType === 'free' || request.requestType === 'explicit_free';
+    return request.requestType === 'free';
   }
 });
 
@@ -76,15 +76,15 @@ const filteredRequests = requests.filter(request => {
           onPress={() => setActiveTab('Lower Price')}
         >
           <Text style={[styles.tabText, activeTab === 'Lower Price' && styles.activeTabText]}>
-            Lower Price
+            Negotiation Requests
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'Donation' && styles.activeTab]}
-          onPress={() => setActiveTab('Donation')}
+          style={[styles.tab, activeTab === 'Free Meal Request' && styles.activeTab]}
+          onPress={() => setActiveTab('Free Meal Request')}
         >
-          <Text style={[styles.tabText, activeTab === 'Donation' && styles.activeTabText]}>
-  Donation 
+          <Text style={[styles.tabText, activeTab === 'Free Meal Request' && styles.activeTabText]}>
+  Free Meal Requests 
 </Text>
         </TouchableOpacity>
       </View>

@@ -10,6 +10,7 @@ export default function FoodCard({
   type = "Paid", 
   status = "Pick up time: 00:00 am", 
   statusTime = "",
+  rest_name="",
   imageSource,
   showTrackButton,
   showCancelOption,
@@ -41,18 +42,21 @@ export default function FoodCard({
             <Text style={[styles.type, type === "Free" && styles.freeType]}>
               {type}
             </Text>
+            
           </View>
-
-          <Text style={styles.description} numberOfLines={1}>
+          {/* <View style={styles.row}> */}
+            <Text style={styles.total}>Donor: {rest_name}</Text>
+          {/* </View> */}
+          {/* <Text style={styles.description} numberOfLines={1}>
             {description}
-          </Text>
+          </Text> */}
           <View style={styles.row}>
             <Text style={styles.total}>Total: {total}</Text>
             <Text style={styles.portions}>Portions: {portions}</Text>
           </View>
-
+          
           <Text style={styles.status}>
-            {status} {statusTime && <Text>{statusTime}</Text>}
+            <Text>Pick Up Time: {status} </Text> {statusTime && <Text>{statusTime}</Text>}
           </Text>
         </View>
       </View>
@@ -215,6 +219,8 @@ const styles = StyleSheet.create({
   cardContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 18,
+
   },
   foodImage: {
     width: 70,
@@ -285,3 +291,4 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
 });
+

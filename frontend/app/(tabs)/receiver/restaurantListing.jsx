@@ -4,12 +4,36 @@ import RestaurantCard from '../../../components/restaurantCard';
 import { Colors } from '../../../constants/Colors';
 import { useRouter } from 'expo-router';
 import apiClient from '../../../utils/apiClient';
-
+import { useLocalSearchParams } from 'expo-router';
+import { Modal,TextInput } from 'react-native';
 export default function RestaurantListing() {
   const router = useRouter();
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [priceFilter, setPriceFilter] = useState({ min: 0, max: 999 });
+  const [mealsCountFilter, setMealsCountFilter] = useState(null);
+  const [distanceFilter, setDistanceFilter] = useState(null);
+  const [activeSort, setActiveSort] = useState('Best Match');
+  const [filteredDonations, setFilteredDonations] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState('Best Match');
+  const params = useLocalSearchParams();
+
+  useEffect(() => {
+  const searchEnabled = params?.showSearch === 'true';
+  setSearchVisible(searchEnabled);
+
+  if (!searchEnabled) {
+    // Reset filters only when hiding the search
+    setPriceFilter({ min: 0, max: 999 });
+    setMealsCountFilter(null);
+    setDistanceFilter(null);
+    setActiveSort('Best Match');
+    setSelectedFilter('Best Match');
+    setSearchVisible==='false';
+  }
+}, [params?.showSearch]);
 
   const fetchDonations = async () => {
     try {
@@ -32,6 +56,27 @@ export default function RestaurantListing() {
   useEffect(() => {
     fetchDonations();
   }, []);
+
+useEffect(() => {
+  
+  const filtered = donations.filter((donation) => {
+    const price = donation.donationUnitPrice?.value || 0;
+    const quantity = donation.donationQuantity?.quantity || 0;
+    const withinPrice = price >= priceFilter.min && price <= priceFilter.max;
+    const matchesMeals = !mealsCountFilter || quantity >= mealsCountFilter;
+    const withinDistance = !distanceFilter || 1 <= distanceFilter; // Replace 1 with actual distance logic if added
+    return withinPrice && matchesMeals && withinDistance;
+  });
+
+  // Optional sorting
+  if (activeSort === 'Price') {
+    filtered.sort((a, b) => (a.donationUnitPrice?.value || 0) - (b.donationUnitPrice?.value || 0));
+  } else if (activeSort === 'Meals Count') {
+    filtered.sort((a, b) => (b.donationQuantity?.quantity || 0) - (a.donationQuantity?.quantity || 0));
+  }
+
+  setFilteredDonations(filtered);
+}, [priceFilter, mealsCountFilter, distanceFilter, activeSort, donations]);
 
 // Update the transformDonationsToRestaurantData function in restaurantListing.jsx
 const transformDonationsToRestaurantData = (donations) => {
@@ -136,10 +181,179 @@ const transformDonationsToRestaurantData = (donations) => {
     );
   }
 
-  const restaurantData = transformDonationsToRestaurantData(donations);
+  //const restaurantData = transformDonationsToRestaurantData(donations);
+  const restaurantData = transformDonationsToRestaurantData(filteredDonations.length ? filteredDonations : donations);
+
 
   return (
     <View style={styles.container}>
+        {/* {searchVisible && (
+  <View>
+    <View style={styles.filterRow}>
+      {['Best Match', 'Price', 'Meals Count', 'Distance'].map((filter) => (
+        <TouchableOpacity
+          key={filter}
+          onPress={() => setSelectedFilter(filter)}
+          style={[
+            styles.filterPill,
+            selectedFilter === filter && styles.activePill
+          ]}
+        >
+          <Text
+            style={{
+              color: selectedFilter === filter ? '#fff' : '#555',
+              fontWeight: '500'
+            }}
+          >
+            {filter}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+
+    {selectedFilter === 'Price' && (
+      <View style={styles.filterInputRow}>
+        <TextInput
+          placeholder="Min"
+          style={styles.filterInput}
+          keyboardType="numeric"
+          onChangeText={(text) =>
+            setPriceFilter((prev) => ({ ...prev, min: parseInt(text) || 0 }))
+          }
+        />
+        <Text style={{ marginHorizontal: 5 }}>-</Text>
+        <TextInput
+          placeholder="Max"
+          style={styles.filterInput}
+          keyboardType="numeric"
+          onChangeText={(text) =>
+            setPriceFilter((prev) => ({ ...prev, max: parseInt(text) || 999 }))
+          }
+        />
+      </View>
+    )}
+
+    {selectedFilter === 'Meals Count' && (
+      <View style={styles.filterInputRow}>
+        <TextInput
+          placeholder="Min Meals"
+          style={styles.filterInput}
+          keyboardType="numeric"
+          onChangeText={(text) => setMealsCountFilter(parseInt(text) || null)}
+        />
+      </View>
+    )}
+
+    {selectedFilter === 'Distance' && (
+      <View style={styles.filterInputRow}>
+        <TextInput
+          placeholder="Max Distance"
+          style={styles.filterInput}
+          keyboardType="numeric"
+          onChangeText={(text) => setDistanceFilter(parseInt(text) || null)}
+        />
+      </View>
+    )}
+
+    <TouchableOpacity
+      onPress={() => {
+        setPriceFilter({ min: 0, max: 999 });
+        setMealsCountFilter(null);
+        setDistanceFilter(null);
+        setActiveSort('Best Match');
+        setSelectedFilter('Best Match');
+      }}
+      style={[styles.applyButton, { backgroundColor: '#ccc', marginBottom: 10 }]}
+    >
+      <Text style={{ color: '#000' }}>Reset Filters</Text>
+    </TouchableOpacity>
+  </View>
+)} */}
+{searchVisible && (
+        <View style={styles.filterContainer}>
+          {/* Filter options UI */}
+          <View style={styles.filterRow}>
+            {['Best Match', 'Price', 'Meals Count', 'Distance'].map((filter) => (
+              <TouchableOpacity
+                key={filter}
+                onPress={() => setSelectedFilter(filter)}
+                style={[
+                  styles.filterPill,
+                  selectedFilter === filter && styles.activePill
+                ]}
+              >
+                <Text style={{
+                  color: selectedFilter === filter ? '#fff' : '#555',
+                  fontWeight: '500'
+                }}>
+                  {filter}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Price Filter Input */}
+          {selectedFilter === 'Price' && (
+            <View style={styles.filterInputRow}>
+              <TextInput
+                placeholder="Min"
+                style={styles.filterInput}
+                keyboardType="numeric"
+                onChangeText={(text) =>
+                  setPriceFilter((prev) => ({ ...prev, min: parseInt(text) || 0 }))
+                }
+              />
+              <Text style={{ marginHorizontal: 5 }}>-</Text>
+              <TextInput
+                placeholder="Max"
+                style={styles.filterInput}
+                keyboardType="numeric"
+                onChangeText={(text) =>
+                  setPriceFilter((prev) => ({ ...prev, max: parseInt(text) || 999 }))
+                }
+              />
+            </View>
+          )}
+
+          {/* Meals Count Filter Input */}
+          {selectedFilter === 'Meals Count' && (
+            <View style={styles.filterInputRow}>
+              <TextInput
+                placeholder="Min Meals"
+                style={styles.filterInput}
+                keyboardType="numeric"
+                onChangeText={(text) => setMealsCountFilter(parseInt(text) || null)}
+              />
+            </View>
+          )}
+
+          {/* Distance Filter Input */}
+          {selectedFilter === 'Distance' && (
+            <View style={styles.filterInputRow}>
+              <TextInput
+                placeholder="Max Distance"
+                style={styles.filterInput}
+                keyboardType="numeric"
+                onChangeText={(text) => setDistanceFilter(parseInt(text) || null)}
+              />
+            </View>
+          )}
+
+          {/* Reset Filters Button */}
+          <TouchableOpacity
+            onPress={() => {
+              setPriceFilter({ min: 0, max: 999 });
+              setMealsCountFilter(null);
+              setDistanceFilter(null);
+              setActiveSort('Best Match');
+              setSelectedFilter('Best Match');
+            }}
+            style={[styles.applyButton, { backgroundColor: '#ccc', marginBottom: 10 }]}
+          >
+            <Text style={{ color: '#000' }}>Reset Filters</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <FlatList
         data={restaurantData}
         keyExtractor={(item) => item.id}
@@ -149,6 +363,7 @@ const transformDonationsToRestaurantData = (donations) => {
             onFoodItemPress={(foodItem) => handleFoodItemPress(foodItem, item)}
           />
         )}
+        
         ListHeaderComponent={() => (
           <View style={styles.row}>
             <View style={styles.line} />
@@ -163,11 +378,23 @@ const transformDonationsToRestaurantData = (donations) => {
           </View>
         )}
       />
+      {/* Filter Buttons Row */}
+    
+
     </View>
+    
   );
+
 }
 
 const styles = StyleSheet.create({
+  filterContainer: {
+  backgroundColor: '#fff',
+  padding: 10,
+  borderBottomWidth: 1,
+  borderBottomColor: '#eee',
+  elevation: 2,
+},
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -226,4 +453,97 @@ const styles = StyleSheet.create({
     color: '#333',
     marginHorizontal: 10,
   },
+  filterModal: {
+  backgroundColor: 'white',
+  margin: 20,
+  padding: 20,
+  borderRadius: 10,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 5,
+  elevation: 5,
+  alignItems: 'center',
+},
+input: {
+  borderWidth: 1,
+  borderColor: '#ccc',
+  borderRadius: 5,
+  padding: 10,
+  width: '100%',
+  marginVertical: 8,
+},
+applyButton: {
+  backgroundColor: Colors.primary,
+  padding: 10,
+  borderRadius: 5,
+  marginTop: 10,
+},
+filterLabel: {
+  fontWeight: '600',
+  alignSelf: 'flex-start',
+  marginTop: 10,
+  marginBottom: 4,
+},
+
+sortRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  marginTop: 8,
+  width: '100%',
+},
+
+sortButton: {
+  padding: 8,
+  borderRadius: 5,
+  backgroundColor: '#eee',
+  flex: 1,
+  marginHorizontal: 3,
+  alignItems: 'center',
+},
+
+sortButtonText: {
+  color: '#333',
+},
+
+sortButtonActiveText: {
+  color: Colors.primary,
+  fontWeight: 'bold',
+},
+filterRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  paddingHorizontal: 10,
+  marginVertical: 10,
+},
+
+filterPill: {
+  backgroundColor: '#eee',
+  paddingVertical: 6,
+  paddingHorizontal: 14,
+  borderRadius: 20,
+  marginHorizontal: 5,
+},
+
+activePill: {
+  backgroundColor: Colors.primary,
+},
+
+filterInputRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: 10,
+},
+
+filterInput: {
+  borderWidth: 1,
+  borderColor: '#ccc',
+  borderRadius: 8,
+  padding: 8,
+  width: 80,
+  backgroundColor: '#fff',
+},
+
+
 });

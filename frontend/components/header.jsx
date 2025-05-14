@@ -46,6 +46,8 @@ export default function Head({
           <Ionicons name="search" size={24} color="#fff" />
         </TouchableOpacity>
       )}
+      
+
     </View>
   );
 }

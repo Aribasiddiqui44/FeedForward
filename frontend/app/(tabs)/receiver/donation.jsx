@@ -152,6 +152,7 @@ export default function MyDonation() {
               description={request.description}
               total={request.price}
               portions={request.portions}
+              rest_name={request.donorName}
               type="Donation"
               status={request.status}
               date={request.date}
