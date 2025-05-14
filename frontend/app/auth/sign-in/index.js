@@ -59,7 +59,7 @@ export default function SignIn() {
                 params: { userType: userRole } 
               });
             } else if (userRole === 'volunteer') {
-                router.push('/(tabs)/volunteer/home');
+                router.push('/volunteer/Vol_application');
             } else {
                 Alert.alert('Error', 'Unknown role');
             }
