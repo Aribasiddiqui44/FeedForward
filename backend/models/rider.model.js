@@ -3,34 +3,51 @@ import { Donor } from "./donor.model.js";
 import { User } from "./user.model.js";
 
 const riderSchema = new Schema({
-    volunteerUserId: {
+   volunteerUserId: {
         type: Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        required: true,
+        unique: true
     },
-    riderName: { type: String },
+    userDetails: {
+        name: { type: String },
+        email: { type: String },
+        phoneNumber: { type: String }
+    },
 
-    riderContacts: [
-        {
-            phoneNumber: { type: String },
-            type: { type: String, enum: ["mobile", "landline", "whatsapp"], default: "mobile" }
-        }
-    ],
+    age: { type: Number },
+    vehicleType: { type: String },
+    hasRiderExperience: { type: String, enum: ["yes", "no", "some"] },
+    motivationStatement: { type: String },
+    weeklyAvailableHours: { type: Number },
+    
+    // Document fields
+    profilePhoto: { type: String },
+    cnic: {
+        front: { type: String },
+        back: { type: String },
+        number: { type: String }
+    },
+    drivingLicense: {
+        front: { type: String },
+        back: { type: String }
+    },
 
-    riderEmail: { type: String },
+    
 
-    availableTimings: [
-        {
-            day: { type: String },
-            availableDayTimings: {
-                from: { type: String },
-                to: { type: String }
-            },
-            availableNightTimings: {
-                from: { type: String },
-                to: { type: String }
-            }
-        }
-    ],
+    // availableTimings: [
+    //     {
+    //         day: { type: String },
+    //         availableDayTimings: {
+    //             from: { type: String },
+    //             to: { type: String }
+    //         },
+    //         availableNightTimings: {
+    //             from: { type: String },
+    //             to: { type: String }
+    //         }
+    //     }
+    // ],
 
     isAssociatedWithAnOrganization: {
         orgName: { type: String },
@@ -43,14 +60,11 @@ const riderSchema = new Schema({
         ]
     },
     pastVolunteerWork: [],
-    cnic: {
-        front: { type: String },
-        back: { type: String },
-        cnicNumber: { type: Number }
-    }
 
 }, {
     timestamps: true
 });
 
 export const Rider = mongoose.model("Rider", riderSchema);
+
+

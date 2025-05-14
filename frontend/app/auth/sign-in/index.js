@@ -48,6 +48,7 @@ export default function SignIn() {
             // console.log(response.data.data.user)
             // Get the user's role from the response
             const userRole = response.data.data.user.userRole;
+            const userId=response.data.data.user._id;
             if (userRole === 'receiver') {
               router.push({
                 pathname: '/(tabs)/receiver/restaurantListing',
@@ -59,7 +60,9 @@ export default function SignIn() {
                 params: { userType: userRole } 
               });
             } else if (userRole === 'volunteer') {
-                router.push('/volunteer/Vol_application');
+                router.push({
+                  pathname:'/volunteer/Vol_application',
+                params: { userType: userRole, userId } });
             } else {
                 Alert.alert('Error', 'Unknown role');
             }
