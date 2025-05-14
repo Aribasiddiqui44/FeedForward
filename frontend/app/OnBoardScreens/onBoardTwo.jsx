@@ -3,53 +3,90 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 
-export default function onBoardTwo() {
+export default function OnBoardTwo() {  // Changed to PascalCase
   const router = useRouter();
   const navigation = useNavigation();
 
+  // Safe navigation handling
+  const safeNavigate = (path) => {
+    if (router) {
+      router.push(path);
+    }
+  };
+
+  // Handle header visibility safely
   useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, []);
+    if (!navigation?.setOptions) return;
 
-  const handleNextPress = () => {
-    router.push('./onBoardFour');
-  };
+    navigation.setOptions({ headerShown: false });
 
-  const handleSkipPress = () => {
-    router.push('auth/sign-in');
-  };
+    return () => {
+      if (navigation?.setOptions) {
+        navigation.setOptions({ headerShown: true });
+      }
+    };
+  }, [navigation]);
+
+  const handleNextPress = () => safeNavigate('./onBoardFour');
+  const handleSkipPress = () => safeNavigate('auth/sign-in');
 
   return (
     <View style={styles.container}>
-      {/* Image Section */}
+      {/* Image Section with accessibility */}
       <View style={styles.imageContainer}>
         <Image
-          source={require('./../../assets/images/on2.png')} 
+          source={require('./../../assets/images/on2.png')}
           style={styles.image}
+          resizeMode="contain"
+          accessibilityLabel="Affordable food illustration"
         />
       </View>
 
       {/* Text Section */}
       <Text style={styles.quoteText}>
-        {'\n'}<Text style={styles.highlight}>Affordable Food for Organizations</Text>{'\n'}
-        Organizations can order desired number of portions at lower prices—or even for free—from nearby restaurants, cafes, and factories. 
+        {'\n'}
+        <Text style={styles.highlight}>Affordable Food for Organizations</Text>
+        {'\n'}
+        Organizations can order desired number of portions at lower prices—or even for free—from nearby restaurants, cafes, and factories.
       </Text>
 
-      {/* Pagination Dots */}
-      <View style={styles.paginationContainer}>
-        <View style={[styles.dot, { backgroundColor: '#00aa95' }]} />
-        <View style={[styles.dot, { backgroundColor: '#d4f7f1' }]} />
-        <View style={[styles.dot, { backgroundColor: '#d4f7f1' }]} />
-        <View style={[styles.dot, { backgroundColor: '#d4f7f1' }]} />
+      {/* Pagination Dots with accessibility */}
+      <View style={styles.paginationContainer} accessibilityRole="tablist">
+        <View 
+          style={[styles.dot, { backgroundColor: '#d4f7f1' }]} 
+          accessibilityRole="tab"
+          accessibilityLabel="Step 1"
+        />
+        <View 
+          style={[styles.dot, { backgroundColor: '#00aa95' }]} 
+          accessibilityRole="tab"
+          accessibilityLabel="Current step"
+        />
+        {[1, 2].map((item) => (
+          <View 
+            key={`dot-${item}`}
+            style={[styles.dot, { backgroundColor: '#d4f7f1' }]} 
+            accessibilityRole="tab"
+            accessibilityLabel={`Step ${item + 2}`}
+          />
+        ))}
       </View>
 
-      {/* Buttons */}
-      <TouchableOpacity style={styles.nextButton} onPress={handleNextPress}>
+      {/* Buttons with accessibility */}
+      <TouchableOpacity 
+        style={styles.nextButton} 
+        onPress={handleNextPress}
+        accessibilityRole="button"
+        accessibilityLabel="Go to next screen"
+      >
         <Text style={styles.nextButtonText}>NEXT</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleSkipPress}>
+      
+      <TouchableOpacity 
+        onPress={handleSkipPress}
+        accessibilityRole="button"
+        accessibilityLabel="Skip onboarding"
+      >
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
     </View>
@@ -67,7 +104,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height:'40%',
+    height: '40%',
     alignItems: 'center',
     marginTop: 50,
   },
