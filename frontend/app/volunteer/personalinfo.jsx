@@ -84,7 +84,7 @@ const VolunteerPersonalInfo = () => {
       if (response.data) {
         setIsSubmitted(true);
         router.push({
-          pathname: '/volunteer/documents',
+          pathname: '/volunteer/documentsubmission',
           params: { riderId: response.data._id } // Use the created rider ID
         });
       }
