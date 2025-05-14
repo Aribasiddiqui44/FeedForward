@@ -5,7 +5,7 @@ import asyncHandler from "./../utils/asyncHandler.js";
 import ApiError from "./../utils/ApiError.js";
 import ApiResponse from "./../utils/ApiResponse.js";
 import uploadOnCloudinary from "../services/cloudinary.service.js";
-
+import { Donation } from "../models/donation.model.js";
 const uploadCNIC = asyncHandler( async(req, res) => {
   
     const CNIC_front_image_path = req.files?.CNIC_front[0]?.path;
@@ -89,6 +89,51 @@ const postRiderForm = asyncHandler( async(req, res) => {
     res.status(201, newRider,"Volunteer successfully created.")
 });
 
+const getAvailableOrders = asyncHandler( async(req, res) => {
+  let donations = await Donation.find({listingStatus: "open"});
+  res.status(200).json(
+    new ApiResponse(200,
+      donations,
+      (donations.length == 0) ? "Fetched the open donations" : "Yahoo, No donations available currently."
+    )
+  );
+});
+const getAcceptedOrders = asyncHandler( async(req, res) => {
+  const { riderId } = req.body;
+  // let rider = await Rider.findById(riderId);
+  let acceptedDonations = await Donation.find({ 'rider.riderId': riderId});
+  res.status(200).json(
+    new ApiResponse(200, acceptedDonations,
+      (acceptedDonations.length == 0) ? "Success" : "User has no accpedted donations yet."
+    )
+  );
+});
+
+const patchChangeDonationDeliveryStatus = asyncHandler( async(req, res) => {
+  const { donationId, riderId, status} = req.body;
+  let donation = await Donation.findOne(
+    { _id: donationId },
+    { 'rider.riderId': riderId }
+  );
+  donation.listingStatus = status;
+  let updateDonationStatus = await Donation.findOneAndUpdate(
+    { _id: donationId },
+    { "rider.riderId": riderId },
+    {
+      $set: {
+        donationTrackingStatus: status
+      }
+    },{
+      new: true
+    }
+  );
+  if ( !updateDonationStatus ) {
+    throw new ApiError(401, "Dontion not found and status not updated.")
+  };
+  return res.status(201).json(
+    new ApiResponse(201, updateDonationStatus, "Donation updated successfully.")
+  )
+});
 
 const patchAddAvailableTimings = asyncHandler( async(req, res) => {
     const {riderId, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday} = req.body;

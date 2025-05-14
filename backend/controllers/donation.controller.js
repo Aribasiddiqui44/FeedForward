@@ -128,7 +128,8 @@ export const getDonationsForUser = asyncHandler(async (req, res) => {
 // 3. Get donations for receiver (receiverId matched)
 export const getDonationsForReceiver = async (req, res) => {
   try {
-    const receiverId = req.user?.id; // This comes from verifyJWT
+    // have to change it to receiver Id, and send receivrId from frontend to fetch the donations accepted by receiver.
+    const receiverId = req.user?._id; // This comes from verifyJWT
 
     if (!receiverId) {
       return res.status(400).json({ message: 'Receiver ID is missing.' });

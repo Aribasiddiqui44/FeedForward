@@ -91,7 +91,7 @@ const donationSchema = new Schema({
             timeUnit: { type: String }
         }
     },
-
+    isRiderAssigned: { type: Boolean, default: false },
     rider: {
         riderId: {
             type: Schema.Types.ObjectId,
@@ -100,6 +100,12 @@ const donationSchema = new Schema({
         riderName: { type: String },
         riderPhone: { type: String }
     },
+    donationTrackingStatus: {
+        type: String,
+        default: "waiting for receiver",
+        enum: ["waiting for receiver", "preparation", "Volunteer reached", "Collected & on the way", "reached destination", "successfully handed donation"]
+    }
+    ,
     donatedBy: {
         type: Schema.Types.ObjectId,
         ref: 'User',
