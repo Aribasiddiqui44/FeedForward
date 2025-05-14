@@ -196,6 +196,8 @@ export default function MyOrder() {
               type={order.type}
               status={order.time}
               rest_name={order.donorName}
+              phone={order.donorPhone}
+              showPhoneNumber={activeTab === 'Ongoing'}
               statusTime={order.date}
               imageSource={order.imageSource}
               showTrackButton={activeTab === 'Ongoing'}
