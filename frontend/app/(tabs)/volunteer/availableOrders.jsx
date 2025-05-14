@@ -1,19 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter, useNavigation } from 'expo-router';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useEffect } from 'react';
+import { useNavigation } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import ChatButton from '../../../components/ChatButton';
 
 const AvailableOrdersScreen = () => {
   const navigation = useNavigation();
-  
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, []);
 
   const orders = [
     {
@@ -45,6 +38,16 @@ const AvailableOrdersScreen = () => {
     }
   ];
 
+  const handleConfirm = (orderId) => {
+    console.log('Confirmed order:', orderId);
+    // Add your confirmation logic here
+  };
+
+  const handleDelete = (orderId) => {
+    console.log('Deleted order:', orderId);
+    // Add your deletion logic here
+  };
+
   const navigateToOrderDetails = (order) => {
     navigation.navigate('OrderDetails', { order });
   };
@@ -60,28 +63,49 @@ const AvailableOrdersScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      
       {orders.map((order) => (
-        <TouchableOpacity 
-          key={order.id} 
-          style={styles.orderCard}
-          onPress={() => navigateToOrderDetails(order)}
-        >
-          <Image source={order.foodPic} style={styles.foodImage} />
-          
-          <View style={styles.orderInfo}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.foodName}>{order.foodName}</Text>
-              <Text style={[styles.type, getTypeStyle(order.type)]}>
-                {order.type.toUpperCase()}
+        <View key={order.id} style={styles.card}>
+          <TouchableOpacity 
+            style={styles.contentContainer}
+            onPress={() => navigateToOrderDetails(order)}
+          >
+            <Image source={order.foodPic} style={styles.foodImage} />
+            
+            <View style={styles.orderInfo}>
+              <View style={styles.titleRow}>
+                <Text style={styles.foodTitle}>{order.foodName}</Text>
+                <Text style={[styles.type, getTypeStyle(order.type)]}>
+                  {order.type.toUpperCase()}
+                </Text>
+              </View>
+              <Text style={styles.idText}>Order ID: {order.id.slice(-6).toUpperCase()}</Text>
+              <Text style={styles.detailText}>Pickup by: {order.pickupTime}</Text>
+              <Text style={[styles.detailText, { color: Colors.primary }]}>
+                Price: {order.price}
               </Text>
             </View>
-            <Text style={styles.orderId}>Order ID: {order.id}</Text>
-            <Text style={styles.pickupTime}>Pickup by: {order.pickupTime}</Text>
-            <Text style={styles.price}>{order.price}</Text>
+            <ChatButton receiverId={order.orgId} />
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+          <View style={styles.buttonRow}>
+            <TouchableOpacity 
+              style={styles.confirmButton}
+              onPress={() => handleConfirm(order.id)}
+            >
+              <Text style={styles.confirmText}>Confirm</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.outlinedButton, { borderColor: Colors.primary }]}
+              onPress={() => handleDelete(order.id)}
+            >
+              <Text style={[styles.outlinedButtonText, { color: Colors.primary }]}>
+                Delete
+              </Text>
+            </TouchableOpacity>
           </View>
-           <ChatButton receiverId="3" /> 
-        </TouchableOpacity>
+        </View>
       ))}
     </ScrollView>
   );
@@ -90,21 +114,23 @@ const AvailableOrdersScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F8F8F8',
     padding: 15,
   },
-  orderCard: {
+  card: {
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderRadius: 15,
     padding: 15,
     marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  contentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   foodImage: {
     width: 70,
@@ -115,33 +141,27 @@ const styles = StyleSheet.create({
   orderInfo: {
     flex: 1,
   },
-  titleContainer: {
+  titleRow: {
     width: '110%',
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 5
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  foodName: {
-    fontSize: 14,
+  foodTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginRight: 10,
   },
-  orderId: {
-    fontSize: 13,
+  idText: {
+    fontSize: 12,
     color: '#666',
-    marginBottom: 5,
+    marginBottom: 4,
   },
-  pickupTime: {
-    fontSize: 13,
+  detailText: {
+    fontSize: 14,
     color: '#666',
-    marginBottom: 5,
-  },
-  price: {
-    fontSize: 13,
-    color: '#FF5722',
-    marginBottom: 5,
+    marginBottom: 4,
   },
   type: {
     fontSize: 12,
@@ -152,20 +172,49 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   freeType: {
-    backgroundColor: '#E8F5E9',
-    color: '#4CAF50',
+    backgroundColor: '#c20b00',
+    color: Colors.White,
   },
   directType: {
-    backgroundColor: '#E3F2FD',
-    color: '#2196F3',
+    backgroundColor: Colors.primary,
+    color: Colors.White,
   },
   negotiatedType: {
-    backgroundColor: '#FFF3E0',
-    color: '#FF9800',
+    backgroundColor: '#008000',
+    color: Colors.White,
   },
-  chatButton: {
-    padding: 8,
-    marginLeft: 10,
+  divider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 10,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: Colors.primary,
+    paddingVertical: 10,
+    borderRadius: 25,
+    marginRight: 5,
+    alignItems: 'center',
+  },
+  outlinedButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 25,
+    marginLeft: 5,
+    borderWidth: 1.5,
+    alignItems: 'center',
+  },
+  confirmText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  outlinedButtonText: {
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });
 
