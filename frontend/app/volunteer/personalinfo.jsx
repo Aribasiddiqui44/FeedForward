@@ -1,167 +1,4 @@
-// import React, { useState, useEffect } from 'react';
-// import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Picker } from 'react-native';
-// import { Colors } from '../../constants/Colors';
-// import Head from '../../components/header';
-// import { useRouter, useNavigation } from 'expo-router';
-// import { MaterialIcons } from '@expo/vector-icons';
-// import { Alert } from 'react-native';
-// import apiClient from '../../utils/apiClient';
-// const VolunteerPersonalInfo = () => {
-//   const navigation = useNavigation();
-//   const router = useRouter();
-//   const [cnicNumber, setCnicNumber] = useState('');
-//   const [age, setAge] = useState('');
-//   const [vehicle, setVehicle] = useState('');
-//   const [experience, setExperience] = useState('');
-//   const [motivation, setMotivation] = useState('');
-//   const [hours, setHours] = useState('5');
 
-//   const handleBackPress = () => {
-//     router.back();
-//   };
-//   const incrementHours = () => {
-//     setHours(prev => {
-//       const num = Number(prev); // Ensure numeric type
-//       return num + 1;
-//     });
-//   };
-
-//   const decrementHours = () => {
-//     setHours(prev => {
-//       const num = Number(prev); // Ensure numeric type
-//       return num > 1 ? num - 1 : 1; // Minimum value of 1
-//     });
-//   };
-
-//   useEffect(() => {
-//         navigation.setOptions({
-//           headerShown: false,
-//         });
-//       }, []);
-
-//   const handleSubmit = () => {
-//   // Check if any required field is empty
-//   if (
-//     cnicNumber.trim() === '' ||
-//     age.trim() === '' ||
-//     vehicle.trim() === '' ||
-//     experience.trim() === '' ||
-//     motivation.trim() === '' ||
-//     motivation.trim() === ''
-//   ){
-//     Alert.alert(
-//       'Incomplete Form',
-//       'Please fill in all the required fields before continuing.'
-//     );
-//     return; // Exit the function if form is incomplete
-//   }
-
-//   // If all fields are filled, navigate
-//   router.push('/volunteer/submissionsuccess');
-// };
-
-//   return (
-//     <View style={styles.container}>
-//       <Head label="Personal Information" showBackOption={true} onBackPress={handleBackPress} />
-      
-//       <ScrollView contentContainerStyle={styles.content}>
-    
-//         <View style={styles.section}>
-//           <Text style={styles.label}>Enter your CNIC number</Text>
-//           <TextInput
-//             style={styles.input}
-//             value={cnicNumber}
-//             onChangeText={setCnicNumber}
-//             keyboardType="numeric"
-//             placeholder="42211-2953987-6"
-//             placeholderTextColor={Colors.Grey}
-//           />
-//         </View>
-
-//         {/* Age */}
-//         <View style={styles.section}>
-//           <Text style={styles.label}>What's your age?</Text>
-//           <TextInput
-//             style={styles.input}
-//             value={age}
-//             onChangeText={setAge}
-//             keyboardType="numeric"
-//             placeholder="22"
-//             placeholderTextColor={Colors.Grey}
-//           />
-//         </View>
-
-//         {/* Vehicle */}
-//         <View style={styles.section}>
-//           <Text style={styles.label}>What vehicle do you have?</Text>
-//           <TextInput
-//             style={styles.input}
-//             value={vehicle}
-//             onChangeText={setVehicle}
-//             placeholder="e.g. Motorcycle, Car, Bicycle"
-//             placeholderTextColor={Colors.Grey}
-//           />
-//         </View>
-
-//         {/* Previous Experience */}
-//         <View style={styles.section}>
-//           <Text style={styles.label}>Have you worked as a rider before?</Text>
-//           <View style={styles.pickerContainer}>
-//             <Picker
-//               selectedValue={experience}
-//               onValueChange={(itemValue) => setExperience(itemValue)}
-//               style={styles.picker}
-//             >
-//               <Picker.Item label="Select an option" value="" color={Colors.Grey} />
-//               <Picker.Item label="Yes" value="yes" />
-//               <Picker.Item label="No" value="no" />
-//               <Picker.Item label="Some experience" value="some" />
-//             </Picker>
-//           </View>
-//         </View>
-
-//         {/* Motivation */}
-//         <View style={styles.section}>
-//           <Text style={styles.label}>Why do you want to join Feed Forward as a Volunteer?</Text>
-//           <TextInput
-//             style={[styles.input, styles.multilineInput]}
-//             value={motivation}
-//             onChangeText={setMotivation}
-//             multiline
-//             numberOfLines={4}
-//             placeholder="I want to do as a social work.."
-//             placeholderTextColor={Colors.Grey}
-//           />
-//         </View>
-//          <View style={styles.section}>
-//           <Text style={styles.label}>How many hours can you dedicate to volunteer service?</Text>
-//           <View style={styles.hoursContainer}>
-//             <TouchableOpacity 
-//               style={styles.hoursButton} 
-//               onPress={decrementHours}
-//             >
-//               <MaterialIcons name="remove" size={24} color={Colors.primary} />
-//             </TouchableOpacity>
-            
-//             <Text style={styles.hoursValue}>{hours}</Text>
-            
-//             <TouchableOpacity 
-//               style={styles.hoursButton} 
-//               onPress={incrementHours}
-//             >
-//               <MaterialIcons name="add" size={24} color={Colors.primary} />
-//             </TouchableOpacity>
-//           </View>
-//         </View>
-
-//         {/* Submit Button */}
-//         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-//           <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
-//         </TouchableOpacity>
-//       </ScrollView>
-//     </View>
-//   );
-// };
 import React, { useState,useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Picker, Alert, ActivityIndicator } from 'react-native';
 import { Colors } from '../../constants/Colors';
@@ -172,15 +9,14 @@ import apiClient from '../../utils/apiClient';
 import { useLocalSearchParams } from 'expo-router';
 const VolunteerPersonalInfo = () => {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const userId = params.userId; 
   const navigation=useNavigation();
   useEffect(() => {
-         navigation.setOptions({
-           headerShown: false,
-         });
-       }, []);
-
-   const params = useLocalSearchParams();
-  const userId = params.userId;
+        navigation.setOptions({
+          headerShown: false,
+        });
+      }, []);
   const [formData, setFormData] = useState({
     cnicNumber: '',
     age: '',
@@ -251,7 +87,6 @@ const VolunteerPersonalInfo = () => {
     }
   };
 
-if (!isSubmitted) {
   return (
     <View style={styles.container}>
       <Head label="Personal Information" showBackOption={true} onBackPress={() => router.back()} />
@@ -355,28 +190,6 @@ if (!isSubmitted) {
       </ScrollView>
     </View>
   );
-}
-return (
-      <View style={styles.container}>
-        <Head label="Personal Information" showBackOption={true} onBackPress={handleBackPress} />
-        
-        <View style={styles.successContainer}>
-          <Text style={styles.successMessage}>
-            Your personal information has been submitted successfully!
-          </Text>
-          <Text style={styles.nextStepMessage}>
-            Please proceed to document submission to complete your application.
-          </Text>
-          
-          <TouchableOpacity 
-            style={styles.submitButton} 
-            onPress={handleSubmit}
-          >
-            <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
 };
 
 const styles = StyleSheet.create({
@@ -492,3 +305,10 @@ const styles = StyleSheet.create({
 });
 
 export default VolunteerPersonalInfo;
+
+
+
+
+
+
+
