@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Picker } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import {Picker} from '@react-native-picker/picker'
 import { Colors } from '../../constants/Colors';
 import Head from '../../components/header';
 import { useRouter, useNavigation } from 'expo-router';
@@ -41,26 +42,28 @@ const VolunteerPersonalInfo = () => {
       }, []);
 
   const handleSubmit = () => {
-  // Check if any required field is empty
-  if (
-    cnicNumber.trim() === '' ||
-    age.trim() === '' ||
-    vehicle.trim() === '' ||
-    experience.trim() === '' ||
-    motivation.trim() === '' ||
-    motivation.trim() === ''
-  ){
-    Alert.alert(
-      'Incomplete Form',
-      'Please fill in all the required fields before continuing.'
-    );
-    return; // Exit the function if form is incomplete
-  }
+    // Check if any required field is empty
+    if (
+      cnicNumber.trim() === '' ||
+      age.trim() === '' ||
+      vehicle.trim() === '' ||
+      experience.trim() === '' ||
+      motivation.trim() === ''
+    ){
+      Alert.alert(
+        'Incomplete Form',
+        'Please fill in all the required fields before continuing.'
+      );
+      return; // Exit the function if form is incomplete
+    }
 
-  // If all fields are filled, navigate
-  router.push('/volunteer/submissionsuccess');
-  setIsSubmitted(true);
-};
+    // If all fields are filled, set submitted to true
+    setIsSubmitted(true);
+  };
+
+  const handleDocumentSubmission = () => {
+    router.push('/volunteer/documentsubmission');
+  };
 
 if (!isSubmitted) {
   return (
@@ -179,7 +182,7 @@ return (
           
           <TouchableOpacity 
             style={styles.submitButton} 
-            onPress={handleSubmit}
+            onPress={handleDocumentSubmission}
           >
             <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
           </TouchableOpacity>

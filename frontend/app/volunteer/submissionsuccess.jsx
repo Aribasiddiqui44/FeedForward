@@ -11,7 +11,7 @@ const SubmissionSuccess = () => {
   const router = useRouter();
 
   const handleBackToHome = () => {
-    router.replace('/volunteer/available_orders');
+    router.replace('/volunteer/availableOrders');
   };
 
   useEffect(() => {
