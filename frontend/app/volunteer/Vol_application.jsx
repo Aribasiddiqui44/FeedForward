@@ -5,11 +5,12 @@ import Head from '../../components/header';
 import {useRouter, useNavigation } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useEffect } from 'react';
-
+import { useLocalSearchParams } from 'expo-router';
 const VolunteerApplication = () => {
   const navigation =  useNavigation(); 
   const router = useRouter();
-
+  const params = useLocalSearchParams();
+  const userId = params.userId;
   const handleBackPress = () => {
     router.back();
   };
@@ -21,12 +22,17 @@ const VolunteerApplication = () => {
     }, []);
 
   const navigateToPersonalInfo = () => {
-    router.push('/volunteer/personalinfo');
+    router.push({
+      pathname: '/volunteer/personalinfo',
+      params: { userId } 
+    });
   };
-
   const navigateToDocumentSubmission = () => {
-    router.push('/volunteer/documentsubmission');
-  };
+    router.push({
+      pathname: '/volunteer/documentsubmission',
+      params: { userId } 
+    });}
+  
 
   return (
     <View style={styles.container}>
