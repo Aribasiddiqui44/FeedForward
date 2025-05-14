@@ -25,7 +25,7 @@ const VolunteerApplication = () => {
   };
 
   const navigateToDocumentSubmission = () => {
-    router.push('/volunteer/document-submission');
+    router.push('/volunteer/documentsubmission');
   };
 
   return (

@@ -4,6 +4,7 @@ import { Colors } from '../../constants/Colors';
 import Head from '../../components/header';
 import { useRouter, useNavigation } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Alert } from 'react-native';
 
 const VolunteerPersonalInfo = () => {
   const navigation = useNavigation();
@@ -12,7 +13,7 @@ const VolunteerPersonalInfo = () => {
   const [age, setAge] = useState('');
   const [vehicle, setVehicle] = useState('');
   const [experience, setExperience] = useState('');
-  const [motivation, setMotivation] = useState('Write your answer here...');
+  const [motivation, setMotivation] = useState('');
   const [hours, setHours] = useState('5');
 
   const handleBackPress = () => {
@@ -39,9 +40,25 @@ const VolunteerPersonalInfo = () => {
       }, []);
 
   const handleSubmit = () => {
-    // Handle form submission
-    router.push('/volunteer/document-submission');
-  };
+  // Check if any required field is empty
+  if (
+    cnicNumber.trim() === '' ||
+    age.trim() === '' ||
+    vehicle.trim() === '' ||
+    experience.trim() === '' ||
+    motivation.trim() === '' ||
+    motivation.trim() === ''
+  ){
+    Alert.alert(
+      'Incomplete Form',
+      'Please fill in all the required fields before continuing.'
+    );
+    return; // Exit the function if form is incomplete
+  }
+
+  // If all fields are filled, navigate
+  router.push('/volunteer/submissionsuccess');
+};
 
   return (
     <View style={styles.container}>
@@ -57,6 +74,7 @@ const VolunteerPersonalInfo = () => {
             onChangeText={setCnicNumber}
             keyboardType="numeric"
             placeholder="42211-2953987-6"
+            placeholderTextColor={Colors.Grey}
           />
         </View>
 
@@ -69,6 +87,7 @@ const VolunteerPersonalInfo = () => {
             onChangeText={setAge}
             keyboardType="numeric"
             placeholder="22"
+            placeholderTextColor={Colors.Grey}
           />
         </View>
 
@@ -80,6 +99,7 @@ const VolunteerPersonalInfo = () => {
             value={vehicle}
             onChangeText={setVehicle}
             placeholder="e.g. Motorcycle, Car, Bicycle"
+            placeholderTextColor={Colors.Grey}
           />
         </View>
 
@@ -92,7 +112,7 @@ const VolunteerPersonalInfo = () => {
               onValueChange={(itemValue) => setExperience(itemValue)}
               style={styles.picker}
             >
-              <Picker.Item label="Select an option" value="" />
+              <Picker.Item label="Select an option" value="" color={Colors.Grey} />
               <Picker.Item label="Yes" value="yes" />
               <Picker.Item label="No" value="no" />
               <Picker.Item label="Some experience" value="some" />
@@ -109,6 +129,8 @@ const VolunteerPersonalInfo = () => {
             onChangeText={setMotivation}
             multiline
             numberOfLines={4}
+            placeholder="I want to do as a social work.."
+            placeholderTextColor={Colors.Grey}
           />
         </View>
          <View style={styles.section}>
@@ -160,7 +182,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   input: {
-    color: Colors.Grey,
+    color: Colors.dark,
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 12,
@@ -169,10 +191,11 @@ const styles = StyleSheet.create({
     borderColor: Colors.Grey,
     marginBottom: 15
   },
+  
   multilineInput: {
     height: 100,
     textAlignVertical: 'top',
-    color: Colors.Grey,
+    color: Colors.dark,
     marginBottom: 10
   },
   pickerContainer: {
@@ -187,7 +210,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: '100%',
     borderRadius: 20,
-    color: Colors.Grey,
+    color: Colors.dark,
     fontSize: 12
   },
   submitButton: {
