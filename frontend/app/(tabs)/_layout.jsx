@@ -16,6 +16,7 @@ import apiClient from '../../utils/apiClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Layout() {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [isSearchVisible, setSearchVisible] = useState(false);
   const [userType, setUserType] = useState(null);
   const navigation = useNavigation();
   const router = useRouter();
@@ -125,7 +126,24 @@ export default function Layout() {
 
   return (
     <View style={styles.container}>
-      <Head label='Feed Forward' showMenuOption={true} onMenuPress={() => setIsDrawerVisible(true)} showSearchOption={true}></Head>
+      {/* <Head label='Feed Forward' showMenuOption={true} onMenuPress={() => setIsDrawerVisible(true)} showSearchOption={userType === 'receiver'}></Head> */}
+      <Head
+  label='Feed Forward'
+  showMenuOption={true}
+  showSearchOption={userType === 'receiver'}
+  onSearchPress={() => {
+  const newSearchState = params?.showSearch !== 'true';
+  router.push({
+    pathname: '/(tabs)/receiver/restaurantListing',
+    params: { 
+      showSearch: String(newSearchState),
+      // Add a timestamp to force update
+      refresh: Date.now().toString() 
+    },
+  });
+}}
+  onMenuPress={() => setIsDrawerVisible(true)}
+/>
 
       {/* Bottom Tabs - Different tabs based on user type */}
       <Tabs

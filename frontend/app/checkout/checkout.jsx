@@ -28,9 +28,7 @@ export default function Checkout() {
       Alert.alert('Error', 'Please select at least one portion');
       return;
     }
-  
     setIsLoading(true);
-    
     try {
       // Prepare the complete checkout payload
       let scheduledTime;
@@ -40,7 +38,6 @@ export default function Checkout() {
       } else {
         scheduledTime = pickupTimeRange; // Already in correct format
       }
-  
       const payload = {
         requestType: 'direct',
         donation: foodId, 
@@ -205,32 +202,7 @@ export default function Checkout() {
 
         {/* Payment Methods */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Payment Method</Text>
-          
-          <TouchableOpacity 
-            style={styles.paymentOption}
-            onPress={() => handlePaymentMethod('card')}
-            disabled={isLoading}
-          >
-            <View style={styles.paymentIcon}>
-              <Ionicons name="card-outline" size={24} color={Colors.primary} />
-            </View>
-            <Text style={styles.paymentText}>Credit/Debit Card</Text>
-            <MaterialIcons name="arrow-forward-ios" size={16} color={Colors.gray} />
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.paymentOption}
-            onPress={() => handlePaymentMethod('bank_transfer')}
-            disabled={isLoading}
-          >
-            <View style={styles.paymentIcon}>
-              <Ionicons name="cash-outline" size={24} color={Colors.primary} />
-            </View>
-            <Text style={styles.paymentText}>Bank Transfer</Text>
-            <MaterialIcons name="arrow-forward-ios" size={16} color={Colors.gray} />
-          </TouchableOpacity>
-          
+          <Text style={styles.sectionTitle}>Payment Method</Text>    
           <TouchableOpacity 
             style={styles.paymentOption}
             onPress={() => handlePaymentMethod('cash_on_pickup')}

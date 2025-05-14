@@ -28,8 +28,10 @@ export default function MyOrder() {
       if (response.data?.success) {
         const formattedOrders = response.data.data.map(order => ({
           id: order._id,
+          time: order.pickupDetails?.scheduledTime ? 
+            `${order.pickupDetails.scheduledTime.startingTime || 'N/A'} - ${order.pickupDetails.scheduledTime.endingTime || 'N/A'}` : 
+            '1pm',
           foodName: order.donation?.donationFoodTitle || 'Food Item',
-          description: order.donation?.donationDescription || 'No description available',
           total: order.orderTotal ? `${order.orderTotal} PKR` : '0 PKR',
           portions: order.items?.[0]?.quantity || 1,
           type: order.paymentStatus === 'completed' ? 'Paid' : 'Unpaid',
@@ -192,8 +194,9 @@ export default function MyOrder() {
               total={order.total}
               portions={order.portions}
               type={order.type}
+              status={order.time}
+              rest_name={order.donorName}
               statusTime={order.date}
-              date={order.date}
               imageSource={order.imageSource}
               showTrackButton={activeTab === 'Ongoing'}
               onTrackPress={() => handleTrackPress(order)}
