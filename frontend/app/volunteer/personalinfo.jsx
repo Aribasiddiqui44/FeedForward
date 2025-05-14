@@ -13,10 +13,23 @@ const VolunteerPersonalInfo = () => {
   const [vehicle, setVehicle] = useState('');
   const [experience, setExperience] = useState('');
   const [motivation, setMotivation] = useState('Write your answer here...');
-  const [hours, setHours] = useState('');
+  const [hours, setHours] = useState('5');
 
   const handleBackPress = () => {
     router.back();
+  };
+  const incrementHours = () => {
+    setHours(prev => {
+      const num = Number(prev); // Ensure numeric type
+      return num + 1;
+    });
+  };
+
+  const decrementHours = () => {
+    setHours(prev => {
+      const num = Number(prev); // Ensure numeric type
+      return num > 1 ? num - 1 : 1; // Minimum value of 1
+    });
   };
 
   useEffect(() => {
@@ -43,6 +56,7 @@ const VolunteerPersonalInfo = () => {
             value={cnicNumber}
             onChangeText={setCnicNumber}
             keyboardType="numeric"
+            placeholder="42211-2953987-6"
           />
         </View>
 
@@ -54,6 +68,7 @@ const VolunteerPersonalInfo = () => {
             value={age}
             onChangeText={setAge}
             keyboardType="numeric"
+            placeholder="22"
           />
         </View>
 
@@ -67,8 +82,6 @@ const VolunteerPersonalInfo = () => {
             placeholder="e.g. Motorcycle, Car, Bicycle"
           />
         </View>
-
-        <View style={styles.divider} />
 
         {/* Previous Experience */}
         <View style={styles.section}>
@@ -98,25 +111,30 @@ const VolunteerPersonalInfo = () => {
             numberOfLines={4}
           />
         </View>
-
-        <View style={styles.divider} />
-
-        {/* Availability */}
-        <View style={styles.section}>
+         <View style={styles.section}>
           <Text style={styles.label}>How many hours can you dedicate to volunteer service?</Text>
-          <TextInput
-            style={styles.input}
-            value={hours}
-            onChangeText={setHours}
-            placeholder="e.g. 10 hours per week"
-            keyboardType="numeric"
-          />
+          <View style={styles.hoursContainer}>
+            <TouchableOpacity 
+              style={styles.hoursButton} 
+              onPress={decrementHours}
+            >
+              <MaterialIcons name="remove" size={24} color={Colors.primary} />
+            </TouchableOpacity>
+            
+            <Text style={styles.hoursValue}>{hours}</Text>
+            
+            <TouchableOpacity 
+              style={styles.hoursButton} 
+              onPress={incrementHours}
+            >
+              <MaterialIcons name="add" size={24} color={Colors.primary} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Submit Button */}
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
-          <MaterialIcons name="arrow-forward" size={24} color="white" />
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -132,35 +150,30 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
   section: {
     marginBottom: 20,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     color: Colors.dark,
-    marginBottom: 8,
+    marginBottom: 15,
   },
   input: {
     color: Colors.Grey,
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 12,
-    fontSize: 16,
+    fontSize: 13,
     borderWidth: 1,
     borderColor: Colors.Grey,
+    marginBottom: 15
   },
   multilineInput: {
     height: 100,
     textAlignVertical: 'top',
-    color: Colors.Grey
+    color: Colors.Grey,
+    marginBottom: 10
   },
   pickerContainer: {
     backgroundColor: 'white',
@@ -172,23 +185,48 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 50,
-    width: 50,
+    width: '100%',
     borderRadius: 20,
-    color: Colors.Grey
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.lightGray,
-    marginVertical: 20,
+    color: Colors.Grey,
+    fontSize: 12
   },
   submitButton: {
     backgroundColor: Colors.primary,
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 20,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
+  },
+  hoursContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
+  },
+  hoursButton: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  hoursValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginHorizontal: 20,
+    minWidth: 40,
+    textAlign: 'center',
+    color: Colors.Grey,
+  },
+  hoursLabel: {
+    textAlign: 'center',
+    color: Colors.Grey,
+    fontSize: 14,
   },
   submitButtonText: {
     color: 'white',
