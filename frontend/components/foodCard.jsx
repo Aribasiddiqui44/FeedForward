@@ -8,10 +8,12 @@ export default function FoodCard({
   total = "0 PKR",
   portions = "0",
   type = "Paid", 
-  status = "Pick up time: 00:00 am", 
+  status = "Pick up time: 00:00 am",
+  phone="",
   statusTime = "",
   rest_name="",
   imageSource,
+  showPhoneNumber,
   showTrackButton,
   showCancelOption,
   showRateOption,
@@ -31,7 +33,6 @@ export default function FoodCard({
   const [completePressed, setCompletePressed] = useState(false);
   const [checkoutPressed, setCheckoutPressed] = useState(false);
 
-  // Card content component to avoid duplication
   const CardContent = () => (
     <>
       <View style={styles.cardContainer}>
@@ -45,18 +46,26 @@ export default function FoodCard({
             
           </View>
           {/* <View style={styles.row}> */}
+          <View style={styles.row}>
             <Text style={styles.total}>Donor: {rest_name}</Text>
-          {/* </View> */}
-          {/* <Text style={styles.description} numberOfLines={1}>
-            {description}
-          </Text> */}
+          </View>
+            
+          <View style={styles.row}>
+            {showPhoneNumber && (
+            <Text style={styles.total}>Phone: {phone}</Text>
+        )}
+          </View>
+            
           <View style={styles.row}>
             <Text style={styles.total}>Total: {total}</Text>
             <Text style={styles.portions}>Portions: {portions}</Text>
           </View>
           
           <Text style={styles.status}>
-            <Text>Pick Up Time: {status} </Text> {statusTime && <Text>{statusTime}</Text>}
+            <Text>Pick Up Time: </Text> {status && <Text>{status}</Text>}
+          </Text>
+          <Text style={styles.status}>
+            <Text>Date: </Text> {statusTime && <Text>{statusTime}</Text>}
           </Text>
         </View>
       </View>
@@ -230,11 +239,13 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     flex: 1,
+  
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop:8
   },
   foodName: {
     fontSize: 16,
@@ -257,6 +268,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginTop:4
   },
   total: {
     fontSize: 12,
