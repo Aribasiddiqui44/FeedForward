@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image,Alert } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import Head from '../../components/header';
 import { useRouter, useNavigation } from 'expo-router';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-
+import { useLocalSearchParams } from 'expo-router';
+import apiClient from '../../utils/apiClient';
 const DocumentSubmission = () => {
   const navigation = useNavigation();  
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const userId = params.userId;
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [nationalIdPhoto, setNationalIdPhoto] = useState(null);
   const [drivingLicensePhoto, setDrivingLicensePhoto] = useState(null);
@@ -23,10 +26,43 @@ const DocumentSubmission = () => {
     router.back();
   };
 
-  const handleSubmit = () => {
-    // Handle form submission
-    router.push('/volunteer/submissionsuccess');
-  };
+//  const handleSubmit = async () => {
+//   try {
+//     if (!profilePhoto || !nationalIdPhoto || !drivingLicensePhoto) {
+//       Alert.alert("Missing Images", "Please upload all required documents.");
+//       return;
+//     }
+
+//     const formData = new FormData();
+//     formData.append('profilePhoto', {
+//       uri: profilePhoto,
+//       type: 'image/jpeg',
+//       name: 'profile.jpg',
+//     });
+//     formData.append('cnicFront', {
+//       uri: nationalIdPhoto,
+//       type: 'image/jpeg',
+//       name: 'cnic_front.jpg',
+//     });
+//     formData.append('licenseFront', {
+//       uri: drivingLicensePhoto,
+//       type: 'image/jpeg',
+//       name: 'license_front.jpg',
+//     });
+//     console.log([...formData]); 
+//     const response = await apiClient.patch(`/api/riders/${userId}/documents`, formData);
+
+//     if (response.status === 200) {
+//       router.push('/volunteer/submissionsuccess');
+//     }
+//   } catch (error) {
+//     console.error('Upload failed:', error);
+//     Alert.alert('Upload Error', error.response?.data?.message || 'Something went wrong');
+//   }
+// };
+const handleSubmit=()=>{      router.push('/volunteer/submissionsuccess');
+}
+
 
   const pickImage = async (setImage) => {
     let result = await ImagePicker.launchImageLibraryAsync({

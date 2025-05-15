@@ -29,7 +29,9 @@ const VolunteerPersonalInfo = () => {
 
 
   const handleDocumentSubmission = () => {
-    router.push('/volunteer/documentsubmission');
+    router.push({pathname:'/volunteer/documentsubmission',
+      params:{ userId: userId }
+    });
 
   const handleChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -199,7 +201,7 @@ const VolunteerPersonalInfo = () => {
 }
 return (
       <View style={styles.container}>
-        <Head label="Personal Information" showBackOption={true} onBackPress={handleBackPress} />
+        <Head label="Personal Information" showBackOption={true} onBackPress={() => router.back()} />
         
         <View style={styles.successContainer}>
           <Text style={styles.successMessage}>
