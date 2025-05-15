@@ -121,7 +121,7 @@ export default function Layout() {
   const menuItems =
   userType === 'donor' ? donorMenuItems :
   userType === 'receiver' ? receiverMenuItems :
-  volunteerMenuItems;
+  userType === 'volunteer' ? volunteerMenuItems:[];
  
 
   return (

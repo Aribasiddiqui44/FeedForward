@@ -1,151 +1,129 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView ,Alert} from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import ChatButton from '../../../components/ChatButton';
+import apiClient from '../../../utils/apiClient';
 
 const AvailableOrdersScreen = () => {
   const router = useRouter();
-  const [availableOrders, setAvailableOrders] = useState([
-    {
-      id: 'ORD-12345',
-      foodName: 'Chicken Biryani',
-      foodPic: require('../../../assets/images/biryaniPng.png'),
-      pickupTime: '11:00 PM',
-      price: '0 PKR',
-      type: 'Free',
-      orgId: 'ORG-789',
-      donorName: 'Hot N Spicy',
-      donorAddress: 'North Nazimabad, Block L, Karachi',
-      receiverName: 'Food Savers',
-      receiverAddress: 'C-456, Block 18, F.B Area, Karachi',
-      toReceiver: '2km',
-      toDonor: '3km'
-    },
-    {
-      id: 'ORD-67890',
-      foodName: 'Burgers',
-      foodPic: require('../../../assets/images/burger.jpeg'), 
-      pickupTime: '08:30 PM',
-      price: '250 PKR',
-      type: 'Direct',
-      orgId: 'ORG-456',
-      donorName: 'Burger King',
-      donorAddress: 'Gulshan-e-Iqbal, Karachi',
-      receiverName:'Rizq Foundation',
-      receiverAddress: 'D-789, Block 5, Clifton, Karachi',
-      toReceiver: '2km',
-      toDonor: '3km'
-    },
-    {
-      id: 'ORD-13579',
-      foodName: 'Pizza',
-      foodPic: require('../../../assets/images/burger.jpeg'),
-      pickupTime: '09:15 PM',
-      price: '100 PKR',
-      type: 'Negotiated',
-      orgId: 'ORG-123',
-      donorName:'Lal Qila',
-      pickupLocation: 'Tariq Road, Karachi',
-      receiverName: 'Alfalah',
-      receiverAddress: 'A-123, Block 10, Gulistan-e-Johar, Karachi',
-      toReceiver: '2km',
-      toDonor: '3km'
-    }
-  ]);
-
+  const [availableOrders, setAvailableOrders] = useState([]);
   const [acceptedOrders, setAcceptedOrders] = useState([]);
 
-  const handleConfirm = (orderId) => {
-    // Find the order to accept
-    const orderToAccept = availableOrders.find(order => order.id === orderId);
-    
-    if (orderToAccept) {
-      // Add to accepted orders
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await apiClient.get('/order/rider/available');
+        setAvailableOrders(response.data?.data || []);
+      } catch (error) {
+        console.error("Failed to fetch orders", error);
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  // const handleConfirm = (orderId) => {
+  //   const orderToAccept = availableOrders.find(order => order._id === orderId);
+  //   if (orderToAccept) {
+  //     setAcceptedOrders(prev => [...prev, orderToAccept]);
+  //     setAvailableOrders(prev => prev.filter(order => order._id !== orderId));
+  //     console.log('Order accepted:', orderId);
+  //   }
+  // };
+
+  // const handleDecline = (orderId) => {
+  //   setAvailableOrders(prev => prev.filter(order => order._id !== orderId));
+  //   console.log('Order declined:', orderId);
+  // };
+const handleConfirm = async (orderId) => {
+  const orderToAccept = availableOrders.find(order => order._id === orderId);
+  if (!orderToAccept) return;
+
+  try {
+    const response = await apiClient.patch(`/order/${orderId}/rider-response`, {
+      action: 'accept'
+    });
+
+    if (response.status === 200) {
       setAcceptedOrders(prev => [...prev, orderToAccept]);
-      
-      // Remove from available orders
-      setAvailableOrders(prev => prev.filter(order => order.id !== orderId));
-      
-      // Here you would typically also make an API call to update the order status
-      console.log('Order accepted:', orderId);
-      // apiClient.patch(`/orders/${orderId}/accept`, { status: 'accepted' });
+      setAvailableOrders(prev => prev.filter(order => order._id !== orderId));
+      console.log('Order accepted on backend:', orderId);
     }
-  };
+  } catch (error) {
+    console.error('Failed to accept order:', error);
+    Alert.alert("Failed to accept", error.response?.data?.message || "Please try again");
+  }
+};
 
-  const handleDecline = (orderId) => {
-    // Remove the order from available orders
-    setAvailableOrders(prev => prev.filter(order => order.id !== orderId));
-    
-    // Here you would typically also make an API call to update the order status
-    console.log('Order declined:', orderId);
-    // apiClient.patch(`/orders/${orderId}/decline`, { status: 'declined' });
-  };
+const handleDecline = async (orderId) => {
+  try {
+    const response = await apiClient.patch(`/order/${orderId}/rider-response`, {
+      action: 'decline'
+    });
 
+    if (response.status === 200) {
+      setAvailableOrders(prev => prev.filter(order => order._id !== orderId));
+      console.log('Order declined on backend:', orderId);
+    }
+  } catch (error) {
+    console.error('Failed to decline order:', error);
+    Alert.alert("Failed to decline", error.response?.data?.message || "Please try again");
+  }
+};
   const navigateToOrderDetails = (order) => {
     router.push({
       pathname: '/(tabs)/volunteer/orderDetails/[id]',
       params: {
-        id: order.id,
-        ...order,
+        id: order._id,
         estimatedTime: '10 mins'
       }
     });
-  };
-  
-  const getTypeStyle = (type) => {
-    switch(type) {
-      case 'Free': return styles.freeType;
-      case 'Direct': return styles.directType;
-      case 'Negotiated': return styles.negotiatedType;
-      default: return styles.freeType;
-    }
   };
 
   return (
     <ScrollView style={styles.container}>
       {availableOrders.map((order) => (
-        <View key={order.id} style={styles.card}>
+        <View key={order._id} style={styles.card}>
           <TouchableOpacity 
             style={styles.contentContainer}
             onPress={() => navigateToOrderDetails(order)}
             activeOpacity={0.7}
           >
-            <Image source={order.foodPic} style={styles.foodImage} />
-            
+            <Image source={{ uri: order.donation?.listingImages?.[0] }} style={styles.foodImage} />
+
             <View style={styles.orderInfo}>
               <View style={styles.titleRow}>
-                <Text style={styles.foodTitle}>{order.foodName}</Text>
-                <Text style={[styles.type, getTypeStyle(order.type)]}>
-                  {order.type.toUpperCase()}
-                </Text>
+                <Text style={styles.foodTitle}>{order.donation?.donationFoodTitle}</Text>
+                {/* <Text style={[styles.type, styles.directType]}>
+                  {order.paymentMethod?.replace(/_/g, ' ').toUpperCase()}
+                </Text> */}
               </View>
-              <Text style={styles.idText}>Order ID: {order.id.slice(-6).toUpperCase()}</Text>
-              <Text style={styles.detailText}>Pickup by: {order.pickupTime}</Text>
-              <Text style={[styles.detailText, { color: Colors.primary }]}>
-                Price: {order.price}
-              </Text>
+              <Text style={styles.idText}>Order ID: {order._id}</Text>
+              <Text style={styles.detailText}>Pickup by: {order.pickupDetails?.scheduledTime?.startingTime}</Text>
+              <Text style={[styles.detailText, { color: Colors.primary }]}>Price: {order.orderTotal} PKR</Text>
             </View>
-            <ChatButton receiverId={order.orgId} />
+
+            <ChatButton receiverId={order.receiver?._id} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
           <View style={styles.buttonRow}>
             <TouchableOpacity 
               style={styles.confirmButton}
-              onPress={() => handleConfirm(order.id)}
+              onPress={() => handleConfirm(order._id)}
             >
               <Text style={styles.confirmText}>Accept</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={[styles.outlinedButton, { borderColor: Colors.primary }]}
-              onPress={() => handleDecline(order.id)}
+              onPress={() => handleDecline(order._id)}
             >
-              <Text style={[styles.outlinedButtonText, { color: Colors.primary }]}>
-                Decline
-              </Text>
+              <Text style={[styles.outlinedButtonText, { color: Colors.primary }]}>Decline</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -185,7 +163,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   titleRow: {
-    width: '110%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -213,18 +190,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 10,
     overflow: 'hidden',
-  },
-  freeType: {
-    backgroundColor: '#c20b00',
     color: Colors.White,
   },
   directType: {
     backgroundColor: Colors.primary,
-    color: Colors.White,
-  },
-  negotiatedType: {
-    backgroundColor: '#008000',
-    color: Colors.White,
   },
   divider: {
     height: 1,

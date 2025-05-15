@@ -12,6 +12,7 @@ const VolunteerPersonalInfo = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
   const userId = params.userId; 
+  const userType=params.userType;
   const navigation = useNavigation();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,7 +37,9 @@ const VolunteerPersonalInfo = () => {
 
   const handleDocumentSubmission = () => {
     router.push({pathname:'/volunteer/documentsubmission',
-      params:{ userId: userId }
+      params:{ userId: userId,
+        userType:userType
+       }
     });
   };
   const handleChange = (name, value) => {
@@ -86,7 +89,7 @@ const VolunteerPersonalInfo = () => {
         setIsSubmitted(true);
         router.push({
           pathname: '/volunteer/documentsubmission',
-          params: { riderId: response.data._id } // Use the created rider ID
+          params: { userId: userId } // Use the created rider ID
         });
       }
     } catch (error) {

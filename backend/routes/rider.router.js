@@ -29,7 +29,7 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/authentication.middleware.js";
 import { 
-    completeVolunteerProfile, 
+    postRiderForm, 
     patchAddAvailableTimings 
 } from './../controllers/rider.controller.js';
 import upload from './../middlewares/multer.middleware.js';
@@ -39,10 +39,15 @@ const router = Router();
 
 // Complete volunteer profile (text data)
 router.post(
-    "/:userId/profile",
-    verifyJWT,
-    checkRole('volunteer'),
-    completeVolunteerProfile
+  "/:userId/profile",
+  verifyJWT,
+  checkRole('volunteer'),
+  upload.fields([
+    { name: 'profilePic', maxCount: 1 },
+    { name: 'CNIC_front', maxCount: 1 },
+    { name: 'license', maxCount: 1 }
+  ]),
+  postRiderForm
 );
 
 // Upload documents (files)

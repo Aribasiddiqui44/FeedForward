@@ -12,6 +12,7 @@ const DocumentSubmission = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
   const userId = params.userId;
+  const userType=params.userType;
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [nationalIdPhoto, setNationalIdPhoto] = useState(null);
   const [drivingLicensePhoto, setDrivingLicensePhoto] = useState(null);
@@ -60,8 +61,54 @@ const DocumentSubmission = () => {
 //     Alert.alert('Upload Error', error.response?.data?.message || 'Something went wrong');
 //   }
 // };
-const handleSubmit=()=>{      router.push('/volunteer/submissionsuccess');
-}
+const buildImageFormField = async (uri, name) => {
+  const img = await fetch(uri);
+  const blob = await img.blob();
+  return {
+    uri,
+    type: blob.type || 'image/jpeg',
+    name
+  };
+};
+
+const handleSubmit = async () => {
+  try {
+    if (!profilePhoto || !nationalIdPhoto || !drivingLicensePhoto) {
+      Alert.alert("Missing Images", "Please upload all required documents.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('profilePic', await buildImageFormField(profilePhoto, 'profile.jpg'));
+    formData.append('CNIC_front', await buildImageFormField(nationalIdPhoto, 'cnic_front.jpg'));
+    formData.append('license', await buildImageFormField(drivingLicensePhoto, 'license.jpg'));
+
+    const response = await apiClient.post(
+      `/api/riders/${userId}/profile`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+
+    if (response.status === 201 || response.status === 200) {
+      router.push({
+        pathname: '/volunteer/submissionsuccess',
+        params: { userType }
+      });
+    }
+  } catch (error) {
+    console.error('Upload failed:', error);
+    Alert.alert(
+      'Upload Error',
+      error.response?.data?.message || 'Something went wrong'
+    );
+  }
+};
+
+
 
 
   const pickImage = async (setImage) => {

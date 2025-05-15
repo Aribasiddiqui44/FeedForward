@@ -6,13 +6,22 @@ import {
     updateOrderStatus,
     assignRiderToOrder,
     markOrderDelivered,
-    cancelOrderByReceiver
+    cancelOrderByReceiver,
+    getAvailableOrdersForRider,
+    riderRespondToOrder
 
 } from '../controllers/order.controller.js';
 import { verifyJWT } from '../middlewares/authentication.middleware.js';
 import { checkRole } from '../middlewares/checkRole.middleware.js';
 
 const router = express.Router();
+
+
+router.get('/rider/available',
+  verifyJWT,
+  checkRole('volunteer'),
+  getAvailableOrdersForRider
+);
 
 // Donor routes
 router.get('/donor',
@@ -59,4 +68,11 @@ router.patch(
     checkRole('receiver'),
     cancelOrderByReceiver
 );
+router.patch(
+  '/:orderId/rider-response',
+  verifyJWT,
+  checkRole('volunteer'),
+  riderRespondToOrder
+);
+
 export default router;

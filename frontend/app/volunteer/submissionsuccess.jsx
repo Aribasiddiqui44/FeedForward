@@ -5,13 +5,18 @@ import Head from '../../components/header';
 import { useRouter, useNavigation } from 'expo-router';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useEffect } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 
 const SubmissionSuccess = () => {
   const navigation = useNavigation();
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const userId = params.userId;
+  const userType=params.userType;
 
   const handleBackToHome = () => {
-    router.replace('/volunteer/availableOrders');
+    router.replace({pathname:'/volunteer/availableOrders',
+  params:{userType:userType}});
   };
 
   useEffect(() => {

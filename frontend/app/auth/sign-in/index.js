@@ -61,7 +61,7 @@ export default function SignIn() {
               });
             } else if (userRole === 'volunteer') {
                 router.push({
-                  pathname:'/volunteer/Vol_application',
+                  pathname:'/(tabs)/volunteer/availableOrders',
                 params: { userType: userRole, userId } });
             } else {
                 Alert.alert('Error', 'Unknown role');
