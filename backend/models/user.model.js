@@ -41,6 +41,16 @@ const userSchema = new Schema(
             type: Boolean,
             default: false
         },
+        address: {
+            address: { type: String },
+            longitude: { type: Schema.Types.Decimal128 },
+            latitude: { type: Schema.Types.Decimal128 },
+            subregion: { type: String },
+            longitudeDelta: { type: Schema.Types.Decimal128 },
+            latitudeDelta: { type: Schema.Types.Decimal128 }
+
+
+        },
         nationality: {
             type: String,
 
