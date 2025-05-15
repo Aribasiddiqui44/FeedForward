@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
-import {Picker} from '@react-native-picker/picker'
+import {Picker} from '@react-native-picker/picker';
 import { Colors } from '../../constants/Colors';
 import Head from '../../components/header';
 import { useNavigation, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import apiClient from '../../utils/apiClient';
 import { useLocalSearchParams } from 'expo-router';
+
 const VolunteerPersonalInfo = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
   const userId = params.userId; 
-  const navigation=useNavigation();
-  useEffect(() => {
-        navigation.setOptions({
-          headerShown: false,
-        });
-      }, []);
+  const navigation = useNavigation();
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     cnicNumber: '',
     age: '',
@@ -26,13 +23,22 @@ const VolunteerPersonalInfo = () => {
     hours: '5'
   });
   const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, []);
 
+  const handleBackPress = () => {
+    router.back();
+  };
 
   const handleDocumentSubmission = () => {
     router.push({pathname:'/volunteer/documentsubmission',
       params:{ userId: userId }
     });
-
+  };
   const handleChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -58,7 +64,7 @@ const VolunteerPersonalInfo = () => {
       Alert.alert('Incomplete Form', 'Please fill all required fields');
       return;
     }
-
+  
     // CNIC format validation
     if (!/^\d{5}-\d{7}-\d{1}$/.test(formData.cnicNumber)) {
       Alert.alert('Invalid CNIC', 'Format should be XXXXX-XXXXXXX-X');
@@ -77,8 +83,9 @@ const VolunteerPersonalInfo = () => {
       });
 
       if (response.data) {
+        setIsSubmitted(true);
         router.push({
-          pathname: '/volunteer/documents',
+          pathname: '/volunteer/documentsubmission',
           params: { riderId: response.data._id } // Use the created rider ID
         });
       }
@@ -91,135 +98,135 @@ const VolunteerPersonalInfo = () => {
     } finally {
       setLoading(false);
     }
-
   };
-
-  return (
-    <View style={styles.container}>
-      <Head label="Personal Information" showBackOption={true} onBackPress={() => router.back()} />
-      
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* CNIC Number */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Enter your CNIC number</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.cnicNumber}
-            onChangeText={(text) => handleChange('cnicNumber', text)}
-            keyboardType="numeric"
-            placeholder="42211-2953987-6"
-            placeholderTextColor={Colors.Grey}
-          />
-        </View>
-
-        {/* Age */}
-        <View style={styles.section}>
-          <Text style={styles.label}>What's your age?</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.age}
-            onChangeText={(text) => handleChange('age', text)}
-            keyboardType="numeric"
-            placeholder="22"
-            placeholderTextColor={Colors.Grey}
-          />
-        </View>
-
-        {/* Vehicle */}
-        <View style={styles.section}>
-          <Text style={styles.label}>What vehicle do you have?</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.vehicle}
-            onChangeText={(text) => handleChange('vehicle', text)}
-            placeholder="e.g. Motorcycle, Car, Bicycle"
-            placeholderTextColor={Colors.Grey}
-          />
-        </View>
-
-        {/* Experience */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Have you worked as a rider before?</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={formData.experience}
-              onValueChange={(value) => handleChange('experience', value)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select an option" value="" />
-              <Picker.Item label="Yes" value="yes" />
-              <Picker.Item label="No" value="no" />
-              <Picker.Item label="Some experience" value="some" />
-            </Picker>
-          </View>
-        </View>
-
-        {/* Motivation */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Why do you want to join as a Volunteer?</Text>
-          <TextInput
-            style={[styles.input, styles.multilineInput]}
-            value={formData.motivation}
-            onChangeText={(text) => handleChange('motivation', text)}
-            multiline
-            numberOfLines={4}
-            placeholder="I want to contribute to my community..."
-            placeholderTextColor={Colors.Grey}
-          />
-        </View>
-
-        {/* Hours */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Weekly available hours</Text>
-          <View style={styles.hoursContainer}>
-            <TouchableOpacity onPress={decrementHours} style={styles.hoursButton}>
-              <MaterialIcons name="remove" size={24} color={Colors.primary} />
-            </TouchableOpacity>
-            <Text style={styles.hoursValue}>{formData.hours}</Text>
-            <TouchableOpacity onPress={incrementHours} style={styles.hoursButton}>
-              <MaterialIcons name="add" size={24} color={Colors.primary} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Submit Button */}
-        <TouchableOpacity 
-          style={[styles.submitButton, loading && styles.disabledButton]} 
-          onPress={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
-          )}
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
-  );
-
-}
-return (
+  
+  if (!isSubmitted) {
+    return (
       <View style={styles.container}>
         <Head label="Personal Information" showBackOption={true} onBackPress={() => router.back()} />
         
-        <View style={styles.successContainer}>
-          <Text style={styles.successMessage}>
-            Your personal information has been submitted successfully!
-          </Text>
-          <Text style={styles.nextStepMessage}>
-            Please proceed to document submission to complete your application.
-          </Text>
-          
+        <ScrollView contentContainerStyle={styles.content}>
+          {/* CNIC Number */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Enter your CNIC number</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.cnicNumber}
+              onChangeText={(text) => handleChange('cnicNumber', text)}
+              keyboardType="numeric"
+              placeholder="42211-2953987-6"
+              placeholderTextColor={Colors.Grey}
+            />
+          </View>
+
+          {/* Age */}
+          <View style={styles.section}>
+            <Text style={styles.label}>What's your age?</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.age}
+              onChangeText={(text) => handleChange('age', text)}
+              keyboardType="numeric"
+              placeholder="22"
+              placeholderTextColor={Colors.Grey}
+            />
+          </View>
+
+          {/* Vehicle */}
+          <View style={styles.section}>
+            <Text style={styles.label}>What vehicle do you have?</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.vehicle}
+              onChangeText={(text) => handleChange('vehicle', text)}
+              placeholder="e.g. Motorcycle, Car, Bicycle"
+              placeholderTextColor={Colors.Grey}
+            />
+          </View>
+
+          {/* Experience */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Have you worked as a rider before?</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={formData.experience}
+                onValueChange={(value) => handleChange('experience', value)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select an option" value="" />
+                <Picker.Item label="Yes" value="yes" />
+                <Picker.Item label="No" value="no" />
+                <Picker.Item label="Some experience" value="some" />
+              </Picker>
+            </View>
+          </View>
+
+          {/* Motivation */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Why do you want to join as a Volunteer?</Text>
+            <TextInput
+              style={[styles.input, styles.multilineInput]}
+              value={formData.motivation}
+              onChangeText={(text) => handleChange('motivation', text)}
+              multiline
+              numberOfLines={4}
+              placeholder="I want to contribute to my community..."
+              placeholderTextColor={Colors.Grey}
+            />
+          </View>
+
+          {/* Hours */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Weekly available hours</Text>
+            <View style={styles.hoursContainer}>
+              <TouchableOpacity onPress={decrementHours} style={styles.hoursButton}>
+                <MaterialIcons name="remove" size={24} color={Colors.primary} />
+              </TouchableOpacity>
+              <Text style={styles.hoursValue}>{formData.hours}</Text>
+              <TouchableOpacity onPress={incrementHours} style={styles.hoursButton}>
+                <MaterialIcons name="add" size={24} color={Colors.primary} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Submit Button */}
           <TouchableOpacity 
-            style={styles.submitButton} 
-            onPress={handleDocumentSubmission}
+            style={[styles.submitButton, loading && styles.disabledButton]} 
+            onPress={handleSubmit}
+            disabled={loading}
           >
-            <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
+            )}
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       </View>
     );
+  }
+
+  return (
+    <View style={styles.container}>
+      <Head label="Personal Information" showBackOption={true} onBackPress={handleBackPress} />
+      
+      <View style={styles.successContainer}>
+        <Text style={styles.successMessage}>
+          Your personal information has been submitted successfully!
+        </Text>
+        <Text style={styles.nextStepMessage}>
+          Please proceed to document submission to complete your application.
+        </Text>
+        
+        <TouchableOpacity 
+          style={styles.submitButton} 
+          onPress={handleDocumentSubmission}
+        >
+          <Text style={styles.submitButtonText}>Continue to Document Submission</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -335,10 +342,3 @@ const styles = StyleSheet.create({
 });
 
 export default VolunteerPersonalInfo;
-
-
-
-
-
-
-
