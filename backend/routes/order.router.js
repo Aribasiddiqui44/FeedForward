@@ -8,7 +8,8 @@ import {
     markOrderDelivered,
     cancelOrderByReceiver,
     getAvailableOrdersForRider,
-    riderRespondToOrder
+    riderRespondToOrder,
+    getAcceptedOrdersByRider
 
 } from '../controllers/order.controller.js';
 import { verifyJWT } from '../middlewares/authentication.middleware.js';
@@ -22,6 +23,13 @@ router.get('/rider/available',
   checkRole('volunteer'),
   getAvailableOrdersForRider
 );
+router.get(
+  '/rider/accepted',
+  verifyJWT,
+  checkRole('volunteer'),
+  getAcceptedOrdersByRider
+);
+
 
 // Donor routes
 router.get('/donor',

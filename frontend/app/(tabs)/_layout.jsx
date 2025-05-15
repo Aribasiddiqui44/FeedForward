@@ -113,7 +113,7 @@ export default function Layout() {
     { label: 'Profile', icon: 'user', screen: '/(tabs)/volunteer/profile' },
     { label: 'Settings', icon: 'settings', screen: '/volunteer/Settings' },
     { label: 'Support', icon: 'message-circle', screen: '/volunteer/Support' },
-    { label: 'Logout', icon: 'log-out', screen: '/Login' },
+    { label: 'Logout', icon: 'log-out', action: logoutUser },
   ];
   
   const menuItems =

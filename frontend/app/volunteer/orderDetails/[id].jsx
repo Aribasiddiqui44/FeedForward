@@ -1,35 +1,87 @@
-import { useLocalSearchParams } from 'expo-router';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView,Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../../../constants/Colors';
-
+import { Colors } from '../../../constants/Colors';
+import { useEffect,useState } from 'react';
+import Head from '../../../components/header';
+import apiClient from '../../../utils/apiClient';
 export default function OrderDetailsScreen() {
   const params = useLocalSearchParams();
+  const navigation=useNavigation();
+  const router=useRouter();
+  const [availableOrders, setAvailableOrders] = useState([]);
+  const [acceptedOrders, setAcceptedOrders] = useState([]);
   
+  useEffect(() => {
+            navigation.setOptions({
+              headerShown: false,
+            });
+          }, []);
+  const handleBackPress = () => {
+    router.back();
+  };
+  const handleConfirm = async (orderId) => {
+  try {
+    const response = await apiClient.patch(`/order/${orderId}/rider-response`, {
+      action: 'accept',
+    });
+
+    if (response.status === 200) {
+      console.log('Order accepted on backend:', orderId);
+      router.push('/(tabs)/volunteer/acceptedOrders');
+    }
+  } catch (error) {
+    console.error('Failed to accept order:', error);
+    Alert.alert("Failed to accept", error.response?.data?.message || "Please try again");
+  }
+};
+
+  
+  const handleDecline = async (orderId) => {
+    try {
+      const response = await apiClient.patch(`/order/${orderId}/rider-response`, {
+        action: 'decline'
+      });
+  
+      if (response.status === 200) {
+        setAvailableOrders(prev => prev.filter(order => order._id !== orderId));
+        console.log('Order declined on backend:', orderId);
+        router.push('/(tabs)/volunteer/availableOrders');
+  
+      }
+    } catch (error) {
+      console.error('Failed to decline order:', error);
+      Alert.alert("Failed to decline", error.response?.data?.message || "Please try again");
+    }
+  };
   return (
+    
+    <ScrollView>
+      <Head label="Order Details" showBackOption={true} onBackPress={handleBackPress} />
     <View style={styles.container}>
-      <View style={styles.header}>
+      
+      {/* <View style={styles.header}>
         <Text style={styles.screenTitle}>New Order</Text>
-      </View>
+      </View> */}
 
       <View style={styles.foodContainer}>
-        <Image source={params.foodPic} style={styles.foodImage} />
-        <Text style={styles.foodName}>{params.foodName}</Text>
+        <Image source={params.foodImage} style={styles.foodImage} />
+        <Text style={styles.foodName}>{params.foodTitle}</Text>
       </View>
 
       <View style={styles.detailsRow}>
         <Ionicons name="pricetag" size={20} color={Colors.primary} />
-        <Text style={styles.detailText}>Price: {params.price}</Text>
+        <Text style={styles.detailText}>Price: {params.orderTotal}</Text>
       </View>
 
       <View style={styles.detailsRow}>
         <Ionicons name="fast-food" size={20} color={Colors.primary} />
-        <Text style={styles.detailText}>Portion: {params.portions || '7'}</Text>
+        <Text style={styles.detailText}>Portion: {params.quantity || 'no'}</Text>
       </View>
 
       <View style={styles.detailsRow}>
         <Ionicons name="time" size={20} color={Colors.primary} />
-        <Text style={styles.detailText}>Pick up time: {params.pickupTime}</Text>
+        <Text style={styles.detailText}>Pick up time: {params.pickupTime} - {params.pickupEndTime}</Text>
       </View>
 
       <View style={styles.locationSection}>
@@ -44,20 +96,21 @@ export default function OrderDetailsScreen() {
         <Text style={styles.sectionTitle}>Drop-off Location</Text>
         <View style={styles.locationCard}>
           <Ionicons name="location" size={20} color={Colors.primary} />
-          <Text style={styles.locationText}>{params.receiverAddress}</Text>
+          <Text style={styles.locationText}>{params.receiverName}-{params.receiverAddress}</Text>
         </View>
-        <Text style={styles.distanceText}>17 mins</Text>
+        <Text style={styles.distanceText}>Distance: 17 mins</Text>
       </View>
      <View style={styles.buttonRow}>
-      <TouchableOpacity style={styles.acceptButton}>
+      <TouchableOpacity style={styles.acceptButton} onPress={() => handleConfirm(params.id)}>
         <Text style={styles.buttonText}>Accept Order</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.declineButton}>
+      <TouchableOpacity style={styles.declineButton} onPress={()=>handleDecline(params.id)}>
         <Text style={styles.decbuttonText}>Decline Order</Text>
       </TouchableOpacity>
      </View>
-      
+     
     </View>
+    </ScrollView> 
   );
 }
 

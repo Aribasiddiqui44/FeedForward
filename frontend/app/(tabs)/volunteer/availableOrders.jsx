@@ -52,6 +52,8 @@ const handleConfirm = async (orderId) => {
       setAcceptedOrders(prev => [...prev, orderToAccept]);
       setAvailableOrders(prev => prev.filter(order => order._id !== orderId));
       console.log('Order accepted on backend:', orderId);
+      router.push('/(tabs)/volunteer/acceptedOrders');
+
     }
   } catch (error) {
     console.error('Failed to accept order:', error);
@@ -68,6 +70,7 @@ const handleDecline = async (orderId) => {
     if (response.status === 200) {
       setAvailableOrders(prev => prev.filter(order => order._id !== orderId));
       console.log('Order declined on backend:', orderId);
+
     }
   } catch (error) {
     console.error('Failed to decline order:', error);
@@ -75,14 +78,26 @@ const handleDecline = async (orderId) => {
   }
 };
   const navigateToOrderDetails = (order) => {
-    router.push({
-      pathname: '/(tabs)/volunteer/orderDetails/[id]',
-      params: {
-        id: order._id,
-        estimatedTime: '10 mins'
-      }
-    });
-  };
+  router.push({
+    pathname: '/volunteer/orderDetails/[id]',
+    params: {
+      id: order._id,
+      foodTitle: order.donation?.donationFoodTitle,
+      foodImage: order.donation?.listingImages?.[0],
+      donorName: order.donor?.fullName,
+      receiverName: order.receiver?.fullName,
+      quantity: order.items?.[0]?.quantity,
+      orderTotal: order.orderTotal,
+      paymentMethod: order.paymentMethod,
+      pickupTime: order.pickupDetails?.scheduledTime?.startingTime,
+      pickupEndTime: order.pickupDetails?.scheduledTime?.endingTime,
+      pickupAddress: order.pickupDetails?.address,
+      receiverId: order.receiver?._id,
+      estimatedTime: '10 mins'
+    }
+  });
+};
+
 
   return (
     <ScrollView style={styles.container}>

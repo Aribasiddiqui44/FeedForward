@@ -182,6 +182,25 @@ export const riderRespondToOrder = asyncHandler(async (req, res) => {
     new ApiResponse(200, order, `Order ${action}ed by rider successfully`)
   );
 });
+export const getAcceptedOrdersByRider = asyncHandler(async (req, res) => {
+  const userId = req.user._id; // this is the User ID
+
+  // Find the Rider document that links to this user
+  const rider = await Rider.findOne({ volunteerUserId: userId });
+  if (!rider) throw new ApiError(404, 'Rider profile not found');
+
+  const orders = await Order.find({
+    'pickupDetails.rider.riderId': rider._id
+  })
+    .populate('donation')
+    .populate('donor')
+    .populate('receiver')
+    .sort({ updatedAt: -1 });
+
+  res.status(200).json(new ApiResponse(200, orders));
+});
+
+
 
 // Mark order as delivered (for rider)
 export const markOrderDelivered = asyncHandler(async (req, res) => {
@@ -320,7 +339,7 @@ export const getAvailableOrdersForRider = asyncHandler(async (req, res) => {
     orderStatus: { $in: ['ready_for_pickup', 'processing'] },
     "pickupDetails.rider": { $exists: false }
   })
-    .populate('donor', 'fullName')
+    .populate('donor', 'fullName' )
     .populate('receiver', 'fullName')
     .populate('donation', 'donationFoodTitle listingImages')
     .sort({ createdAt: -1 });
