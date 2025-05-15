@@ -1,135 +1,252 @@
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Alert } from 'react-native';
-import React, { useState, useCallback } from 'react';
-import FoodCard from '../../../components/foodCard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter, useFocusEffect } from 'expo-router';
-import Icon from 'react-native-vector-icons/AntDesign';
+import React from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../../../constants/Colors';
 
-export default function AcceptedOrders() {
-  const [confirmedOrders, setConfirmedOrders] = useState([]);
-  const router = useRouter();
+const AcceptedOrders = () => {
+  // In a real app, you would fetch these from your state management or API
+  const acceptedOrders = [
+    {
+      id: 'ORD-12345',
+      foodName: 'Chicken Biryani',
+      foodPic: require('../../../assets/images/biryaniPng.png'),
+      pickupTime: '11:00 PM',
+      price: '0 PKR',
+      type: 'Free',
+      orgId: 'ORG-789',
+      donorName: 'Hot N Spicy',
+      donorAddress: 'North Nazimabad, Block L, Karachi',
+      receiverName: 'Food Savers',
+      receiverAddress: 'C-456, Block 18, F.B Area, Karachi',
+      toReceiver: '2km',
+      toDonor: '3km',
+      status: 'accepted',
+      acceptedAt: new Date().toISOString()
+    },
+    // Add more accepted orders as needed
+  ];
 
-  const loadConfirmedOrders = async () => {
-    try {
-      const data = await AsyncStorage.getItem('confirmedOrders');
-      if (data) {
-        setConfirmedOrders(JSON.parse(data));
-      }
-    } catch (error) {
-      console.error('Error loading confirmed orders:', error);
-      Alert.alert('Error', 'Failed to load confirmed orders');
-    }
+  const handleCompleteOrder = (orderId) => {
+    // Implement order completion logic
+    console.log('Completing order:', orderId);
+    // apiClient.patch(`/orders/${orderId}/complete`);
   };
 
-  // Reload confirmed orders when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      loadConfirmedOrders();
-    }, [])
-  );
-
-  const handleTrackPress = (order) => {
-    router.push({
-      pathname: '../../TrackOrder/VolunteerTrackOrder',
-      params: {
-        foodName: order.foodName,
-        statusTime: order.statusTime,
-        imageSource: order.imageSource,
-        portions: order.portions,
-        total: order.total,
-        date: order.date,
-        orderFrom: order.orderFrom,
-        deliverTo: order.deliverTo,
-        deliveryStatus: order.deliveryStatus,
-      },
-    });
-  };
-
-  const handleDeleteOrder = async (foodName) => {
-    const updatedOrders = confirmedOrders.filter(order => order.foodName !== foodName);
-    setConfirmedOrders(updatedOrders);
-    try {
-      await AsyncStorage.setItem('confirmedOrders', JSON.stringify(updatedOrders));
-      Alert.alert('Success', 'Order deleted successfully');
-    } catch (error) {
-      console.error('Error deleting order:', error);
-      Alert.alert('Error', 'Failed to delete order');
-    }
+  const handleCancelOrder = (orderId) => {
+    // Implement order cancellation logic
+    console.log('Canceling order:', orderId);
+    // apiClient.patch(`/orders/${orderId}/cancel`);
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.subHeader}>Accepted Orders</Text>
-      <ScrollView>
-        {confirmedOrders.map((order, index) => (
-          <View key={index} style={styles.foodCardContainer}>
-            <FoodCard
-              foodName={order.foodName}
-              description={order.description}
-              total={order.total}
-              portions={order.portions}
-              statusTime={order.statusTime}
-              date={order.date}
-              imageSource={order.imageSource}
-            />
-            <Text>{order.deliveryStatus}</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.trackButton}
-                onPress={() => handleTrackPress(order)}
+    <ScrollView style={styles.container}>
+      {acceptedOrders.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="fast-food" size={60} color={Colors.primary} />
+          <Text style={styles.emptyText}>No accepted orders yet</Text>
+          <Text style={styles.emptySubtext}>Accepted orders will appear here</Text>
+        </View>
+      ) : (
+        acceptedOrders.map((order) => (
+          <View key={order.id} style={styles.card}>
+            <View style={styles.contentContainer}>
+              <Image source={order.foodPic} style={styles.foodImage} />
+              
+              <View style={styles.orderInfo}>
+                <View style={styles.titleRow}>
+                  <Text style={styles.foodTitle}>{order.foodName}</Text>
+                  <View style={[styles.statusBadge, styles.acceptedBadge]}>
+                    <Text style={styles.statusText}>ACCEPTED</Text>
+                  </View>
+                </View>
+                <Text style={styles.idText}>Order ID: {order.id.slice(-6).toUpperCase()}</Text>
+                <Text style={styles.detailText}>Pickup by: {order.pickupTime}</Text>
+                <Text style={styles.detailText}>Accepted at: {new Date(order.acceptedAt).toLocaleString()}</Text>
+              </View>
+            </View>
+
+            <View style={styles.divider} />
+            
+            <View style={styles.locationSection}>
+              <Text style={styles.sectionTitle}>Pickup Location</Text>
+              <View style={styles.locationCard}>
+                <Ionicons name="restaurant" size={20} color={Colors.primary} />
+                <Text style={styles.locationText}>{order.donorName} - {order.donorAddress}</Text>
+              </View>
+            </View>
+
+            <View style={styles.locationSection}>
+              <Text style={styles.sectionTitle}>Delivery Location</Text>
+              <View style={styles.locationCard}>
+                <Ionicons name="location" size={20} color={Colors.primary} />
+                <Text style={styles.locationText}>{order.receiverAddress}</Text>
+              </View>
+              <Text style={styles.distanceText}>{order.toReceiver} away (~17 mins)</Text>
+            </View>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.completeButton]}
+                onPress={() => handleCompleteOrder(order.id)}
               >
-                <Text style={styles.trackButtonText}>Track Order</Text>
+                <Text style={styles.buttonText}>Mark Completed</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleDeleteOrder(order.foodName)}
+
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.cancelButton]}
+                onPress={() => handleCancelOrder(order.id)}
               >
-                <Icon name="delete" size={20} color="#e74c3c" />
+                <Text style={[styles.buttonText, { color: Colors.danger }]}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
-        ))}
-      </ScrollView>
-    </View>
+        ))
+      )}
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
-    paddingHorizontal: 10,
+    backgroundColor: '#F8F8F8',
+    padding: 15,
   },
-  subHeader: {
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  emptyText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#00aa95',
-    marginVertical: 10,
+    marginTop: 20,
+    color: Colors.dark,
   },
-  foodCardContainer: {
-    marginBottom: 20,
-    position: 'relative',
-  },
-  trackButton: {
-    backgroundColor: '#00aa95',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    alignItems: 'center',
+  emptySubtext: {
+    fontSize: 14,
+    color: Colors.Grey,
     marginTop: 10,
   },
-  trackButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 5,
+    elevation: 3,
   },
-  buttonContainer: {
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  foodImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 50,
+    marginRight: 15,
+  },
+  orderInfo: {
+    flex: 1,
+  },
+  titleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
+  },
+  foodTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  acceptedBadge: {
+    backgroundColor: Colors.primaryLight,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: Colors.primary,
+  },
+  idText: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  detailText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 10,
+  },
+  locationSection: {
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: Colors.dark,
+    marginBottom: 8,
+  },
+  locationCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.lightGray,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 5,
+  },
+  locationText: {
+    fontSize: 14,
+    color: Colors.dark,
+    marginLeft: 10,
+    flex: 1,
+  },
+  distanceText: {
+    fontSize: 14,
+    color: Colors.primary,
+    textAlign: 'right',
+  },
+  buttonRow: {
+    flexDirection: 'row',
     marginTop: 10,
   },
-  deleteButton: {
-    backgroundColor: 'transparent',
-    padding: 10,
+  actionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  completeButton: {
+    backgroundColor: Colors.primary,
+    marginRight: 10,
+  },
+  cancelButton: {
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.danger,
+    marginLeft: 10,
+  },
+  buttonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: Colors.white,
   },
 });
+
+export default AcceptedOrders;
