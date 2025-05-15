@@ -33,6 +33,15 @@ const AcceptedOrders = () => {
     // apiClient.patch(`/orders/${orderId}/complete`);
   };
 
+  const getTypeStyle = (type) => {
+    switch(type) {
+      case 'Free': return styles.freeType;
+      case 'Direct': return styles.directType;
+      case 'Negotiated': return styles.negotiatedType;
+      default: return styles.freeType;
+    }
+  };
+
   const handleCancelOrder = (orderId) => {
     // Implement order cancellation logic
     console.log('Canceling order:', orderId);
@@ -56,33 +65,15 @@ const AcceptedOrders = () => {
               <View style={styles.orderInfo}>
                 <View style={styles.titleRow}>
                   <Text style={styles.foodTitle}>{order.foodName}</Text>
-                  <View style={[styles.statusBadge, styles.acceptedBadge]}>
-                    <Text style={styles.statusText}>ACCEPTED</Text>
-                  </View>
+                  <Text style={[styles.type, getTypeStyle(order.type)]}>
+                      {order.type.toUpperCase()}
+                  </Text>
                 </View>
                 <Text style={styles.idText}>Order ID: {order.id.slice(-6).toUpperCase()}</Text>
                 <Text style={styles.detailText}>Pickup by: {order.pickupTime}</Text>
+                <Text style={[styles.detailText, { color: Colors.primary }]}>Price: {order.price}</Text>
                 <Text style={styles.detailText}>Accepted at: {new Date(order.acceptedAt).toLocaleString()}</Text>
               </View>
-            </View>
-
-            <View style={styles.divider} />
-            
-            <View style={styles.locationSection}>
-              <Text style={styles.sectionTitle}>Pickup Location</Text>
-              <View style={styles.locationCard}>
-                <Ionicons name="restaurant" size={20} color={Colors.primary} />
-                <Text style={styles.locationText}>{order.donorName} - {order.donorAddress}</Text>
-              </View>
-            </View>
-
-            <View style={styles.locationSection}>
-              <Text style={styles.sectionTitle}>Delivery Location</Text>
-              <View style={styles.locationCard}>
-                <Ionicons name="location" size={20} color={Colors.primary} />
-                <Text style={styles.locationText}>{order.receiverAddress}</Text>
-              </View>
-              <Text style={styles.distanceText}>{order.toReceiver} away (~17 mins)</Text>
             </View>
 
             <View style={styles.buttonRow}>
@@ -90,14 +81,14 @@ const AcceptedOrders = () => {
                 style={[styles.actionButton, styles.completeButton]}
                 onPress={() => handleCompleteOrder(order.id)}
               >
-                <Text style={styles.buttonText}>Mark Completed</Text>
+                <Text style={styles.buttonText}>Go To Donor</Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
                 style={[styles.actionButton, styles.cancelButton]}
                 onPress={() => handleCancelOrder(order.id)}
               >
-                <Text style={[styles.buttonText, { color: Colors.danger }]}>Cancel</Text>
+                <Text style={[styles.buttonText, { color: Colors.primary }]}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -170,6 +161,26 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 10,
   },
+  type: {
+      fontSize: 12,
+      fontWeight: 'bold',
+      paddingVertical: 2,
+      paddingHorizontal: 8,
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
+    freeType: {
+      backgroundColor: '#c20b00',
+      color: Colors.White,
+    },
+    directType: {
+      backgroundColor: Colors.primary,
+      color: Colors.White,
+    },
+    negotiatedType: {
+      backgroundColor: '#008000',
+      color: Colors.White,
+    },
   acceptedBadge: {
     backgroundColor: Colors.primaryLight,
   },
@@ -179,7 +190,7 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
   idText: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#666',
     marginBottom: 4,
   },
@@ -233,19 +244,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   completeButton: {
+    flex: 1,
     backgroundColor: Colors.primary,
-    marginRight: 10,
+    paddingVertical: 10,
+    borderRadius: 25,
+    marginRight: 5,
+    alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.danger,
-    marginLeft: 10,
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 25,
+    marginLeft: 5,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    borderColor: Colors.primary
   },
   buttonText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: Colors.White,
   },
 });
 
