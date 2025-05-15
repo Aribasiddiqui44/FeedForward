@@ -53,21 +53,25 @@ export default function MyOrder() {
     }
   };
 
-  const handleTrackPress = (order) => {
-    router.push({
-      pathname: '../../TrackOrder/TrackOrder',
-      params: {
-        foodName: order.foodName,
-        statusTime: 'Tracking not implemented', // You can replace with actual tracking time
-        imageSource: order.imageSource,
-        portions: order.portions,
-        total: order.total,
-        date: order.date,
-        orderFrom: order.donorName,
-        deliverTo: 'Your Location' // Or use actual delivery address
-      },
-    });
-  };
+ const handleTrackPress = (order) => {
+  router.push({
+    pathname: '../../TrackOrder/TrackOrder',
+    params: {
+      foodName: order.foodName,
+      statusTime: order.time,
+      imageSource: order.imageSource,
+      portions: order.portions,
+      total: order.total,
+      date: order.date,
+      orderFrom: order.donorName,
+      deliverTo: order.receiver?.fullName || "Your Location",
+      orderStatus: order.status,
+      orderId: order.id, // pass for polling
+      status:order.status
+    },
+  });
+};
+
 
   const handleCancelPress = async (orderId, donationId, portions) => {
     try {

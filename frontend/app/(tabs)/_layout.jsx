@@ -90,9 +90,9 @@ export default function Layout() {
     { label: 'My Orders', icon: 'shopping-bag', screen: '/receiver/myOrder' },
     { label: 'My Requests', icon: 'git-pull-request', screen: '/receiver/myRequest' },
     { label: 'My Donations', icon: 'gift', screen: '/receiver/donation' },
-    { label: 'About', icon: 'info', screen: '/receiver/About' },
-    { label: 'Settings', icon: 'settings', screen: '/receiver/Settings' },
-    { label: 'Customer Support', icon: 'message-circle', screen: '/receiver/Support' },
+    // { label: 'About', icon: 'info', screen: '/receiver/About' },
+    // { label: 'Settings', icon: 'settings', screen: '/receiver/Settings' },
+    // { label: 'Customer Support', icon: 'message-circle', screen: '/receiver/Support' },
     { label: 'Logout', icon: 'log-out', action: logoutUser },
   ];
 

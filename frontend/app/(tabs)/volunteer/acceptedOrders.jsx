@@ -30,7 +30,7 @@
 //   const handleCompleteOrder = (orderId) => {
 //     // Implement order completion logic
 //     console.log('Completing order:', orderId);
-//     // apiClient.patch(`/orders/${orderId}/complete`);
+//     // apiClient.patch(/orders/${orderId}/complete);
 //   };
 
 //   const getTypeStyle = (type) => {
@@ -45,7 +45,7 @@
 //   const handleCancelOrder = (orderId) => {
 //     // Implement order cancellation logic
 //     console.log('Canceling order:', orderId);
-//     // apiClient.patch(`/orders/${orderId}/cancel`);
+//     // apiClient.patch(/orders/${orderId}/cancel);
 //   };
 
 //   return (
@@ -358,7 +358,6 @@ const AcceptedOrders = () => {
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.actionButton, styles.completeButton]}
-                onPress={() => handleGoToDonor(order.id)}
                 onPress={() => handleCompleteOrder(order._id)}
               >
                 <Text style={styles.buttonText}>Go To Donor</Text>

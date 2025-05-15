@@ -9,7 +9,8 @@ import {
     cancelOrderByReceiver,
     getAvailableOrdersForRider,
     riderRespondToOrder,
-    getAcceptedOrdersByRider
+    getAcceptedOrdersByRider,
+    getOrderById
 
 } from '../controllers/order.controller.js';
 import { verifyJWT } from '../middlewares/authentication.middleware.js';
@@ -29,7 +30,6 @@ router.get(
   checkRole('volunteer'),
   getAcceptedOrdersByRider
 );
-
 
 // Donor routes
 router.get('/donor',
@@ -60,16 +60,16 @@ router.get('/receiver',
 // Rider routes
 router.patch('/:orderId/delivered',
     verifyJWT,
-    checkRole('rider'),
+    checkRole('volunteer'),
     markOrderDelivered
 );
 
 // Shared route (donor, receiver, or rider)
-router.get('/:orderId',
-    verifyJWT,
-    checkRole(['donor', 'receiver', 'rider']),
-    getOrderDetails
-);
+// router.get('/:orderId',
+//     verifyJWT,
+//     checkRole(['donor', 'receiver', 'rider']),
+//     getOrderDetails
+// );
 router.patch(
     '/receiver/cancel/:orderId',
     verifyJWT,
@@ -82,5 +82,6 @@ router.patch(
   checkRole('volunteer'),
   riderRespondToOrder
 );
+router.get('/:orderId', verifyJWT, getOrderById);
 
 export default router;

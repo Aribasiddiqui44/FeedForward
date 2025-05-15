@@ -30,7 +30,7 @@ app.use ("/api/riders",RiderRoutes);
 ;(async() => {
     try{
         await connectDB(); // first we wait for our server to connect with mongoDB database server.
-        app.listen(PORT, () => {
+        app.listen(PORT,'0.0.0.0', () => {
           console.log(`Server is running on port : ${PORT}`);
       })
     } catch(error){
