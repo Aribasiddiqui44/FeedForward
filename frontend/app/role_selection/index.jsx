@@ -26,7 +26,8 @@ export default function RoleSelection() {
     try {
       // Navigate to the sign-up page, passing the selected role as a parameter
       router.push({
-        pathname: '/auth/sign-up',
+        // pathname: '/auth/sign-up',
+        pathname: './../auth/sign-up/LocationPicker',
         params: { role: selectedRole },
       });
     } catch (error) {

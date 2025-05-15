@@ -6,9 +6,28 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import axios from "axios";
 import apiClient from './../../../utils/apiClient.js';
 import { useLocalSearchParams } from 'expo-router';
-export default function SignUp() {
-  const { role } = useLocalSearchParams();  // Get role passed from RoleSelection page
 
+export default function SignUp() {
+  // const { role } = useLocalSearchParams();  // Get role passed from RoleSelection page
+  const { role, title, longitude, latitude, longitudeDelta, latitudeDelta, formattedAddress, subregion } = useLocalSearchParams(); // get selected address from LocationPicker
+  // const selectedAddress = rawAddress ? JSON.parse(rawAddress) : null; 
+// useEffect(() => {
+//   if (selectedAddress) {
+//     handleChange('address', selectedAddress);
+//   }
+// }, [selectedAddress]);
+  
+  useEffect(() => {
+    if (role) {
+      handleChange('role', role);
+    }
+    if (formattedAddress) {
+      // console.log(formattedAddress)
+      // console.log(selectedAddress)
+      // selectedAddress = selectedAddress ? JSON.parse(selectedAddress) : null;
+      handleChange('address', formattedAddress);
+    }
+  }, [role, formattedAddress]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -39,13 +58,20 @@ export default function SignUp() {
     setLoading(true);
 
     try {
+      console.log(subregion);
       const response = await apiClient.post('/user/signUp', {
         fullName: formData.name,
         email: formData.email,
         password: formData.password,
         userRole: formData.role,
-        address: formData.address,
+        // address: formData.address,
         phoneNumber: formData.contactNumber,
+        formattedAddress,
+        latitude,
+        longitude,
+        latitudeDelta,
+        longitudeDelta,
+        subregion,
       });
 
       if (response.status === 201) {
@@ -139,14 +165,26 @@ export default function SignUp() {
           </View>
 
           {/* Address Input */}
-          <View style={styles.inputContainer}>
+          {/* <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Address</Text>
             <TextInput 
               style={styles.input_text} 
               placeholder='Enter Address' 
               placeholderTextColor={Colors.Grey}
             />
+          </View> */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Address</Text>
+            <TouchableOpacity
+              onPress={() => router.push('./LocationPicker')}
+              style={[styles.input_text, { justifyContent: 'center' }]}
+            >
+              <Text style={{ color: formData.address ? 'black' : Colors.Grey }}>
+                {formData.address || 'Select on Map'}
+              </Text>
+            </TouchableOpacity>
           </View>
+
 
           {/* Contact Number Input */}
           <View style={styles.inputContainer}>

@@ -71,8 +71,8 @@ const generateAccessAndRefreshTokens = async(userId) => {
 
 const post_CreateUser_SignUp_Register_Initial = asyncHandler(
     async (req, res) => {
-        const { fullName, email, password,userRole,phoneNumber } = req.body; 
-
+        const { fullName, email, password, userRole, phoneNumber, formattedAddress, latitude, longitude, longitudeDelta, latitudeDelta, subregion } = req.body; 
+        console.log(req.body)
         if (
             [fullName, email, password,phoneNumber].some((field) => field?.trim() === "")
         ) {
@@ -87,14 +87,22 @@ const post_CreateUser_SignUp_Register_Initial = asyncHandler(
         if (existedUser) {
             throw new ApiError(409, "User with this email already exists.");
         }
-
+        let address = {
+            address: formattedAddress,
+            latitude: latitude,
+            longitude: longitude,
+            subregion: subregion,
+            latitudeDelta: latitudeDelta,
+            longitudeDelta: longitudeDelta
+        }
         // Creating a new user if they do not already exist
         const newUser = await User.create({
             fullName,
             email,
             password,
             userRole,
-            phoneNumber
+            phoneNumber,
+            address: address
         });
 
         if (!newUser._id) {

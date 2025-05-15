@@ -358,6 +358,7 @@ const AcceptedOrders = () => {
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.actionButton, styles.completeButton]}
+                onPress={() => handleGoToDonor(order.id)}
                 onPress={() => handleCompleteOrder(order._id)}
               >
                 <Text style={styles.buttonText}>Go To Donor</Text>
