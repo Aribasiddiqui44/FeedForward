@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import ChatButton from '../../../components/ChatButton';
 
 const AvailableOrdersScreen = () => {
+  const router = useRouter();
   const navigation = useNavigation();
 
   const orders = [
@@ -15,17 +16,29 @@ const AvailableOrdersScreen = () => {
       foodPic: require('../../../assets/images/biryaniPng.png'),
       pickupTime: '11:00 PM',
       price: '0 PKR',
-      type: 'free',
-      orgId: 'ORG-789'
+      type: 'Free',
+      orgId: 'ORG-789',
+      donorName: 'Hot N Spicy',
+      donorAddress: 'North Nazimabad, Block L, Karachi',
+      receiverName: 'Food Savers',
+      receiverAddress: 'C-456, Block 18, F.B Area, Karachi',
+      toReceiver: '2km',
+      toDonor: '3km'
     },
     {
       id: 'ORD-67890',
       foodName: 'Burgers',
-      foodPic: require('../../../assets/images/burger.jpeg'),
+      foodPic: require('../../../assets/images/burger.jpeg'), 
       pickupTime: '08:30 PM',
       price: '250 PKR',
-      type: 'direct',
-      orgId: 'ORG-456'
+      type: 'Direct',
+      orgId: 'ORG-456',
+      donorName: 'Burger King',
+      donorAddress: 'Gulshan-e-Iqbal, Karachi',
+      receiverName:'Rizq Foundation',
+      receiverAddress: 'D-789, Block 5, Clifton, Karachi',
+      toReceiver: '2km',
+      toDonor: '3km'
     },
     {
       id: 'ORD-13579',
@@ -33,8 +46,14 @@ const AvailableOrdersScreen = () => {
       foodPic: require('../../../assets/images/burger.jpeg'),
       pickupTime: '09:15 PM',
       price: '100 PKR',
-      type: 'negotiated',
-      orgId: 'ORG-123'
+      type: 'Negotiated',
+      orgId: 'ORG-123',
+      donorName:'Lal Qila',
+      pickupLocation: 'Tariq Road, Karachi',
+      receiverName: 'Alfalah',
+      receiverAddress: 'A-123, Block 10, Gulistan-e-Johar, Karachi',
+      toReceiver: '2km',
+      toDonor: '3km'
     }
   ];
 
@@ -49,14 +68,28 @@ const AvailableOrdersScreen = () => {
   };
 
   const navigateToOrderDetails = (order) => {
-    navigation.navigate('OrderDetails', { order });
-  };
-
+  console.log('Attempting to navigate to:', {
+    pathname: '/(tabs)/volunteer/orderDetails/[id]',
+    params: {
+      id: order.id,
+      ...order
+    }
+  });
+  router.push({
+    pathname: '/(tabs)/volunteer/orderDetails/[id]',
+    params: {
+      id: order.id,
+      ...order,
+      estimatedTime: '10 mins'
+    }
+  });
+};
+  
   const getTypeStyle = (type) => {
     switch(type) {
-      case 'free': return styles.freeType;
-      case 'direct': return styles.directType;
-      case 'negotiated': return styles.negotiatedType;
+      case 'Free': return styles.freeType;
+      case 'Direct': return styles.directType;
+      case 'Negotiated': return styles.negotiatedType;
       default: return styles.freeType;
     }
   };
@@ -68,6 +101,7 @@ const AvailableOrdersScreen = () => {
           <TouchableOpacity 
             style={styles.contentContainer}
             onPress={() => navigateToOrderDetails(order)}
+            activeOpacity={0.7}
           >
             <Image source={order.foodPic} style={styles.foodImage} />
             
@@ -93,7 +127,7 @@ const AvailableOrdersScreen = () => {
               style={styles.confirmButton}
               onPress={() => handleConfirm(order.id)}
             >
-              <Text style={styles.confirmText}>Confirm</Text>
+              <Text style={styles.confirmText}>Accept</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -101,7 +135,7 @@ const AvailableOrdersScreen = () => {
               onPress={() => handleDelete(order.id)}
             >
               <Text style={[styles.outlinedButtonText, { color: Colors.primary }]}>
-                Delete
+                Decline
               </Text>
             </TouchableOpacity>
           </View>
