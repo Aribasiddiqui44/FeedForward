@@ -100,8 +100,7 @@ export default function Layout() {
   const donorMenuItems = [
     { label: 'My Donations', icon: 'gift', screen: '/(tabs)/donor/myDonation' },
     { label: 'Profile', icon: 'user', screen: '/(tabs)/donor/profileDonor' },
-    { label: 'Donation History', icon: 'clock', screen: '/donor/donationHistory' },
-    { label: 'About', icon: 'info', screen: '/donor/About' },
+    { label: 'My Requests', icon: 'git-pull-request', screen: '/donor/myRequests' },
     { label: 'Settings', icon: 'settings', screen: '/donor/Settings' },
     { label: 'Customer Support', icon: 'message-circle', screen: '/donor/Support' },
     { label: 'Logout', icon: 'log-out', action: logoutUser },
@@ -112,7 +111,6 @@ export default function Layout() {
     { label: 'Available Orders', icon: 'list', screen: '/(tabs)/volunteer/availableOrders' },
     { label: 'Accepted Orders', icon: 'check-circle', screen: '/(tabs)/volunteer/acceptedOrders' },
     { label: 'Profile', icon: 'user', screen: '/(tabs)/volunteer/profile' },
-    { label: 'About', icon: 'info', screen: '/volunteer/About' },
     { label: 'Settings', icon: 'settings', screen: '/volunteer/Settings' },
     { label: 'Support', icon: 'message-circle', screen: '/volunteer/Support' },
     { label: 'Logout', icon: 'log-out', screen: '/Login' },
@@ -269,7 +267,7 @@ export default function Layout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.LightGrey,
+    backgroundColor: Colors.lightGray,
   },
   feedTitle: {
     alignItems: 'center',
