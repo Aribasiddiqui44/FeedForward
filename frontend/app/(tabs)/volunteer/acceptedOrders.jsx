@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
+import ChatButton from '../../../components/ChatButton';
 
 const AcceptedOrders = () => {
+  const router = useRouter();
   // In a real app, you would fetch these from your state management or API
   const acceptedOrders = [
     {
@@ -27,10 +29,27 @@ const AcceptedOrders = () => {
     // Add more accepted orders as needed
   ];
 
-  const handleCompleteOrder = (orderId) => {
-    // Implement order completion logic
-    console.log('Completing order:', orderId);
-    // apiClient.patch(`/orders/${orderId}/complete`);
+  const handleGoToDonor = (orderId) => {
+    // Find the specific order from acceptedOrders
+    const order = acceptedOrders.find(o => o.id === orderId);
+    
+    if (order) {
+      router.push({
+        pathname: '/(tabs)/volunteer/goToDonor', // Update this to your actual donor screen path
+        params: {
+          orderId: order.id,
+          foodName: order.foodName,
+          foodPic: order.foodPic, // Pass the image reference
+          donorName: order.donorName,
+          donorAddress: order.donorAddress,
+          pickupTime: order.pickupTime,
+          price: order.price,
+          type: order.type,
+          orgId: order.orgId,
+          toDonor: order.toDonor // Distance to donor
+        }
+      });
+    }
   };
 
   const getTypeStyle = (type) => {
@@ -79,7 +98,7 @@ const AcceptedOrders = () => {
             <View style={styles.buttonRow}>
               <TouchableOpacity 
                 style={[styles.actionButton, styles.completeButton]}
-                onPress={() => handleCompleteOrder(order.id)}
+                onPress={() => handleGoToDonor(order.id)}
               >
                 <Text style={styles.buttonText}>Go To Donor</Text>
               </TouchableOpacity>
