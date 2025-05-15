@@ -36,7 +36,7 @@ const VolunteerApplication = () => {
 
   return (
     <View style={styles.container}>
-      <Head label="Volunteer's Application" showBackOption={true} onBackPress={handleBackPress} />
+      <Head label="Volunteer's Application" />
       
       <ScrollView contentContainerStyle={styles.content}>
         

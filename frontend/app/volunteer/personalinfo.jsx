@@ -35,9 +35,10 @@ const VolunteerPersonalInfo = () => {
   };
 
   const handleDocumentSubmission = () => {
-    router.push('/volunteer/documentsubmission');
-  }; // Fixed missing closing brace
-
+    router.push({pathname:'/volunteer/documentsubmission',
+      params:{ userId: userId }
+    });
+  };
   const handleChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -63,7 +64,7 @@ const VolunteerPersonalInfo = () => {
       Alert.alert('Incomplete Form', 'Please fill all required fields');
       return;
     }
-
+  
     // CNIC format validation
     if (!/^\d{5}-\d{7}-\d{1}$/.test(formData.cnicNumber)) {
       Alert.alert('Invalid CNIC', 'Format should be XXXXX-XXXXXXX-X');
@@ -98,7 +99,7 @@ const VolunteerPersonalInfo = () => {
       setLoading(false);
     }
   };
-
+  
   if (!isSubmitted) {
     return (
       <View style={styles.container}>

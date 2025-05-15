@@ -30,7 +30,6 @@ import { Router } from "express";
 import { verifyJWT } from "../middlewares/authentication.middleware.js";
 import { 
     completeVolunteerProfile, 
-    uploadVolunteerDocuments, 
     patchAddAvailableTimings 
 } from './../controllers/rider.controller.js';
 import upload from './../middlewares/multer.middleware.js';
@@ -47,19 +46,19 @@ router.post(
 );
 
 // Upload documents (files)
-router.patch(
-    "/:userId/documents",
-    verifyJWT,
-    checkRole('volunteer'),
-    upload.fields([
-        { name: 'profilePhoto', maxCount: 1 },
-        { name: 'cnicFront', maxCount: 1 },
-        { name: 'cnicBack', maxCount: 1 },
-        { name: 'licenseFront', maxCount: 1 },
-        { name: 'licenseBack', maxCount: 1 }
-    ]),
-    uploadVolunteerDocuments
-);
+// router.patch(
+//     "/:userId/documents",
+//     verifyJWT,
+//     checkRole('volunteer'),
+//     upload.fields([
+//         { name: 'profilePhoto', maxCount: 1 },
+//         { name: 'cnicFront', maxCount: 1 },
+        
+//         { name: 'licenseFront', maxCount: 1 },
+        
+//     ]),
+//     uploadVolunteerDocuments
+// );
 
 // Update availability timings
 router.patch(
