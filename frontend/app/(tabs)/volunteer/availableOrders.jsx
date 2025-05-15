@@ -1,15 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter, useNavigation } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/Colors';
 import ChatButton from '../../../components/ChatButton';
 
 const AvailableOrdersScreen = () => {
   const router = useRouter();
-  const navigation = useNavigation();
-
-  const orders = [
+  const [availableOrders, setAvailableOrders] = useState([
     {
       id: 'ORD-12345',
       foodName: 'Chicken Biryani',
@@ -55,35 +53,46 @@ const AvailableOrdersScreen = () => {
       toReceiver: '2km',
       toDonor: '3km'
     }
-  ];
+  ]);
+
+  const [acceptedOrders, setAcceptedOrders] = useState([]);
 
   const handleConfirm = (orderId) => {
-    console.log('Confirmed order:', orderId);
-    // Add your confirmation logic here
+    // Find the order to accept
+    const orderToAccept = availableOrders.find(order => order.id === orderId);
+    
+    if (orderToAccept) {
+      // Add to accepted orders
+      setAcceptedOrders(prev => [...prev, orderToAccept]);
+      
+      // Remove from available orders
+      setAvailableOrders(prev => prev.filter(order => order.id !== orderId));
+      
+      // Here you would typically also make an API call to update the order status
+      console.log('Order accepted:', orderId);
+      // apiClient.patch(`/orders/${orderId}/accept`, { status: 'accepted' });
+    }
   };
 
-  const handleDelete = (orderId) => {
-    console.log('Deleted order:', orderId);
-    // Add your deletion logic here
+  const handleDecline = (orderId) => {
+    // Remove the order from available orders
+    setAvailableOrders(prev => prev.filter(order => order.id !== orderId));
+    
+    // Here you would typically also make an API call to update the order status
+    console.log('Order declined:', orderId);
+    // apiClient.patch(`/orders/${orderId}/decline`, { status: 'declined' });
   };
 
   const navigateToOrderDetails = (order) => {
-  console.log('Attempting to navigate to:', {
-    pathname: '/(tabs)/volunteer/orderDetails/[id]',
-    params: {
-      id: order.id,
-      ...order
-    }
-  });
-  router.push({
-    pathname: '/(tabs)/volunteer/orderDetails/[id]',
-    params: {
-      id: order.id,
-      ...order,
-      estimatedTime: '10 mins'
-    }
-  });
-};
+    router.push({
+      pathname: '/(tabs)/volunteer/orderDetails/[id]',
+      params: {
+        id: order.id,
+        ...order,
+        estimatedTime: '10 mins'
+      }
+    });
+  };
   
   const getTypeStyle = (type) => {
     switch(type) {
@@ -96,7 +105,7 @@ const AvailableOrdersScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      {orders.map((order) => (
+      {availableOrders.map((order) => (
         <View key={order.id} style={styles.card}>
           <TouchableOpacity 
             style={styles.contentContainer}
@@ -132,7 +141,7 @@ const AvailableOrdersScreen = () => {
 
             <TouchableOpacity 
               style={[styles.outlinedButton, { borderColor: Colors.primary }]}
-              onPress={() => handleDelete(order.id)}
+              onPress={() => handleDecline(order.id)}
             >
               <Text style={[styles.outlinedButtonText, { color: Colors.primary }]}>
                 Decline
