@@ -9,87 +9,97 @@ import CallButton from '../../../components/CallButton';
 const GoToDonorScreen = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
-  
-  // Extract order details from params
-  const {
-    receiverId = 'Zar123',
-    foodName = 'Chicken Biryani',
-    foodPic = require('../../../assets/images/biryaniPng.png'),
-    pickupTime = '11:00 PM',
-    price = '0 PKR',
-    donorName = 'Hot N Spicy',
-    donorAddress = 'North Nazimabad, Block L, Karachi',
-    receiverName = 'Food Savers',
-    receiverAddress = 'C-456, Block 18, F.B Area, Karachi',
-    toReceiver = '2km',
-    toDonor = '3km'
-  } = params;
+
+  // Extract all order details with fallback values
+  const order = {
+    id: params.orderId || 'N/A',
+    foodName: params.foodName || 'No food name specified',
+    foodPic: params.foodPic || 'default',
+    pickupTime: params.pickupTime || 'Not specified',
+    price: params.price || '0 PKR',
+    type: params.type || 'Unknown',
+    donorName: params.donorName || 'Unknown donor',
+    donorAddress: params.donorAddress || 'Address not available',
+    receiverName: params.receiverName || 'Unknown receiver',
+    receiverAddress: params.receiverAddress || 'Address not available',
+    toDonor: params.toDonor || '? km',
+    orgId: params.orgId || 'N/A'
+  };
 
   const handleCompletePickup = () => {
-    console.log('Pickup completed');
-    // Implement pickup completion logic
+    console.log('Pickup completed for order:', order.id);
+    // Add your pickup completion logic here
     // router.push('/pickup-completed');
   };
 
   return (
     <ScrollView style={styles.container}>
+      {/* Header with back button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={Colors.dark} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Go To Donor</Text>
-        <View style={{ width: 24 }} /> {/* Spacer for alignment */}
+        <Text style={styles.headerTitle}>Order Details</Text>
+        <View style={{ width: 24 }} />
       </View>
 
+      {/* Food image and name */}
       <View style={styles.foodContainer}>
-        <Image source={foodPic} style={styles.foodImage} />
-        <Text style={styles.foodName}>{foodName}</Text>
+        <Image source={order.foodPic} style={styles.foodImage} />
+        <Text style={styles.foodName}>{order.foodName}</Text>
+        <Text style={styles.orderId}>Order ID: {order.id}</Text>
       </View>
 
+      {/* Order details */}
       <View style={styles.detailsContainer}>
         <View style={styles.detailRow}>
           <Ionicons name="pricetag" size={20} color={Colors.primary} />
-          <Text style={styles.detailText}>Price: {price}</Text>
-        </View>
-
-        <View style={styles.detailRow}>
-          <Ionicons name="fast-food" size={20} color={Colors.primary} />
-          <Text style={styles.detailText}>Portion: 7</Text>
+          <Text style={styles.detailText}>Price: {order.price}</Text>
         </View>
 
         <View style={styles.detailRow}>
           <Ionicons name="time" size={20} color={Colors.primary} />
-          <Text style={styles.detailText}>Pick up time: {pickupTime}</Text>
+          <Text style={styles.detailText}>Pickup by: {order.pickupTime}</Text>
         </View>
 
         <View style={styles.detailRow}>
           <Ionicons name="car" size={20} color={Colors.primary} />
-          <Text style={styles.detailText}>Distance To Donor: 17 mins</Text>
+          <Text style={styles.detailText}>Distance: {order.toDonor} away</Text>
+        </View>
+
+        <View style={styles.detailRow}>
+          <Ionicons name="business" size={20} color={Colors.primary} />
+          <Text style={styles.detailText}>Type: {order.type}</Text>
         </View>
       </View>
-      
-        
 
-
-      <View style={styles.locationSection}>
-        <Text style={styles.sectionTitle}>Pickup Location</Text>
-        <View style={styles.locationCard}>
+      {/* Donor information */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Donor Information</Text>
+        <View style={styles.infoCard}>
           <Ionicons name="restaurant" size={24} color={Colors.primary} />
-          <View style={styles.locationTextContainer}>
-            <Text style={styles.locationName}>{donorName}</Text>
-            <Text style={styles.locationAddress}>{donorAddress}</Text>
+          <View style={styles.infoTextContainer}>
+            <Text style={styles.infoTitle}>{order.donorName}</Text>
+            <Text style={styles.infoSubtitle}>{order.donorAddress}</Text>
           </View>
         </View>
       </View>
-        <View style={styles.locationCard}>
-          <ChatButton receiverId={receiverId} />
-          <Text style={styles.detailText}>Chat with Donor</Text>
-        </View>
-        <View style={styles.locationCard}>
-          <CallButton number="03362168153" />
-          <Text style={styles.detailText}>Call with Donor</Text>
-        </View>
 
+    
+      {/* Action buttons */}
+      <View style={styles.actionsContainer}>
+        <View style={styles.actionRow}>
+          <ChatButton receiverId={order.orgId} />
+          <Text style={styles.actionText}>Chat with Donor</Text>
+        </View>
+        
+        <View style={styles.actionRow}>
+          <CallButton number="03362168153" />
+          <Text style={styles.actionText}>Call Donor</Text>
+        </View>
+      </View>
+
+      {/* Complete pickup button */}
       <TouchableOpacity 
         style={styles.completeButton}
         onPress={handleCompletePickup}
@@ -104,13 +114,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.White,
-    padding: 15,
+    padding: 16,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   headerTitle: {
     fontSize: 20,
@@ -119,95 +129,90 @@ const styles = StyleSheet.create({
   },
   foodContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   foodImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 10,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    marginBottom: 12,
   },
   foodName: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     color: Colors.dark,
+    marginBottom: 4,
+  },
+  orderId: {
+    fontSize: 14,
+    color: Colors.Grey,
   },
   detailsContainer: {
+    backgroundColor: Colors.lightGray,
+    borderRadius: 12,
+    padding: 16,
     marginBottom: 20,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    marginBottom: 12,
   },
   detailText: {
     fontSize: 16,
     color: Colors.dark,
-    marginLeft: 10,
+    marginLeft: 12,
   },
-  ingredientsContainer: {
+  section: {
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
     color: Colors.dark,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    marginBottom: 12,
+    paddingLeft: 8,
   },
-  ingredientsList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 10,
-  },
-  ingredient: {
-    backgroundColor: Colors.lightGray,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    marginRight: 8,
-    marginBottom: 8,
-    color: Colors.dark,
-  },
-  locationSection: {
-    marginBottom: 20,
-  },
-  locationCard: {
+  infoCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.lightGray,
-    borderRadius: 10,
-    padding: 15,
-    marginTop: 8,
+    borderRadius: 12,
+    padding: 16,
   },
-  locationTextContainer: {
+  infoTextContainer: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: 12,
   },
-  locationName: {
+  infoTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.dark,
   },
-  locationAddress: {
+  infoSubtitle: {
+    fontSize: 14,
+    color: Colors.gray,
+    marginTop: 4,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  actionRow: {
+    alignItems: 'center',
+    width: '48%',
+  },
+  actionText: {
     fontSize: 14,
     color: Colors.dark,
-    marginTop: 5,
-  },
-  distanceText: {
-    fontSize: 14,
-    color: Colors.primary,
-    marginTop: 5,
-    textAlign: 'right',
-    paddingRight: 10,
+    marginTop: 8,
   },
   completeButton: {
     backgroundColor: Colors.primary,
-    padding: 15,
+    padding: 16,
     borderRadius: 25,
     alignItems: 'center',
-    marginTop: 20,
   },
   completeButtonText: {
     color: Colors.White,
