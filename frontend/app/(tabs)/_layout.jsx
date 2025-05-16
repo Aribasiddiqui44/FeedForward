@@ -100,7 +100,7 @@ export default function Layout() {
   const donorMenuItems = [
     { label: 'My Donations', icon: 'gift', screen: '/(tabs)/donor/myDonation' },
     { label: 'Profile', icon: 'user', screen: '/(tabs)/donor/profileDonor' },
-    { label: 'My Requests', icon: 'git-pull-request', screen: '/donor/myRequests' },
+    { label: 'My Requests', icon: 'git-pull-request', screen: '/donor/donorActivity' },
     { label: 'Settings', icon: 'settings', screen: '/donor/Settings' },
     { label: 'Customer Support', icon: 'message-circle', screen: '/donor/Support' },
     { label: 'Logout', icon: 'log-out', action: logoutUser },

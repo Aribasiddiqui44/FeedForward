@@ -346,3 +346,13 @@ export const getAvailableOrdersForRider = asyncHandler(async (req, res) => {
 
   res.status(200).json(new ApiResponse(200, orders, "Available orders for riders"));
 });
+
+export const getOrderById = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+  const order = await Order.findById(orderId)
+    .populate('donation')
+    .populate('donor')
+    .populate('receiver');
+  if (!order) throw new ApiError(404, "Order not found");
+  res.status(200).json(new ApiResponse(200, order));
+});

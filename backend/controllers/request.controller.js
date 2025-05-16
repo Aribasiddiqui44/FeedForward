@@ -714,3 +714,75 @@ export const getReceiverRequests = asyncHandler(async (req, res) => {
         new ApiResponse(200, formattedRequests, 'Requests fetched successfully')
     );
 });
+
+// Get all requests and orders for a donor
+export const getDonorActivity = asyncHandler(async (req, res) => {
+    const donorId = req.user._id;
+
+    // Step 1: Get all donations created by this donor
+    const donations = await Donation.find({ donatedBy: donorId }, '_id');
+    const donationIds = donations.map(d => d._id);
+
+    // Step 2: Fetch related donation requests
+    const requests = await DonationRequest.find({ donation: { $in: donationIds } })
+        .populate({
+            path: 'donation',
+            select: 'donationFoodTitle donationUnitPrice donationQuantity listingImages donationInitialPickupTimeRange',
+            populate: { path: 'donatedBy', select: 'fullName' }
+        })
+        .populate('requester', 'fullName phoneNumber profilePicture')
+        .sort({ createdAt: -1 });
+
+    // Step 3: Fetch related orders
+    const orders = await Order.find({ donor: donorId })
+        .populate('donation', 'donationFoodTitle listingImages')
+        .populate('receiver', 'fullName phoneNumber')
+        .sort({ createdAt: -1 });
+
+    // Step 4: Format response
+    const formattedRequests = requests.map(req => ({
+        _id: req._id,
+        requestType: req.requestType,
+        status: req.status,
+        quantity: req.quantity,
+        proposedPrice: req.proposedPrice,
+        finalPrice: req.finalPrice,
+        createdAt: req.createdAt,
+        updatedAt: req.updatedAt,
+        foodItem: {
+            id: req.donation._id,
+            title: req.donation.donationFoodTitle,
+            total: req.finalPrice,
+            quantity: req.donation.donationQuantity,
+            images: req.donation.listingImages,
+            pickupTime: req.donation.donationInitialPickupTimeRange
+        },
+        requester: {
+            id: req.requester._id,
+            name: req.requester.fullName,
+            phone: req.requester.phoneNumber,
+            profilePic: req.requester.profilePicture
+        }
+    }));
+
+    const formattedOrders = orders.map(order => ({
+        _id: order._id,
+        status: order.orderStatus,
+        total: order.orderTotal,
+        createdAt: order.createdAt,
+        donation: {
+            id: order.donation._id,
+            title: order.donation.donationFoodTitle,
+            images: order.donation.listingImages
+        },
+        receiver: {
+            id: order.receiver._id,
+            name: order.receiver.fullName,
+            phone: order.receiver.phoneNumber
+        }
+    }));
+
+    return res.status(200).json(
+        new ApiResponse(200, { requests: formattedRequests, orders: formattedOrders }, 'Donor activity fetched successfully')
+    );
+});
